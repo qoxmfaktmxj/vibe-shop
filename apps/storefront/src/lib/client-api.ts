@@ -1,0 +1,58 @@
+import type {
+  CartItem,
+  CheckoutPreview,
+  CreateOrderPayload,
+  CreateOrderResponse,
+} from "@/lib/contracts";
+
+function getApiBaseUrl() {
+  if (process.env.NEXT_PUBLIC_API_BASE_URL) {
+    return process.env.NEXT_PUBLIC_API_BASE_URL;
+  }
+
+  if (typeof window !== "undefined") {
+    return `${window.location.protocol}//${window.location.hostname}:8080`;
+  }
+
+  return "http://localhost:8080";
+}
+
+async function fetchJson<T>(path: string, init: RequestInit): Promise<T> {
+  const response = await fetch(`${getApiBaseUrl()}${path}`, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...(init.headers ?? {}),
+    },
+  });
+
+  if (!response.ok) {
+    const error = (await response.json().catch(() => null)) as
+      | { message?: string }
+      | null;
+    throw new Error(error?.message ?? "요청 처리 중 문제가 발생했습니다.");
+  }
+
+  return response.json() as Promise<T>;
+}
+
+export async function previewOrder(items: CartItem[]): Promise<CheckoutPreview> {
+  return fetchJson<CheckoutPreview>("/api/v1/orders/preview", {
+    method: "POST",
+    body: JSON.stringify({
+      items: items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+      })),
+    }),
+  });
+}
+
+export async function createOrder(
+  payload: CreateOrderPayload,
+): Promise<CreateOrderResponse> {
+  return fetchJson<CreateOrderResponse>("/api/v1/orders", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}

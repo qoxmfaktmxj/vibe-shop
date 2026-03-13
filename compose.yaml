@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: vibe-shop-postgres
+    environment:
+      POSTGRES_DB: vibeshop
+      POSTGRES_USER: vibeshop
+      POSTGRES_PASSWORD: vibeshop
+    ports:
+      - "5433:5432"
+    volumes:
+      - vibe-shop-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vibeshop -d vibeshop"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  vibe-shop-postgres:
