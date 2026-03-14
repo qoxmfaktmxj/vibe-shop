@@ -20,8 +20,8 @@ function HeaderLink({
       href={href}
       className={`rounded-full px-4 py-2 text-sm font-medium transition ${
         active
-          ? "bg-[var(--ink)] text-white"
-          : "bg-white/70 text-[var(--ink-soft)] hover:bg-white"
+          ? "bg-[var(--accent-strong)] text-white shadow-[0_10px_24px_rgba(41,51,155,0.16)]"
+          : "border border-[rgba(41,51,155,0.14)] bg-[rgba(255,255,243,0.8)] text-[var(--ink-soft)] hover:bg-[rgba(116,164,188,0.16)]"
       }`}
     >
       {label}
@@ -34,7 +34,7 @@ export function SiteHeader({ categories }: { categories: Category[] }) {
   const { itemCount, hydrated } = useCart();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-black/5 bg-[rgba(251,247,242,0.86)] backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-[rgba(20,40,29,0.08)] bg-[rgba(255,255,243,0.84)] backdrop-blur-xl">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-5 py-4 sm:px-8">
         <div className="flex items-center justify-between gap-4">
           <Link href="/" className="flex flex-col">
@@ -47,7 +47,7 @@ export function SiteHeader({ categories }: { categories: Category[] }) {
           <div className="flex items-center gap-3">
             <Link
               href="/cart"
-              className="surface-card rounded-full px-4 py-2 text-sm font-semibold"
+              className="button-secondary px-4 py-2"
             >
               장바구니 {hydrated ? itemCount : 0}
             </Link>

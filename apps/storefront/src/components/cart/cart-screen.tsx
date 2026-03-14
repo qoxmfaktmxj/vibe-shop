@@ -58,7 +58,7 @@ export function CartScreen() {
         </p>
         <Link
           href="/"
-          className="mt-6 inline-flex rounded-full bg-[var(--ink)] px-5 py-3 text-sm font-semibold text-white"
+          className="button-primary mt-6 px-5 py-3"
         >
           메인으로 가기
         </Link>
@@ -75,7 +75,7 @@ export function CartScreen() {
           {items.map((item) => (
             <article
               key={item.productId}
-              className="rounded-[24px] border border-black/5 bg-white/70 p-5"
+              className="rounded-[24px] border border-[rgba(41,51,155,0.1)] bg-[rgba(255,255,243,0.72)] p-5"
             >
               <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                 <div className="space-y-2">
@@ -89,7 +89,7 @@ export function CartScreen() {
                   <button
                     type="button"
                     onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                    className="h-10 w-10 rounded-full border border-black/10 bg-white"
+                    className="h-10 w-10 rounded-full border border-[rgba(41,51,155,0.16)] bg-[rgba(116,164,188,0.1)]"
                   >
                     -
                   </button>
@@ -97,14 +97,14 @@ export function CartScreen() {
                   <button
                     type="button"
                     onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                    className="h-10 w-10 rounded-full border border-black/10 bg-white"
+                    className="h-10 w-10 rounded-full border border-[rgba(41,51,155,0.16)] bg-[rgba(116,164,188,0.1)]"
                   >
                     +
                   </button>
                   <button
                     type="button"
                     onClick={() => removeItem(item.productId)}
-                    className="rounded-full border border-black/10 px-4 py-2 text-sm font-medium text-[var(--ink-soft)]"
+                    className="button-secondary px-4 py-2 font-medium text-[var(--ink-soft)]"
                   >
                     삭제
                   </button>
@@ -127,7 +127,7 @@ export function CartScreen() {
             <span>배송비</span>
             <span>{formatPrice(preview?.shippingFee ?? 0)}원</span>
           </div>
-          <div className="flex justify-between border-t border-black/10 pt-4 text-base font-semibold">
+          <div className="stat-divider flex justify-between pt-4 text-base font-semibold">
             <span>총 결제 금액</span>
             <span>{formatPrice(preview?.total ?? 0)}원</span>
           </div>
@@ -138,7 +138,7 @@ export function CartScreen() {
 
         <Link
           href="/checkout"
-          className="mt-8 inline-flex w-full justify-center rounded-full bg-[var(--accent-strong)] px-5 py-3 text-sm font-semibold text-white"
+          className="button-primary mt-8 w-full px-5 py-3"
         >
           주문서 작성
         </Link>

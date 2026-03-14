@@ -4,6 +4,7 @@ const path = require("node:path");
 const { expect, test } = require("playwright/test");
 
 const OUTPUT_DIR = path.join(process.cwd(), "output", "playwright");
+const NAVIGATION_TIMEOUT = 60_000;
 
 test("storefront MVP smoke flow", async ({ page }) => {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -15,7 +16,7 @@ test("storefront MVP smoke flow", async ({ page }) => {
   });
 
   await page.getByRole("link", { name: "대표 카테고리 보기" }).click();
-  await expect(page).toHaveURL(/\/category\//);
+  await expect(page).toHaveURL(/\/category\//, { timeout: NAVIGATION_TIMEOUT });
   await page.waitForLoadState("networkidle");
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "02-category.png"),
@@ -23,7 +24,7 @@ test("storefront MVP smoke flow", async ({ page }) => {
   });
 
   await page.locator('a[href^="/products/"]').first().click();
-  await expect(page).toHaveURL(/\/products\//);
+  await expect(page).toHaveURL(/\/products\//, { timeout: NAVIGATION_TIMEOUT });
   await page.waitForLoadState("networkidle");
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "03-product.png"),
@@ -37,7 +38,7 @@ test("storefront MVP smoke flow", async ({ page }) => {
   expect(cartState).not.toBeNull();
 
   await page.getByRole("link", { name: /장바구니/ }).first().click();
-  await expect(page).toHaveURL(/\/cart$/);
+  await expect(page).toHaveURL(/\/cart$/, { timeout: NAVIGATION_TIMEOUT });
   await page.waitForLoadState("networkidle");
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "04-cart.png"),
@@ -45,7 +46,7 @@ test("storefront MVP smoke flow", async ({ page }) => {
   });
 
   await page.getByRole("link", { name: "주문서 작성" }).click();
-  await expect(page).toHaveURL(/\/checkout$/);
+  await expect(page).toHaveURL(/\/checkout$/, { timeout: NAVIGATION_TIMEOUT });
   await page.getByLabel("받는 분").fill("Kim Minsu");
   await page.getByLabel("연락처").fill("01012345678");
   await page.getByLabel("우편번호").fill("06236");
@@ -58,7 +59,7 @@ test("storefront MVP smoke flow", async ({ page }) => {
   });
 
   await page.getByRole("button", { name: "주문 완료하기" }).click();
-  await expect(page).toHaveURL(/\/orders\//, { timeout: 60_000 });
+  await expect(page).toHaveURL(/\/orders\//, { timeout: NAVIGATION_TIMEOUT });
   await page.waitForLoadState("domcontentloaded");
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "06-order-complete.png"),

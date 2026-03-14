@@ -36,16 +36,16 @@ export default async function ProductPage({
               {product.name}
             </h1>
           </div>
-          <span className="rounded-full bg-white/80 px-3 py-1 text-xs font-semibold">
+          <span className="rounded-full bg-[var(--accent-hot)] px-3 py-1 text-xs font-semibold text-[var(--surface)] shadow-[0_10px_20px_rgba(255,58,32,0.18)]">
             {product.badge}
           </span>
         </div>
 
-        <p className="mt-8 max-w-xl text-base leading-8 text-black/70">
+        <p className="mt-8 max-w-xl text-base leading-8 text-black/72">
           {product.summary}
         </p>
 
-        <div className="mt-16 grid gap-4 text-sm text-black/65 sm:grid-cols-3">
+        <div className="mt-16 grid gap-4 text-sm text-black/66 sm:grid-cols-3">
           <div>
             <p className="font-semibold">Price</p>
             <p className="mt-2 text-lg font-semibold text-[var(--ink)]">
@@ -73,7 +73,7 @@ export default async function ProductPage({
           {product.description}
         </p>
 
-        <div className="mt-8 rounded-[28px] border border-black/8 bg-white/75 p-6">
+        <div className="mt-8 rounded-[28px] border border-[rgba(41,51,155,0.14)] bg-[rgba(255,255,243,0.76)] p-6">
           <p className="text-sm uppercase tracking-[0.24em] text-[var(--ink-soft)]">
             Purchase
           </p>
@@ -90,7 +90,7 @@ export default async function ProductPage({
             />
             <Link
               href="/cart"
-              className="rounded-full border border-black/10 px-4 py-2 text-sm font-semibold"
+              className="button-secondary px-4 py-2"
             >
               장바구니 보기
             </Link>
