@@ -12,6 +12,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 
 import lombok.AccessLevel;
@@ -30,6 +32,9 @@ public class CustomerOrder {
 
     @Column(name = "order_number", nullable = false, unique = true, length = 30)
     private String orderNumber;
+
+    @Column(name = "idempotency_key", nullable = false, unique = true, length = 64)
+    private String idempotencyKey;
 
     @Column(name = "customer_name", nullable = false, length = 80)
     private String customerName;
@@ -58,6 +63,10 @@ public class CustomerOrder {
     @Column(nullable = false, precision = 12, scale = 0)
     private BigDecimal total;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private OrderStatus status;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
@@ -66,6 +75,7 @@ public class CustomerOrder {
 
     public CustomerOrder(
         String orderNumber,
+        String idempotencyKey,
         String customerName,
         String phone,
         String postalCode,
@@ -75,9 +85,11 @@ public class CustomerOrder {
         BigDecimal subtotal,
         BigDecimal shippingFee,
         BigDecimal total,
+        OrderStatus status,
         OffsetDateTime createdAt
     ) {
         this.orderNumber = orderNumber;
+        this.idempotencyKey = idempotencyKey;
         this.customerName = customerName;
         this.phone = phone;
         this.postalCode = postalCode;
@@ -87,6 +99,7 @@ public class CustomerOrder {
         this.subtotal = subtotal;
         this.shippingFee = shippingFee;
         this.total = total;
+        this.status = status;
         this.createdAt = createdAt;
     }
 

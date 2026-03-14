@@ -36,6 +36,10 @@ export default async function OrderPage({
         <div className="mt-8 rounded-[28px] border border-[rgba(41,51,155,0.14)] bg-[rgba(255,255,243,0.76)] p-6">
           <dl className="grid gap-4 text-sm sm:grid-cols-2">
             <div>
+              <dt className="text-[var(--ink-soft)]">주문 상태</dt>
+              <dd className="mt-1 font-semibold">{order.status}</dd>
+            </div>
+            <div>
               <dt className="text-[var(--ink-soft)]">받는 분</dt>
               <dd className="mt-1 font-semibold">{order.customerName}</dd>
             </div>

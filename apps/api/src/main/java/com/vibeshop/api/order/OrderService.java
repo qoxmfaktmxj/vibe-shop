@@ -49,10 +49,17 @@ public class OrderService {
 
     @Transactional
     public CreateOrderResponse create(CreateOrderRequest request) {
+        String idempotencyKey = request.idempotencyKey().trim();
+        CustomerOrder existingOrder = customerOrderRepository.findByIdempotencyKey(idempotencyKey).orElse(null);
+        if (existingOrder != null) {
+            return new CreateOrderResponse(existingOrder.getOrderNumber(), existingOrder.getStatus().name());
+        }
+
         ResolvedOrder resolvedOrder = resolveOrder(request.items());
 
         CustomerOrder order = new CustomerOrder(
             generateOrderNumber(),
+            idempotencyKey,
             request.customerName().trim(),
             request.phone().trim(),
             request.postalCode().trim(),
@@ -62,6 +69,7 @@ public class OrderService {
             resolvedOrder.subtotal(),
             resolvedOrder.shippingFee(),
             resolvedOrder.total(),
+            OrderStatus.RECEIVED,
             OffsetDateTime.now(SEOUL)
         );
 
@@ -76,7 +84,7 @@ public class OrderService {
         }
 
         customerOrderRepository.save(order);
-        return new CreateOrderResponse(order.getOrderNumber());
+        return new CreateOrderResponse(order.getOrderNumber(), order.getStatus().name());
     }
 
     @Transactional(readOnly = true)
@@ -86,6 +94,7 @@ public class OrderService {
 
         return new OrderResponse(
             order.getOrderNumber(),
+            order.getStatus().name(),
             order.getCustomerName(),
             order.getPhone(),
             order.getPostalCode(),

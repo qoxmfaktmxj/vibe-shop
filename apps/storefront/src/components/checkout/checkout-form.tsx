@@ -8,12 +8,21 @@ import type { CheckoutPreview } from "@/lib/contracts";
 import { useCart } from "@/lib/cart-store";
 import { formatPrice } from "@/lib/currency";
 
+function makeIdempotencyKey() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID().replaceAll("-", "");
+  }
+
+  return `${Date.now()}${Math.random().toString(16).slice(2)}`;
+}
+
 export function CheckoutForm() {
   const router = useRouter();
   const { items, clearCart, hydrated } = useCart();
   const [preview, setPreview] = useState<CheckoutPreview | null>(null);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
+  const [idempotencyKey, setIdempotencyKey] = useState(() => makeIdempotencyKey());
   const [form, setForm] = useState({
     customerName: "",
     phone: "",
@@ -70,6 +79,7 @@ export function CheckoutForm() {
             startTransition(async () => {
               try {
                 const result = await createOrder({
+                  idempotencyKey,
                   ...form,
                   items: items.map((item) => ({
                     productId: item.productId,
@@ -77,6 +87,7 @@ export function CheckoutForm() {
                   })),
                 });
                 clearCart();
+                setIdempotencyKey(makeIdempotencyKey());
                 router.push(`/orders/${result.orderNumber}`);
               } catch (submitError) {
                 setError(

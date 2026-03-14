@@ -9,5 +9,8 @@ public interface CustomerOrderRepository extends JpaRepository<CustomerOrder, Lo
 
     @EntityGraph(attributePaths = "lines")
     Optional<CustomerOrder> findByOrderNumber(String orderNumber);
+
+    @EntityGraph(attributePaths = "lines")
+    Optional<CustomerOrder> findByIdempotencyKey(String idempotencyKey);
 }
 

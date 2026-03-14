@@ -51,6 +51,7 @@ export type CheckoutPreview = {
 };
 
 export type CreateOrderPayload = {
+  idempotencyKey: string;
   customerName: string;
   phone: string;
   postalCode: string;
@@ -62,10 +63,12 @@ export type CreateOrderPayload = {
 
 export type CreateOrderResponse = {
   orderNumber: string;
+  status: string;
 };
 
 export type OrderResponse = {
   orderNumber: string;
+  status: string;
   customerName: string;
   phone: string;
   postalCode: string;
