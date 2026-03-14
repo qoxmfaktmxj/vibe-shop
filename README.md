@@ -196,10 +196,9 @@ npm run test:api
 
 ### 3. 브라우저 E2E
 
-Playwright smoke는 API와 storefront를 자동으로 띄우고, 구매 퍼널을 끝까지 검증한다.
+Playwright smoke는 로컬 Postgres가 없으면 먼저 띄우고, 그다음 API와 storefront를 자동으로 실행해서 구매 퍼널을 끝까지 검증한다.
 
 ```bash
-npm run infra:up
 npm run qa:e2e:install
 npm run qa:e2e
 ```

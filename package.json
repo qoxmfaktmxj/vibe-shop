@@ -15,9 +15,9 @@
     "build:storefront": "node scripts/run-storefront-tool.mjs next build",
     "build:api": "node scripts/run-api-gradle.mjs build",
     "test:api": "node scripts/run-api-gradle.mjs test",
-    "qa:e2e": "node node_modules/playwright/cli.js test",
-    "qa:e2e:headed": "node node_modules/playwright/cli.js test --headed",
-    "qa:e2e:ui": "node node_modules/playwright/cli.js test --ui",
+    "qa:e2e": "node scripts/ensure-postgres.mjs && node node_modules/playwright/cli.js test",
+    "qa:e2e:headed": "node scripts/ensure-postgres.mjs && node node_modules/playwright/cli.js test --headed",
+    "qa:e2e:ui": "node scripts/ensure-postgres.mjs && node node_modules/playwright/cli.js test --ui",
     "qa:e2e:install": "node node_modules/playwright/cli.js install chromium"
   },
   "devDependencies": {
