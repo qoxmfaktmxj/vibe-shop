@@ -2,14 +2,18 @@
 
 import {
   createContext,
-  startTransition,
   useContext,
   useEffect,
-  useEffectEvent,
   useState,
 } from "react";
 
-import type { CartItem, CartProduct } from "@/lib/contracts";
+import {
+  clearCartItems,
+  getCart,
+  removeCartItem,
+  setCartItemQuantity,
+} from "@/lib/client-api";
+import type { CartItem, CartProduct, CartResponse } from "@/lib/contracts";
 
 type CartContextValue = {
   items: CartItem[];
@@ -22,7 +26,6 @@ type CartContextValue = {
   clearCart: () => void;
 };
 
-const STORAGE_KEY = "vibe-shop-cart";
 const CartContext = createContext<CartContextValue | null>(null);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
@@ -30,69 +33,60 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        setItems(JSON.parse(saved) as CartItem[]);
+    let cancelled = false;
+
+    const loadCart = async () => {
+      try {
+        const cart = await getCart();
+        if (!cancelled) {
+          setItems(cart.items);
+          setHydrated(true);
+        }
+      } catch {
+        if (!cancelled) {
+          setHydrated(true);
+        }
       }
-    } catch {
-      localStorage.removeItem(STORAGE_KEY);
-    } finally {
-      setHydrated(true);
-    }
+    };
+
+    void loadCart();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const persistItems = useEffectEvent((nextItems: CartItem[]) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(nextItems));
-  });
-
-  useEffect(() => {
-    if (!hydrated) {
-      return;
+  const syncCart = async (request: () => Promise<CartResponse>) => {
+    try {
+      const cart = await request();
+      setItems(cart.items);
+      setHydrated(true);
+    } catch {
+      setHydrated(true);
     }
-    persistItems(items);
-  }, [hydrated, items]);
+  };
 
   const addItem = (product: CartProduct) => {
-    startTransition(() => {
-      setItems((current) => {
-        const existing = current.find((item) => item.productId === product.productId);
-
-        if (!existing) {
-          return [...current, { ...product, quantity: 1 }];
-        }
-
-        return current.map((item) =>
-          item.productId === product.productId
-            ? { ...item, quantity: item.quantity + 1 }
-            : item,
-        );
-      });
-    });
+    const existing = items.find((item) => item.productId === product.productId);
+    const nextQuantity = (existing?.quantity ?? 0) + 1;
+    void syncCart(() => setCartItemQuantity(product.productId, nextQuantity));
   };
 
   const updateQuantity = (productId: number, quantity: number) => {
-    startTransition(() => {
-      setItems((current) =>
-        current
-          .map((item) =>
-            item.productId === productId ? { ...item, quantity } : item,
-          )
-          .filter((item) => item.quantity > 0),
-      );
-    });
+    if (quantity < 1) {
+      void syncCart(() => removeCartItem(productId));
+      return;
+    }
+
+    void syncCart(() => setCartItemQuantity(productId, quantity));
   };
 
   const removeItem = (productId: number) => {
-    startTransition(() => {
-      setItems((current) => current.filter((item) => item.productId !== productId));
-    });
+    void syncCart(() => removeCartItem(productId));
   };
 
   const clearCart = () => {
-    startTransition(() => {
-      setItems([]);
-    });
+    void syncCart(() => clearCartItems());
   };
 
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);

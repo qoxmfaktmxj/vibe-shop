@@ -34,8 +34,12 @@ test("storefront MVP smoke flow", async ({ page }) => {
   await page.getByRole("button", { name: "장바구니 담기" }).click();
   await expect(page.getByRole("button", { name: "장바구니에 담았어요" })).toBeVisible();
 
-  const cartState = await page.evaluate(() => localStorage.getItem("vibe-shop-cart"));
-  expect(cartState).not.toBeNull();
+  await expect
+    .poll(async () => {
+      const cartCookies = await page.context().cookies("http://127.0.0.1:8180");
+      return cartCookies.some((cookie) => cookie.name === "vibe_shop_cart");
+    })
+    .toBeTruthy();
 
   await page.getByRole("link", { name: /장바구니/ }).first().click();
   await expect(page).toHaveURL(/\/cart$/, { timeout: NAVIGATION_TIMEOUT });

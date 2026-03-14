@@ -91,3 +91,9 @@ export type CartItem = CartProduct & {
   quantity: number;
 };
 
+export type CartResponse = {
+  items: CartItem[];
+  itemCount: number;
+  subtotal: number;
+};
+

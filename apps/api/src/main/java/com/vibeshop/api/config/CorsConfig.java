@@ -16,9 +16,9 @@ public class CorsConfig {
     CorsFilter corsFilter(@Value("${app.cors.allowed-origins:http://localhost:3000}") List<String> allowedOrigins) {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(allowedOrigins);
-        configuration.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(false);
+        configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
