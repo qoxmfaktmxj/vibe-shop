@@ -4,6 +4,8 @@ import type {
   CheckoutPreview,
   CreateOrderPayload,
   CreateOrderResponse,
+  GuestOrderLookupPayload,
+  GuestOrderLookupResponse,
 } from "@/lib/contracts";
 
 function getApiBaseUrl() {
@@ -82,6 +84,15 @@ export async function createOrder(
   payload: CreateOrderPayload,
 ): Promise<CreateOrderResponse> {
   return fetchJson<CreateOrderResponse>("/api/v1/orders", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function lookupGuestOrder(
+  payload: GuestOrderLookupPayload,
+): Promise<GuestOrderLookupResponse> {
+  return fetchJson<GuestOrderLookupResponse>("/api/v1/orders/lookup", {
     method: "POST",
     body: JSON.stringify(payload),
   });

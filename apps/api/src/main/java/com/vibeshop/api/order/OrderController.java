@@ -18,6 +18,8 @@ import com.vibeshop.api.order.OrderDtos.CheckoutPreviewRequest;
 import com.vibeshop.api.order.OrderDtos.CheckoutPreviewResponse;
 import com.vibeshop.api.order.OrderDtos.CreateOrderRequest;
 import com.vibeshop.api.order.OrderDtos.CreateOrderResponse;
+import com.vibeshop.api.order.OrderDtos.GuestOrderLookupRequest;
+import com.vibeshop.api.order.OrderDtos.GuestOrderLookupResponse;
 import com.vibeshop.api.order.OrderDtos.OrderResponse;
 
 @RestController
@@ -57,6 +59,11 @@ public class OrderController {
                 .toString());
         }
         return createdOrder;
+    }
+
+    @PostMapping("/lookup")
+    GuestOrderLookupResponse lookup(@Valid @RequestBody GuestOrderLookupRequest request) {
+        return orderService.lookup(request);
     }
 
     @GetMapping("/{orderNumber}")

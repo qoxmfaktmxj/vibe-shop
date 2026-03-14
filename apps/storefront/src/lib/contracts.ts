@@ -66,6 +66,15 @@ export type CreateOrderResponse = {
   status: string;
 };
 
+export type GuestOrderLookupPayload = {
+  orderNumber: string;
+  phone: string;
+};
+
+export type GuestOrderLookupResponse = {
+  orderNumber: string;
+};
+
 export type OrderResponse = {
   orderNumber: string;
   status: string;

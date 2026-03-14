@@ -23,6 +23,8 @@ import com.vibeshop.api.order.OrderDtos.CheckoutPreviewRequest;
 import com.vibeshop.api.order.OrderDtos.CheckoutPreviewResponse;
 import com.vibeshop.api.order.OrderDtos.CreateOrderRequest;
 import com.vibeshop.api.order.OrderDtos.CreateOrderResponse;
+import com.vibeshop.api.order.OrderDtos.GuestOrderLookupRequest;
+import com.vibeshop.api.order.OrderDtos.GuestOrderLookupResponse;
 import com.vibeshop.api.order.OrderDtos.OrderResponse;
 
 @Service
@@ -115,6 +117,18 @@ public class OrderService {
             order.getTotal(),
             order.getCreatedAt()
         );
+    }
+
+    @Transactional(readOnly = true)
+    public GuestOrderLookupResponse lookup(GuestOrderLookupRequest request) {
+        CustomerOrder order = customerOrderRepository.findByOrderNumber(request.orderNumber().trim())
+            .orElseThrow(() -> new ResourceNotFoundException("주문 정보를 찾을 수 없습니다."));
+
+        if (!order.getPhone().equals(request.phone().trim())) {
+            throw new ResourceNotFoundException("주문 정보를 찾을 수 없습니다.");
+        }
+
+        return new GuestOrderLookupResponse(order.getOrderNumber());
     }
 
     private ResolvedOrder resolveOrder(List<CheckoutItemRequest> items) {

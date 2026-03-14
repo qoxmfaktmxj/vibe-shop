@@ -59,6 +59,17 @@ public final class OrderDtos {
     public record CreateOrderResponse(String orderNumber, String status) {
     }
 
+    public record GuestOrderLookupRequest(
+        @NotBlank(message = "주문번호를 입력해주세요.") String orderNumber,
+        @NotBlank(message = "연락처를 입력해주세요.") String phone
+    ) {
+    }
+
+    public record GuestOrderLookupResponse(
+        String orderNumber
+    ) {
+    }
+
     public record OrderResponse(
         String orderNumber,
         String status,

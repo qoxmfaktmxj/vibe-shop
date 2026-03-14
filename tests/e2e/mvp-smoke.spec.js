@@ -73,9 +73,19 @@ test("storefront MVP smoke flow", async ({ page }) => {
   const result = {
     title: await page.title(),
     url: page.url(),
+    orderNumber: page.url().split("/").at(-1),
     orderHeading: await page.locator("h1").first().textContent(),
     receiptLines: await page.locator("aside .space-y-4 > div").allTextContents(),
   };
+
+  await page.getByRole("link", { name: "비회원 주문조회" }).click();
+  await expect(page).toHaveURL(/\/lookup-order$/, { timeout: NAVIGATION_TIMEOUT });
+  await page.getByLabel("주문번호").fill(result.orderNumber);
+  await page.getByLabel("연락처").fill("01012345678");
+  await page.getByRole("button", { name: "주문 조회하기" }).click();
+  await expect(page).toHaveURL(new RegExp(`/orders/${result.orderNumber}$`), {
+    timeout: NAVIGATION_TIMEOUT,
+  });
 
   fs.writeFileSync(
     path.join(OUTPUT_DIR, "qa-result.json"),

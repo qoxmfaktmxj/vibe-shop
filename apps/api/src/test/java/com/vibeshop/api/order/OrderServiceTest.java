@@ -13,6 +13,8 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import com.vibeshop.api.order.OrderDtos.CheckoutItemRequest;
 import com.vibeshop.api.order.OrderDtos.CreateOrderRequest;
 import com.vibeshop.api.order.OrderDtos.CreateOrderResponse;
+import com.vibeshop.api.order.OrderDtos.GuestOrderLookupRequest;
+import com.vibeshop.api.order.OrderDtos.GuestOrderLookupResponse;
 
 @SpringBootTest
 class OrderServiceTest {
@@ -89,5 +91,26 @@ class OrderServiceTest {
         assertThat(first.status()).isEqualTo("RECEIVED");
         assertThat(second.status()).isEqualTo("RECEIVED");
         assertThat(orderCount).isEqualTo(1);
+    }
+
+    @Test
+    void lookupReturnsOrderWhenPhoneMatches() {
+        CreateOrderResponse created = orderService.create(new CreateOrderRequest(
+            "idem-order-lookup",
+            "Kim Minsu",
+            "01012345678",
+            "06236",
+            "Teheran-ro 123",
+            "8F",
+            "Leave at the door.",
+            List.of(new CheckoutItemRequest(10L, 1))
+        ));
+
+        GuestOrderLookupResponse found = orderService.lookup(new GuestOrderLookupRequest(
+            created.orderNumber(),
+            "01012345678"
+        ));
+
+        assertThat(found.orderNumber()).isEqualTo(created.orderNumber());
     }
 }
