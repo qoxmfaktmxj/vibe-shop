@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# storefront
 
-## Getting Started
+`apps/storefront`는 사용자용 쇼핑 화면 앱이다.  
+현재 목적은 "메인에서 상품을 보고, 장바구니에 담고, 주문을 생성하는 흐름"을 빠르게 검증하는 데 있다.
 
-First, run the development server:
+## 사용 기술
+
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS 4
+
+## 현재 화면
+
+- `/`
+  - 홈
+- `/category/[slug]`
+  - 카테고리 상품 목록
+- `/products/[slug]`
+  - 상품 상세
+- `/cart`
+  - 장바구니
+- `/checkout`
+  - 주문서 작성
+- `/orders/[orderNumber]`
+  - 주문 완료
+
+## 실행 방법
+
+루트에서 실행하는 방법:
+
+```bash
+npm run dev:storefront
+```
+
+앱 디렉터리에서 직접 실행하는 방법:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+기본 포트는 `3000`이다.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 환경 변수
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+예시 파일:
 
-## Learn More
+- `.env.local.example`
 
-To learn more about Next.js, take a look at the following resources:
+주요 값:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `API_BASE_URL`
+- `NEXT_PUBLIC_API_BASE_URL`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+서버 컴포넌트와 브라우저가 모두 API 서버 주소를 알고 있어야 하므로, 로컬에서는 보통 둘 다 같은 값으로 맞춘다.
 
-## Deploy on Vercel
+```bash
+API_BASE_URL=http://127.0.0.1:8080
+NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8080
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 검증 방법
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+정적 검증:
+
+```bash
+npm run lint
+npm run build
+```
+
+브라우저 흐름 검증은 루트의 Playwright 시나리오를 사용한다.
+
+```bash
+cd ../..
+npm run qa:e2e
+```
+
+## 구현 메모
+
+- API 호출은 `src/lib/server-api.ts`, `src/lib/client-api.ts`로 분리한다.
+- 장바구니는 현재 `localStorage` 기반이다.
+- 디자인은 초기 MVP 수준이지만, 이후 전시/검색/상품 경험을 기준으로 확장할 예정이다.
