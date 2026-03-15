@@ -1,5 +1,6 @@
 package com.vibeshop.api.catalog;
 
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -33,12 +34,17 @@ public class CatalogService {
     }
 
     public List<ProductSummary> getProducts(String categorySlug) {
-        return getProducts(categorySlug, null);
+        return getProducts(categorySlug, null, null);
     }
 
     public List<ProductSummary> getProducts(String categorySlug, String keyword) {
+        return getProducts(categorySlug, keyword, null);
+    }
+
+    public List<ProductSummary> getProducts(String categorySlug, String keyword, String sort) {
         String normalizedCategorySlug = categorySlug == null || categorySlug.isBlank() ? null : categorySlug.trim();
         String normalizedKeyword = keyword == null || keyword.isBlank() ? null : keyword.trim();
+        String normalizedSort = sort == null || sort.isBlank() ? "recommended" : sort.trim();
 
         List<Product> products = normalizedKeyword == null
             ? (
@@ -48,6 +54,7 @@ public class CatalogService {
             )
             : productRepository.search(normalizedCategorySlug, normalizedKeyword);
 
+        applySort(products, normalizedSort);
         return products.stream().map(this::toProductSummary).toList();
     }
 
@@ -92,5 +99,16 @@ public class CatalogService {
             product.getBadge(),
             product.getAccentColor()
         );
+    }
+
+    private void applySort(List<Product> products, String sort) {
+        if ("price-asc".equals(sort)) {
+            products.sort(Comparator.comparing(Product::getPrice).thenComparing(Product::getId));
+            return;
+        }
+
+        if ("price-desc".equals(sort)) {
+            products.sort(Comparator.comparing(Product::getPrice).reversed().thenComparing(Product::getId));
+        }
     }
 }
