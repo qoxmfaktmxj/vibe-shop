@@ -115,6 +115,10 @@ test("storefront MVP smoke flow", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /주문내역 \d+건/ })).toBeVisible();
   await expect(page.getByText(result.orderNumber)).toBeVisible();
 
+  await page.getByRole("link", { name: "FAQ" }).click();
+  await expect(page).toHaveURL(/\/faq$/, { timeout: NAVIGATION_TIMEOUT });
+  await expect(page.getByRole("heading", { name: "자주 묻는 질문" })).toBeVisible();
+
   fs.writeFileSync(
     path.join(OUTPUT_DIR, "qa-result.json"),
     JSON.stringify(result, null, 2),
