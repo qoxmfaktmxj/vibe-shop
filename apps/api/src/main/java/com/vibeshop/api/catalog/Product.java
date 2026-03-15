@@ -56,5 +56,22 @@ public class Product {
 
     @Column(nullable = false)
     private int stock;
+
+    public void decreaseStock(int quantity) {
+        if (quantity < 1) {
+            throw new IllegalArgumentException("수량은 1개 이상이어야 합니다.");
+        }
+        if (stock < quantity) {
+            throw new IllegalArgumentException(name + " 재고가 부족합니다.");
+        }
+        this.stock -= quantity;
+    }
+
+    public void increaseStock(int quantity) {
+        if (quantity < 1) {
+            throw new IllegalArgumentException("수량은 1개 이상이어야 합니다.");
+        }
+        this.stock += quantity;
+    }
 }
 
