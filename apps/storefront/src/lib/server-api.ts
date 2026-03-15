@@ -40,6 +40,11 @@ export const getProducts = cache(async (category?: string) => {
   return fetchFromApi<ProductSummary[]>(`/api/v1/products${query}`);
 });
 
+export const searchProducts = cache(async (keyword: string) => {
+  const query = `?q=${encodeURIComponent(keyword)}`;
+  return fetchFromApi<ProductSummary[]>(`/api/v1/products${query}`);
+});
+
 export const getProduct = cache(async (slug: string) =>
   fetchFromApi<ProductDetail>(`/api/v1/products/${slug}`),
 );

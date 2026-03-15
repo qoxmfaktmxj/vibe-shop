@@ -24,7 +24,7 @@ export default async function CategoryPage({
       <section
         className="surface-card rounded-[36px] p-8 sm:p-10"
         style={{
-          background: `linear-gradient(135deg, ${category.accentColor}30 0%, rgba(255,252,247,0.92) 100%)`,
+          background: `linear-gradient(135deg, ${category.accentColor}26 0%, rgba(255,255,243,0.94) 100%)`,
         }}
       >
         <p className="display-eyebrow">{category.name}</p>

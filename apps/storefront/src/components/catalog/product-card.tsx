@@ -14,10 +14,10 @@ export function ProductCard({ product }: { product: ProductSummary }) {
         style={{ background: productGradient(product.accentColor) }}
       >
         <div className="flex items-start justify-between gap-4">
-          <span className="rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-[var(--ink)]">
+          <span className="rounded-full bg-[var(--accent-hot)] px-3 py-1 text-xs font-semibold text-[var(--surface)] shadow-[0_10px_20px_rgba(255,58,32,0.18)]">
             {product.badge}
           </span>
-          <span className="text-xs font-medium uppercase tracking-[0.24em] text-black/40">
+          <span className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--accent-strong)]">
             {product.categoryName}
           </span>
         </div>
@@ -25,7 +25,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
           <p className="display-heading text-2xl font-semibold leading-tight">
             {product.name}
           </p>
-          <p className="mt-3 max-w-xs text-sm leading-6 text-black/60">
+          <p className="mt-3 max-w-xs text-sm leading-6 text-black/68">
             {product.summary}
           </p>
         </div>

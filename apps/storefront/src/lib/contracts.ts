@@ -51,6 +51,7 @@ export type CheckoutPreview = {
 };
 
 export type CreateOrderPayload = {
+  idempotencyKey: string;
   customerName: string;
   phone: string;
   postalCode: string;
@@ -62,10 +63,21 @@ export type CreateOrderPayload = {
 
 export type CreateOrderResponse = {
   orderNumber: string;
+  status: string;
+};
+
+export type GuestOrderLookupPayload = {
+  orderNumber: string;
+  phone: string;
+};
+
+export type GuestOrderLookupResponse = {
+  orderNumber: string;
 };
 
 export type OrderResponse = {
   orderNumber: string;
+  status: string;
   customerName: string;
   phone: string;
   postalCode: string;
@@ -89,5 +101,11 @@ export type CartProduct = {
 
 export type CartItem = CartProduct & {
   quantity: number;
+};
+
+export type CartResponse = {
+  items: CartItem[];
+  itemCount: number;
+  subtotal: number;
 };
 

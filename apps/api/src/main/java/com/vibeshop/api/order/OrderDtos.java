@@ -45,6 +45,7 @@ public final class OrderDtos {
     }
 
     public record CreateOrderRequest(
+        @NotBlank(message = "중복 제출 방지 키가 필요합니다.") String idempotencyKey,
         @NotBlank(message = "받는 분 이름을 입력해주세요.") String customerName,
         @NotBlank(message = "연락처를 입력해주세요.") String phone,
         @NotBlank(message = "우편번호를 입력해주세요.") String postalCode,
@@ -55,11 +56,23 @@ public final class OrderDtos {
     ) {
     }
 
-    public record CreateOrderResponse(String orderNumber) {
+    public record CreateOrderResponse(String orderNumber, String status) {
+    }
+
+    public record GuestOrderLookupRequest(
+        @NotBlank(message = "주문번호를 입력해주세요.") String orderNumber,
+        @NotBlank(message = "연락처를 입력해주세요.") String phone
+    ) {
+    }
+
+    public record GuestOrderLookupResponse(
+        String orderNumber
+    ) {
     }
 
     public record OrderResponse(
         String orderNumber,
+        String status,
         String customerName,
         String phone,
         String postalCode,

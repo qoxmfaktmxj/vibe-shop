@@ -21,13 +21,13 @@ export default async function HomePage() {
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href={`/category/${home.featuredCategories[0]?.slug ?? "living"}`}
-              className="rounded-full bg-[var(--accent-strong)] px-5 py-3 text-sm font-semibold text-white"
+              className="button-primary px-5 py-3"
             >
               대표 카테고리 보기
             </Link>
             <Link
               href="/cart"
-              className="rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-semibold"
+              className="button-secondary px-5 py-3"
             >
               장바구니 확인
             </Link>
@@ -41,14 +41,14 @@ export default async function HomePage() {
               href={`/category/${category.slug}`}
               className="surface-card rounded-[30px] p-6 transition hover:translate-y-[-2px]"
               style={{
-                background: `linear-gradient(135deg, ${category.accentColor}22 0%, rgba(255,252,247,0.95) 100%)`,
+                background: `linear-gradient(135deg, ${category.accentColor}24 0%, rgba(255,255,243,0.96) 100%)`,
               }}
             >
               <p className="display-eyebrow">{category.name}</p>
               <p className="display-heading mt-3 text-2xl font-semibold">
                 {category.description}
               </p>
-              <p className="mt-5 text-sm font-medium text-[var(--ink-soft)]">
+              <p className="mt-5 text-sm font-semibold text-[var(--accent-strong)]">
                 바로 보기
               </p>
             </Link>

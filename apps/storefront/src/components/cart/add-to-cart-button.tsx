@@ -17,7 +17,7 @@ export function AddToCartButton({ product }: { product: CartProduct }) {
         setAdded(true);
         window.setTimeout(() => setAdded(false), 1400);
       }}
-      className="rounded-full bg-[var(--ink)] px-4 py-2 text-sm font-semibold text-white transition hover:translate-y-[-1px]"
+      className={`${added ? "button-hot" : "button-ink"} px-4 py-2`}
     >
       {added ? "장바구니에 담았어요" : "장바구니 담기"}
     </button>

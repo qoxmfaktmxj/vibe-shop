@@ -1,8 +1,11 @@
 import type {
   CartItem,
+  CartResponse,
   CheckoutPreview,
   CreateOrderPayload,
   CreateOrderResponse,
+  GuestOrderLookupPayload,
+  GuestOrderLookupResponse,
 } from "@/lib/contracts";
 
 function getApiBaseUrl() {
@@ -19,6 +22,7 @@ function getApiBaseUrl() {
 
 async function fetchJson<T>(path: string, init: RequestInit): Promise<T> {
   const response = await fetch(`${getApiBaseUrl()}${path}`, {
+    credentials: "include",
     ...init,
     headers: {
       "Content-Type": "application/json",
@@ -34,6 +38,34 @@ async function fetchJson<T>(path: string, init: RequestInit): Promise<T> {
   }
 
   return response.json() as Promise<T>;
+}
+
+export async function getCart(): Promise<CartResponse> {
+  return fetchJson<CartResponse>("/api/v1/cart", {
+    method: "GET",
+  });
+}
+
+export async function setCartItemQuantity(
+  productId: number,
+  quantity: number,
+): Promise<CartResponse> {
+  return fetchJson<CartResponse>(`/api/v1/cart/items/${productId}`, {
+    method: "PUT",
+    body: JSON.stringify({ quantity }),
+  });
+}
+
+export async function removeCartItem(productId: number): Promise<CartResponse> {
+  return fetchJson<CartResponse>(`/api/v1/cart/items/${productId}`, {
+    method: "DELETE",
+  });
+}
+
+export async function clearCartItems(): Promise<CartResponse> {
+  return fetchJson<CartResponse>("/api/v1/cart", {
+    method: "DELETE",
+  });
 }
 
 export async function previewOrder(items: CartItem[]): Promise<CheckoutPreview> {
@@ -52,6 +84,15 @@ export async function createOrder(
   payload: CreateOrderPayload,
 ): Promise<CreateOrderResponse> {
   return fetchJson<CreateOrderResponse>("/api/v1/orders", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function lookupGuestOrder(
+  payload: GuestOrderLookupPayload,
+): Promise<GuestOrderLookupResponse> {
+  return fetchJson<GuestOrderLookupResponse>("/api/v1/orders/lookup", {
     method: "POST",
     body: JSON.stringify(payload),
   });

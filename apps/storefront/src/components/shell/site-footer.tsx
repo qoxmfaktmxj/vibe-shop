@@ -1,6 +1,6 @@
 export function SiteFooter() {
   return (
-    <footer className="border-t border-black/5 bg-[rgba(255,252,247,0.86)]">
+    <footer className="border-t border-[rgba(20,40,29,0.08)] bg-[rgba(255,255,243,0.84)]">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-5 py-8 text-sm text-[var(--ink-soft)] sm:px-8 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="display-eyebrow">PM Approved MVP</p>

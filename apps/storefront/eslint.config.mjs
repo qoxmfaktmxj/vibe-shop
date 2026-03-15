@@ -7,6 +7,8 @@ const eslintConfig = defineConfig([
   ...nextTs,
   // Override default ignores of eslint-config-next.
   globalIgnores([
+    "node_modules/**",
+    "node_modules_old/**",
     // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",

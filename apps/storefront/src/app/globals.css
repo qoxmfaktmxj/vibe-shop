@@ -1,15 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --surface: #f5efe6;
-  --surface-strong: #efe2cf;
-  --panel: rgba(255, 252, 247, 0.9);
-  --ink: #23170f;
-  --ink-soft: #6f5847;
-  --line: rgba(35, 23, 15, 0.12);
-  --accent: #d96f4a;
-  --accent-strong: #b24f2e;
-  --shadow: 0 18px 40px rgba(78, 55, 35, 0.12);
+  --surface: #fffff3;
+  --surface-strong: #edf3f0;
+  --panel: rgba(255, 255, 243, 0.9);
+  --ink: #14281d;
+  --ink-soft: #51655d;
+  --line: rgba(20, 40, 29, 0.14);
+  --accent: #74a4bc;
+  --accent-strong: #29339b;
+  --accent-hot: #ff3a20;
+  --accent-strong-deep: #21287a;
+  --shadow: 0 20px 52px rgba(20, 40, 29, 0.1);
 }
 
 @theme inline {
@@ -29,9 +31,9 @@ html {
 
 body {
   background:
-    radial-gradient(circle at top left, rgba(255, 196, 151, 0.38), transparent 30%),
-    radial-gradient(circle at top right, rgba(146, 207, 179, 0.28), transparent 24%),
-    linear-gradient(180deg, #fbf7f2 0%, #f1e6d8 100%);
+    radial-gradient(circle at top left, rgba(41, 51, 155, 0.14), transparent 32%),
+    radial-gradient(circle at top right, rgba(116, 164, 188, 0.18), transparent 28%),
+    linear-gradient(180deg, #fffff3 0%, #f7faf4 48%, #eef4f6 100%);
   color: var(--ink);
   font-family: var(--font-noto-sans), sans-serif;
   min-height: 100vh;
@@ -49,18 +51,18 @@ textarea {
 }
 
 ::selection {
-  background: rgba(217, 111, 74, 0.24);
+  background: rgba(255, 58, 32, 0.2);
 }
 
 .surface-card {
-  background: var(--panel);
+  background: linear-gradient(180deg, rgba(255, 255, 243, 0.96) 0%, rgba(255, 255, 243, 0.84) 100%);
   border: 1px solid var(--line);
   box-shadow: var(--shadow);
   backdrop-filter: blur(14px);
 }
 
 .display-eyebrow {
-  color: var(--accent-strong);
+  color: var(--accent-hot);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.24em;
@@ -74,6 +76,76 @@ textarea {
 .grid-shell {
   display: grid;
   gap: 1.5rem;
+}
+
+.button-primary,
+.button-secondary,
+.button-ink,
+.button-hot {
+  align-items: center;
+  border-radius: 9999px;
+  display: inline-flex;
+  font-size: 0.875rem;
+  font-weight: 700;
+  justify-content: center;
+  line-height: 1;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease,
+    transform 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.button-primary:hover,
+.button-secondary:hover,
+.button-ink:hover,
+.button-hot:hover {
+  transform: translateY(-1px);
+}
+
+.button-primary {
+  background: var(--accent-strong);
+  box-shadow: 0 12px 24px rgba(41, 51, 155, 0.18);
+  color: var(--surface);
+}
+
+.button-primary:hover {
+  background: var(--accent-strong-deep);
+}
+
+.button-secondary {
+  background: rgba(116, 164, 188, 0.14);
+  border: 1px solid rgba(41, 51, 155, 0.18);
+  color: var(--ink);
+}
+
+.button-secondary:hover {
+  background: rgba(116, 164, 188, 0.22);
+}
+
+.button-ink {
+  background: var(--ink);
+  box-shadow: 0 12px 24px rgba(20, 40, 29, 0.14);
+  color: var(--surface);
+}
+
+.button-ink:hover {
+  background: #1d3729;
+}
+
+.button-hot {
+  background: var(--accent-hot);
+  box-shadow: 0 14px 28px rgba(255, 58, 32, 0.18);
+  color: var(--surface);
+}
+
+.button-hot:hover {
+  background: #e4321b;
+}
+
+.stat-divider {
+  border-top: 1px solid rgba(41, 51, 155, 0.14);
 }
 
 @media (min-width: 768px) {

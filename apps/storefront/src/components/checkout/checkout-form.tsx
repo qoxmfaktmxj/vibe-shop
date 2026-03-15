@@ -8,12 +8,21 @@ import type { CheckoutPreview } from "@/lib/contracts";
 import { useCart } from "@/lib/cart-store";
 import { formatPrice } from "@/lib/currency";
 
+function makeIdempotencyKey() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID().replaceAll("-", "");
+  }
+
+  return `${Date.now()}${Math.random().toString(16).slice(2)}`;
+}
+
 export function CheckoutForm() {
   const router = useRouter();
   const { items, clearCart, hydrated } = useCart();
   const [preview, setPreview] = useState<CheckoutPreview | null>(null);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
+  const [idempotencyKey, setIdempotencyKey] = useState(() => makeIdempotencyKey());
   const [form, setForm] = useState({
     customerName: "",
     phone: "",
@@ -70,6 +79,7 @@ export function CheckoutForm() {
             startTransition(async () => {
               try {
                 const result = await createOrder({
+                  idempotencyKey,
                   ...form,
                   items: items.map((item) => ({
                     productId: item.productId,
@@ -77,6 +87,7 @@ export function CheckoutForm() {
                   })),
                 });
                 clearCart();
+                setIdempotencyKey(makeIdempotencyKey());
                 router.push(`/orders/${result.orderNumber}`);
               } catch (submitError) {
                 setError(
@@ -96,7 +107,7 @@ export function CheckoutForm() {
               onChange={(event) =>
                 setForm((current) => ({ ...current, customerName: event.target.value }))
               }
-              className="rounded-2xl border border-black/10 bg-white px-4 py-3"
+              className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,243,0.92)] px-4 py-3"
             />
           </label>
 
@@ -108,7 +119,7 @@ export function CheckoutForm() {
               onChange={(event) =>
                 setForm((current) => ({ ...current, phone: event.target.value }))
               }
-              className="rounded-2xl border border-black/10 bg-white px-4 py-3"
+              className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,243,0.92)] px-4 py-3"
             />
           </label>
 
@@ -121,7 +132,7 @@ export function CheckoutForm() {
                 onChange={(event) =>
                   setForm((current) => ({ ...current, postalCode: event.target.value }))
                 }
-                className="rounded-2xl border border-black/10 bg-white px-4 py-3"
+                className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,243,0.92)] px-4 py-3"
               />
             </label>
             <label className="grid gap-2">
@@ -132,7 +143,7 @@ export function CheckoutForm() {
                 onChange={(event) =>
                   setForm((current) => ({ ...current, address1: event.target.value }))
                 }
-                className="rounded-2xl border border-black/10 bg-white px-4 py-3"
+                className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,243,0.92)] px-4 py-3"
               />
             </label>
           </div>
@@ -144,7 +155,7 @@ export function CheckoutForm() {
               onChange={(event) =>
                 setForm((current) => ({ ...current, address2: event.target.value }))
               }
-              className="rounded-2xl border border-black/10 bg-white px-4 py-3"
+              className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,243,0.92)] px-4 py-3"
             />
           </label>
 
@@ -156,7 +167,7 @@ export function CheckoutForm() {
               onChange={(event) =>
                 setForm((current) => ({ ...current, note: event.target.value }))
               }
-              className="rounded-2xl border border-black/10 bg-white px-4 py-3"
+              className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,243,0.92)] px-4 py-3"
             />
           </label>
 
@@ -165,14 +176,14 @@ export function CheckoutForm() {
           <button
             type="submit"
             disabled={isPending}
-            className="rounded-full bg-[var(--ink)] px-5 py-3 text-sm font-semibold text-white disabled:opacity-60"
+            className="button-hot px-5 py-3 disabled:opacity-60"
           >
             {isPending ? "주문 생성 중..." : "주문 완료하기"}
           </button>
         </form>
       </section>
 
-      <aside className="surface-card rounded-[28px] p-6 sm:p-8">
+      <aside className="surface-card rounded-[28px] border-[rgba(41,51,155,0.14)] bg-[linear-gradient(180deg,rgba(41,51,155,0.06),rgba(255,255,243,0.88))] p-6 sm:p-8">
         <p className="display-eyebrow">Order Summary</p>
         <h2 className="display-heading mt-3 text-2xl font-semibold">최종 확인</h2>
         <div className="mt-6 space-y-3 text-sm">
@@ -185,7 +196,7 @@ export function CheckoutForm() {
             </div>
           ))}
         </div>
-        <div className="mt-6 space-y-3 border-t border-black/10 pt-5 text-sm">
+        <div className="stat-divider mt-6 space-y-3 pt-5 text-sm">
           <div className="flex justify-between">
             <span>상품 합계</span>
             <span>{formatPrice(preview?.subtotal ?? 0)}원</span>

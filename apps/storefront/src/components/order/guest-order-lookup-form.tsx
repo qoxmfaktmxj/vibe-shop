@@ -1,0 +1,72 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+
+import { lookupGuestOrder } from "@/lib/client-api";
+
+export function GuestOrderLookupForm() {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState("");
+  const [form, setForm] = useState({
+    orderNumber: "",
+    phone: "",
+  });
+
+  return (
+    <form
+      className="mt-8 grid gap-5"
+      onSubmit={(event) => {
+        event.preventDefault();
+        startTransition(async () => {
+          try {
+            const result = await lookupGuestOrder(form);
+            setError("");
+            router.push(`/orders/${result.orderNumber}`);
+          } catch (lookupError) {
+            setError(
+              lookupError instanceof Error
+                ? lookupError.message
+                : "주문 정보를 찾지 못했습니다.",
+            );
+          }
+        });
+      }}
+    >
+      <label className="grid gap-2">
+        <span className="text-sm font-medium">주문번호</span>
+        <input
+          required
+          value={form.orderNumber}
+          onChange={(event) =>
+            setForm((current) => ({ ...current, orderNumber: event.target.value }))
+          }
+          className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,243,0.92)] px-4 py-3"
+        />
+      </label>
+
+      <label className="grid gap-2">
+        <span className="text-sm font-medium">연락처</span>
+        <input
+          required
+          value={form.phone}
+          onChange={(event) =>
+            setForm((current) => ({ ...current, phone: event.target.value }))
+          }
+          className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,243,0.92)] px-4 py-3"
+        />
+      </label>
+
+      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+
+      <button
+        type="submit"
+        disabled={isPending}
+        className="button-primary px-5 py-3 disabled:opacity-60"
+      >
+        {isPending ? "조회 중..." : "주문 조회하기"}
+      </button>
+    </form>
+  );
+}

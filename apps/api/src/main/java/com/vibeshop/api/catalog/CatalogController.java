@@ -29,8 +29,11 @@ public class CatalogController {
     }
 
     @GetMapping("/products")
-    List<ProductSummary> products(@RequestParam(required = false) String category) {
-        return catalogService.getProducts(category);
+    List<ProductSummary> products(
+        @RequestParam(required = false) String category,
+        @RequestParam(required = false, name = "q") String keyword
+    ) {
+        return catalogService.getProducts(category, keyword);
     }
 
     @GetMapping("/products/{slug}")
