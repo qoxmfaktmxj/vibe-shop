@@ -33,9 +33,20 @@ public class CatalogService {
     }
 
     public List<ProductSummary> getProducts(String categorySlug) {
-        List<Product> products = categorySlug == null || categorySlug.isBlank()
-            ? productRepository.findAllByOrderByFeaturedDescIdAsc()
-            : productRepository.findByCategory_SlugOrderByFeaturedDescIdAsc(categorySlug);
+        return getProducts(categorySlug, null);
+    }
+
+    public List<ProductSummary> getProducts(String categorySlug, String keyword) {
+        String normalizedCategorySlug = categorySlug == null || categorySlug.isBlank() ? null : categorySlug.trim();
+        String normalizedKeyword = keyword == null || keyword.isBlank() ? null : keyword.trim();
+
+        List<Product> products = normalizedKeyword == null
+            ? (
+                normalizedCategorySlug == null
+                    ? productRepository.findAllByOrderByFeaturedDescIdAsc()
+                    : productRepository.findByCategory_SlugOrderByFeaturedDescIdAsc(normalizedCategorySlug)
+            )
+            : productRepository.search(normalizedCategorySlug, normalizedKeyword);
 
         return products.stream().map(this::toProductSummary).toList();
     }

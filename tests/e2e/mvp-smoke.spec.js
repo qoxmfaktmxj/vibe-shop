@@ -6,6 +6,8 @@ const { expect, test } = require("playwright/test");
 const OUTPUT_DIR = path.join(process.cwd(), "output", "playwright");
 const NAVIGATION_TIMEOUT = 60_000;
 
+test.setTimeout(180_000);
+
 test("storefront MVP smoke flow", async ({ page }) => {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
@@ -86,6 +88,16 @@ test("storefront MVP smoke flow", async ({ page }) => {
   await expect(page).toHaveURL(new RegExp(`/orders/${result.orderNumber}$`), {
     timeout: NAVIGATION_TIMEOUT,
   });
+
+  await page.getByRole("link", { name: "검색" }).click();
+  await expect(page).toHaveURL(/\/search$/, { timeout: NAVIGATION_TIMEOUT });
+  await page.getByPlaceholder("상품명, 카테고리, 요약으로 검색").fill("린넨");
+  await page.getByRole("button", { name: "검색" }).click();
+  await expect(page).toHaveURL(/\/search\?q=%EB%A6%B0%EB%84%A8$/, {
+    timeout: NAVIGATION_TIMEOUT,
+  });
+  await expect(page.getByText('"린넨" 검색 결과')).toBeVisible();
+  await expect(page.getByText("린넨 베드 세트")).toBeVisible();
 
   fs.writeFileSync(
     path.join(OUTPUT_DIR, "qa-result.json"),

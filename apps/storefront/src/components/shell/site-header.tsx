@@ -56,6 +56,7 @@ export function SiteHeader({ categories }: { categories: Category[] }) {
 
         <nav className="flex flex-wrap gap-2">
           <HeaderLink href="/" label="메인" active={pathname === "/"} />
+          <HeaderLink href="/search" label="검색" active={pathname === "/search"} />
           <HeaderLink href="/lookup-order" label="비회원 주문조회" active={pathname === "/lookup-order"} />
           {categories.map((category) => (
             <HeaderLink
