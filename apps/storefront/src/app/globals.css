@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f5f3ee;
-  --surface: #fcfbf8;
-  --surface-strong: #f1efe9;
+  --background: #ffffff;
+  --surface: #ffffff;
+  --surface-strong: #fafafa;
   --panel: #ffffff;
   --ink: #181715;
   --ink-soft: #66625b;
@@ -29,8 +29,8 @@ html {
 
 body {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.45), transparent 18%),
-    linear-gradient(180deg, #f7f5f0 0%, #f3f1eb 52%, #efede7 100%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.92)),
+    linear-gradient(180deg, #ffffff 0%, #fcfcfc 100%);
   color: var(--ink);
   font-family: var(--font-noto-sans), sans-serif;
   min-height: 100vh;
@@ -62,7 +62,7 @@ textarea::placeholder {
 }
 
 .surface-card {
-  background: linear-gradient(180deg, rgba(252, 251, 248, 0.98) 0%, rgba(255, 255, 255, 0.96) 100%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.98) 100%);
   border: 1px solid var(--line);
   box-shadow: var(--shadow);
 }
