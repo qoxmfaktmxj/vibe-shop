@@ -70,6 +70,12 @@ public final class OrderDtos {
     ) {
     }
 
+    public record CancelOrderResponse(
+        String orderNumber,
+        String status
+    ) {
+    }
+
     public record OrderResponse(
         String orderNumber,
         String status,

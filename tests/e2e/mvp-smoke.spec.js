@@ -80,6 +80,9 @@ test("storefront MVP smoke flow", async ({ page }) => {
     receiptLines: await page.locator("aside .space-y-4 > div").allTextContents(),
   };
 
+  await page.getByRole("button", { name: "주문 취소하기" }).click();
+  await expect(page.getByText("CANCELLED")).toBeVisible({ timeout: NAVIGATION_TIMEOUT });
+
   await page.getByRole("link", { name: "비회원 주문조회" }).click();
   await expect(page).toHaveURL(/\/lookup-order$/, { timeout: NAVIGATION_TIMEOUT });
   await page.getByLabel("주문번호").fill(result.orderNumber);

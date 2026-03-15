@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
 import com.vibeshop.api.order.OrderDtos.CheckoutItemRequest;
+import com.vibeshop.api.order.OrderDtos.CancelOrderResponse;
 import com.vibeshop.api.order.OrderDtos.CreateOrderRequest;
 import com.vibeshop.api.order.OrderDtos.CreateOrderResponse;
 import com.vibeshop.api.order.OrderDtos.GuestOrderLookupRequest;
@@ -112,5 +113,25 @@ class OrderServiceTest {
         ));
 
         assertThat(found.orderNumber()).isEqualTo(created.orderNumber());
+    }
+
+    @Test
+    void cancelChangesStatusToCancelled() {
+        CreateOrderResponse created = orderService.create(new CreateOrderRequest(
+            "idem-order-cancel",
+            "Kim Minsu",
+            "01012345678",
+            "06236",
+            "Teheran-ro 123",
+            "8F",
+            "Leave at the door.",
+            List.of(new CheckoutItemRequest(10L, 1))
+        ));
+
+        CancelOrderResponse cancelled = orderService.cancel(created.orderNumber());
+
+        assertThat(cancelled.orderNumber()).isEqualTo(created.orderNumber());
+        assertThat(cancelled.status()).isEqualTo("CANCELLED");
+        assertThat(orderService.get(created.orderNumber()).status()).isEqualTo("CANCELLED");
     }
 }
