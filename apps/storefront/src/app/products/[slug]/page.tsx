@@ -27,7 +27,7 @@ export default async function ProductPage({
     <div className="grid-shell lg:grid-cols-[1.1fr_0.9fr]">
       <section
         className="surface-card min-h-[420px] rounded-[36px] p-8 sm:p-10"
-        style={{ background: productGradient(product.accentColor) }}
+        style={{ background: productGradient() }}
       >
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -36,46 +36,46 @@ export default async function ProductPage({
               {product.name}
             </h1>
           </div>
-          <span className="rounded-full bg-[var(--accent-hot)] px-3 py-1 text-xs font-semibold text-[var(--surface)] shadow-[0_10px_20px_rgba(255,58,32,0.18)]">
+          <span className="rounded-[999px] border border-[var(--line)] bg-[rgba(255,255,255,0.88)] px-3 py-1 text-xs font-semibold text-[var(--ink)]">
             {product.badge}
           </span>
         </div>
 
-        <p className="mt-8 max-w-xl text-base leading-8 text-black/72">
+        <p className="mt-8 max-w-xl text-base leading-8 text-[var(--ink-soft)]">
           {product.summary}
         </p>
 
-        <div className="mt-16 grid gap-4 text-sm text-black/66 sm:grid-cols-3">
+        <div className="mt-16 grid gap-4 text-sm text-[var(--ink-soft)] sm:grid-cols-3">
           <div>
-            <p className="font-semibold">Price</p>
+            <p className="font-semibold">가격</p>
             <p className="mt-2 text-lg font-semibold text-[var(--ink)]">
               {formatPrice(product.price)}원
             </p>
           </div>
           <div>
-            <p className="font-semibold">Stock</p>
+            <p className="font-semibold">재고</p>
             <p className="mt-2 text-lg font-semibold text-[var(--ink)]">
               {product.stock}개
             </p>
           </div>
           <div>
-            <p className="font-semibold">Flow</p>
+            <p className="font-semibold">주문 단계</p>
             <p className="mt-2 text-lg font-semibold text-[var(--ink)]">
-              Detail → Cart → Checkout
+              상품 확인 → 장바구니 → 주문서 작성
             </p>
           </div>
         </div>
       </section>
 
       <aside className="surface-card rounded-[36px] p-8 sm:p-10">
-        <p className="display-eyebrow">Product Story</p>
+        <p className="display-eyebrow">Details</p>
         <p className="mt-4 text-base leading-8 text-[var(--ink-soft)]">
           {product.description}
         </p>
 
-        <div className="mt-8 rounded-[28px] border border-[rgba(41,51,155,0.14)] bg-[rgba(255,255,243,0.76)] p-6">
-          <p className="text-sm uppercase tracking-[0.24em] text-[var(--ink-soft)]">
-            Purchase
+        <div className="mt-8 rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.76)] p-6">
+          <p className="text-sm uppercase tracking-[0.18em] text-[var(--ink-soft)]">
+            구매 정보
           </p>
           <p className="mt-3 text-3xl font-semibold">{formatPrice(product.price)}원</p>
           <div className="mt-6 flex flex-wrap gap-3">

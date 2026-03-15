@@ -23,15 +23,15 @@ export function OrderHistoryForm() {
       <input
         value={phone}
         onChange={(event) => setPhone(event.target.value)}
-        placeholder="주문 연락처 입력"
-        className="min-w-0 flex-1 rounded-2xl border border-[var(--line)] bg-[rgba(255,255,243,0.92)] px-4 py-3"
+        placeholder="주문할 때 사용한 연락처를 입력해 주세요"
+        className="min-w-0 flex-1 rounded-2xl border border-[var(--line)] bg-[rgba(255,255,255,0.9)] px-4 py-3"
       />
       <button
         type="submit"
         disabled={isPending}
         className="button-primary px-5 py-3 disabled:opacity-60"
       >
-        {isPending ? "조회 중..." : "주문내역 보기"}
+        {isPending ? "조회하고 있습니다." : "주문내역 조회"}
       </button>
     </form>
   );

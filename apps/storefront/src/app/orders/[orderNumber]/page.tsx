@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { CancelOrderButton } from "@/components/order/cancel-order-button";
 import { formatPrice } from "@/lib/currency";
+import { formatOrderStatus } from "@/lib/order-status";
 import { ApiNotFoundError, getOrder } from "@/lib/server-api";
 
 export default async function OrderPage({
@@ -25,20 +26,19 @@ export default async function OrderPage({
   return (
     <div className="grid-shell lg:grid-cols-[1.2fr_0.8fr]">
       <section className="surface-card rounded-[36px] p-8 sm:p-10">
-        <p className="display-eyebrow">Order Complete</p>
+        <p className="display-eyebrow">Order</p>
         <h1 className="display-heading mt-4 text-4xl font-semibold">
           주문이 접수되었습니다.
         </h1>
         <p className="mt-4 text-base leading-8 text-[var(--ink-soft)]">
-          주문번호 <strong className="text-[var(--accent-strong)]">{order.orderNumber}</strong> 기준으로 MVP 주문 플로우를 확인할 수
-          있습니다.
+          주문번호 <strong className="text-[var(--ink)]">{order.orderNumber}</strong>로 주문 상태와 배송 정보를 확인할 수 있습니다.
         </p>
 
-        <div className="mt-8 rounded-[28px] border border-[rgba(41,51,155,0.14)] bg-[rgba(255,255,243,0.76)] p-6">
+        <div className="mt-8 rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.76)] p-6">
           <dl className="grid gap-4 text-sm sm:grid-cols-2">
             <div>
               <dt className="text-[var(--ink-soft)]">주문 상태</dt>
-              <dd className="mt-1 font-semibold">{order.status}</dd>
+              <dd className="mt-1 font-semibold">{formatOrderStatus(order.status)}</dd>
             </div>
             <div>
               <dt className="text-[var(--ink-soft)]">받는 분</dt>
@@ -66,8 +66,8 @@ export default async function OrderPage({
         {order.status === "RECEIVED" ? <CancelOrderButton orderNumber={order.orderNumber} /> : null}
       </section>
 
-      <aside className="surface-card rounded-[36px] border-[rgba(41,51,155,0.14)] bg-[linear-gradient(180deg,rgba(41,51,155,0.06),rgba(255,255,243,0.88))] p-8 sm:p-10">
-        <p className="display-eyebrow">Receipt</p>
+      <aside className="surface-card rounded-[36px] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(241,239,233,0.76))] p-8 sm:p-10">
+        <p className="display-eyebrow">주문 내역</p>
         <div className="mt-6 space-y-4 text-sm">
           {order.lines.map((line) => (
             <div key={`${line.productId}-${line.productName}`} className="flex justify-between gap-4">

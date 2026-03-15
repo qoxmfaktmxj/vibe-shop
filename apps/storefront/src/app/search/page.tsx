@@ -21,7 +21,7 @@ export default async function SearchPage({
           상품 검색
         </h1>
         <p className="mt-4 max-w-2xl text-base leading-8 text-[var(--ink-soft)]">
-          상품명, 카테고리명, 상품 요약 기준으로 현재 MVP 상품을 검색할 수 있습니다.
+          상품명과 카테고리, 상품 설명을 기준으로 원하는 제품을 찾아보세요.
         </p>
         <SearchForm />
       </section>
@@ -54,7 +54,7 @@ export default async function SearchPage({
               ))}
             </div>
           ) : (
-            <div className="mt-8 rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,243,0.72)] p-6 text-sm text-[var(--ink-soft)]">
+            <div className="mt-8 rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm text-[var(--ink-soft)]">
               검색 결과가 없습니다. 다른 키워드로 다시 시도해 주세요.
             </div>
           )}

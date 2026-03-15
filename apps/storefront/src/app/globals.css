@@ -1,24 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --surface: #fffff3;
-  --surface-strong: #edf3f0;
-  --panel: rgba(255, 255, 243, 0.9);
-  --ink: #14281d;
-  --ink-soft: #51655d;
-  --line: rgba(20, 40, 29, 0.14);
-  --accent: #74a4bc;
-  --accent-strong: #29339b;
-  --accent-hot: #ff3a20;
-  --accent-strong-deep: #21287a;
-  --shadow: 0 20px 52px rgba(20, 40, 29, 0.1);
+  --background: #f5f3ee;
+  --surface: #fcfbf8;
+  --surface-strong: #f1efe9;
+  --panel: #ffffff;
+  --ink: #181715;
+  --ink-soft: #66625b;
+  --line: rgba(24, 23, 21, 0.1);
+  --line-strong: rgba(24, 23, 21, 0.18);
+  --shadow: 0 20px 48px rgba(24, 23, 21, 0.05);
 }
 
 @theme inline {
-  --color-background: var(--surface);
+  --color-background: var(--background);
   --color-foreground: var(--ink);
   --font-sans: var(--font-noto-sans);
-  --font-display: var(--font-noto-serif);
+  --font-display: var(--font-noto-sans);
 }
 
 * {
@@ -31,9 +29,8 @@ html {
 
 body {
   background:
-    radial-gradient(circle at top left, rgba(41, 51, 155, 0.14), transparent 32%),
-    radial-gradient(circle at top right, rgba(116, 164, 188, 0.18), transparent 28%),
-    linear-gradient(180deg, #fffff3 0%, #f7faf4 48%, #eef4f6 100%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.45), transparent 18%),
+    linear-gradient(180deg, #f7f5f0 0%, #f3f1eb 52%, #efede7 100%);
   color: var(--ink);
   font-family: var(--font-noto-sans), sans-serif;
   min-height: 100vh;
@@ -50,27 +47,37 @@ textarea {
   font: inherit;
 }
 
+input,
+textarea {
+  color: var(--ink);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #8d877f;
+}
+
 ::selection {
-  background: rgba(255, 58, 32, 0.2);
+  background: rgba(24, 23, 21, 0.12);
 }
 
 .surface-card {
-  background: linear-gradient(180deg, rgba(255, 255, 243, 0.96) 0%, rgba(255, 255, 243, 0.84) 100%);
+  background: linear-gradient(180deg, rgba(252, 251, 248, 0.98) 0%, rgba(255, 255, 255, 0.96) 100%);
   border: 1px solid var(--line);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(14px);
 }
 
 .display-eyebrow {
-  color: var(--accent-hot);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.24em;
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
 }
 
 .display-heading {
-  font-family: var(--font-display), serif;
+  font-family: var(--font-noto-sans), sans-serif;
+  letter-spacing: -0.03em;
 }
 
 .grid-shell {
@@ -83,10 +90,10 @@ textarea {
 .button-ink,
 .button-hot {
   align-items: center;
-  border-radius: 9999px;
+  border-radius: 1.125rem;
   display: inline-flex;
   font-size: 0.875rem;
-  font-weight: 700;
+  font-weight: 600;
   justify-content: center;
   line-height: 1;
   transition:
@@ -104,48 +111,33 @@ textarea {
   transform: translateY(-1px);
 }
 
-.button-primary {
-  background: var(--accent-strong);
-  box-shadow: 0 12px 24px rgba(41, 51, 155, 0.18);
-  color: var(--surface);
+.button-primary,
+.button-ink,
+.button-hot {
+  background: var(--ink);
+  box-shadow: 0 10px 24px rgba(24, 23, 21, 0.12);
+  color: #fff;
 }
 
-.button-primary:hover {
-  background: var(--accent-strong-deep);
+.button-primary:hover,
+.button-ink:hover,
+.button-hot:hover {
+  background: #24221f;
 }
 
 .button-secondary {
-  background: rgba(116, 164, 188, 0.14);
-  border: 1px solid rgba(41, 51, 155, 0.18);
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid var(--line);
   color: var(--ink);
 }
 
 .button-secondary:hover {
-  background: rgba(116, 164, 188, 0.22);
-}
-
-.button-ink {
-  background: var(--ink);
-  box-shadow: 0 12px 24px rgba(20, 40, 29, 0.14);
-  color: var(--surface);
-}
-
-.button-ink:hover {
-  background: #1d3729;
-}
-
-.button-hot {
-  background: var(--accent-hot);
-  box-shadow: 0 14px 28px rgba(255, 58, 32, 0.18);
-  color: var(--surface);
-}
-
-.button-hot:hover {
-  background: #e4321b;
+  background: var(--surface-strong);
+  border-color: var(--line-strong);
 }
 
 .stat-divider {
-  border-top: 1px solid rgba(41, 51, 155, 0.14);
+  border-top: 1px solid var(--line);
 }
 
 @media (min-width: 768px) {

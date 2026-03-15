@@ -21,7 +21,7 @@ export function ContentPage({
         </p>
       </section>
 
-      <aside className="surface-card rounded-[36px] border-[rgba(41,51,155,0.14)] bg-[linear-gradient(180deg,rgba(41,51,155,0.06),rgba(255,255,243,0.88))] p-8 sm:p-10">
+      <aside className="surface-card rounded-[36px] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(241,239,233,0.76))] p-8 sm:p-10">
         <div className="space-y-6 text-sm leading-7 text-[var(--ink-soft)]">{children}</div>
         <Link href="/" className="button-secondary mt-8 px-5 py-3">
           메인으로 돌아가기

@@ -1,4 +1,4 @@
-export function productGradient(accentColor: string) {
-  return `linear-gradient(135deg, ${accentColor} 0%, rgba(255, 252, 247, 0.94) 88%)`;
+export function productGradient() {
+  return `linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(241,239,233,0.82) 100%)`;
 }
 

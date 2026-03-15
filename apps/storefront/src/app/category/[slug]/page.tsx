@@ -28,16 +28,14 @@ export default async function CategoryPage({
     <div className="grid-shell">
       <section
         className="surface-card rounded-[36px] p-8 sm:p-10"
-        style={{
-          background: `linear-gradient(135deg, ${category.accentColor}26 0%, rgba(255,255,243,0.94) 100%)`,
-        }}
+        style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(241,239,233,0.72) 100%)" }}
       >
         <p className="display-eyebrow">{category.name}</p>
         <h1 className="display-heading mt-3 text-4xl font-semibold">
           {category.description}
         </h1>
         <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--ink-soft)]">
-          1차 MVP에서는 카테고리 탐색, 상세 진입, 장바구니 이동 흐름을 우선 검증합니다.
+          취향에 맞는 상품을 차분하게 둘러보고 원하는 제품을 골라보세요.
         </p>
         <div className="mt-6">
           <ProductSortTabs

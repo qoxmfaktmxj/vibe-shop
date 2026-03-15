@@ -22,8 +22,8 @@ public class CatalogService {
 
     public HomeResponse getHome() {
         return new HomeResponse(
-            "오늘의 감도로 공간을 채우는 셀렉트 숍",
-            "리빙, 키친, 웰니스까지 하루의 리듬을 바꾸는 제품만 가볍게 묶었습니다.",
+            "차분한 일상을 위한 셀렉션",
+            "리빙, 키친, 웰니스 카테고리에서 오래 곁에 두기 좋은 제품을 소개합니다.",
             categoryRepository.findAllByOrderByIdAsc().stream().map(this::toCategorySummary).toList(),
             productRepository.findTop4ByFeaturedTrueOrderByIdAsc().stream().map(this::toProductSummary).toList()
         );

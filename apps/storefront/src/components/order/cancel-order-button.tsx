@@ -36,7 +36,7 @@ export function CancelOrderButton({
         }}
         className="button-secondary px-5 py-3 disabled:opacity-60"
       >
-        {isPending ? "주문 취소 중..." : "주문 취소하기"}
+        {isPending ? "주문을 취소하고 있습니다." : "주문 취소"}
       </button>
       {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
     </div>

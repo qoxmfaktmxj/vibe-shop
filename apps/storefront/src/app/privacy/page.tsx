@@ -11,10 +11,10 @@ export default function PrivacyPage() {
     <ContentPage
       eyebrow="Privacy"
       title="개인정보처리방침"
-      description="현재 단계에서 실제로 다루는 개인정보 범위와 이후 확정이 필요한 항목을 구분해 안내합니다."
+      description="주문과 배송에 필요한 개인정보 처리 범위를 중심으로 안내합니다."
     >
       {PRIVACY_ITEMS.map((item) => (
-        <p key={item} className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,243,0.72)] p-5">
+        <p key={item} className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
           {item}
         </p>
       ))}

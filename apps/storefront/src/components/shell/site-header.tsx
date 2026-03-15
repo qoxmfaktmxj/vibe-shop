@@ -18,10 +18,10 @@ function HeaderLink({
   return (
     <Link
       href={href}
-      className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+      className={`rounded-2xl px-4 py-2 text-sm font-medium transition ${
         active
-          ? "bg-[var(--accent-strong)] text-white shadow-[0_10px_24px_rgba(41,51,155,0.16)]"
-          : "border border-[rgba(41,51,155,0.14)] bg-[rgba(255,255,243,0.8)] text-[var(--ink-soft)] hover:bg-[rgba(116,164,188,0.16)]"
+          ? "border border-[var(--line-strong)] bg-[var(--ink)] text-white shadow-[0_10px_24px_rgba(24,23,21,0.12)]"
+          : "border border-[var(--line)] bg-[rgba(255,255,255,0.84)] text-[var(--ink-soft)] hover:bg-[var(--surface-strong)]"
       }`}
     >
       {label}
@@ -34,13 +34,13 @@ export function SiteHeader({ categories }: { categories: Category[] }) {
   const { itemCount, hydrated } = useCart();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[rgba(20,40,29,0.08)] bg-[rgba(255,255,243,0.84)] backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[rgba(247,245,240,0.88)] backdrop-blur-xl">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-5 py-4 sm:px-8">
         <div className="flex items-center justify-between gap-4">
           <Link href="/" className="flex flex-col">
             <span className="display-eyebrow">Vibe Shop</span>
             <span className="display-heading text-2xl font-semibold tracking-tight">
-              오늘의 감도
+              Everyday Selections
             </span>
           </Link>
 

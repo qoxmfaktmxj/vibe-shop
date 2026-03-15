@@ -54,7 +54,7 @@ export function CartScreen() {
         <p className="display-eyebrow">Cart</p>
         <h1 className="display-heading mt-3 text-3xl font-semibold">장바구니가 비어 있습니다.</h1>
         <p className="mt-3 text-[var(--ink-soft)]">
-          메인이나 카테고리에서 제품을 담은 뒤 다시 돌아오세요.
+          마음에 드는 상품을 담으면 이곳에서 한눈에 확인할 수 있습니다.
         </p>
         <Link
           href="/"
@@ -70,12 +70,12 @@ export function CartScreen() {
     <div className="grid-shell lg:grid-cols-[1.6fr_0.9fr]">
       <section className="surface-card rounded-[28px] p-6 sm:p-8">
         <p className="display-eyebrow">Cart</p>
-        <h1 className="display-heading mt-3 text-3xl font-semibold">지금 담은 셀렉션</h1>
+        <h1 className="display-heading mt-3 text-3xl font-semibold">장바구니</h1>
         <div className="mt-8 space-y-4">
           {items.map((item) => (
             <article
               key={item.productId}
-              className="rounded-[24px] border border-[rgba(41,51,155,0.1)] bg-[rgba(255,255,243,0.72)] p-5"
+              className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5"
             >
               <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                 <div className="space-y-2">
@@ -89,7 +89,7 @@ export function CartScreen() {
                   <button
                     type="button"
                     onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                    className="h-10 w-10 rounded-full border border-[rgba(41,51,155,0.16)] bg-[rgba(116,164,188,0.1)]"
+                    className="h-10 w-10 rounded-2xl border border-[var(--line)] bg-[rgba(255,255,255,0.88)]"
                   >
                     -
                   </button>
@@ -97,7 +97,7 @@ export function CartScreen() {
                   <button
                     type="button"
                     onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                    className="h-10 w-10 rounded-full border border-[rgba(41,51,155,0.16)] bg-[rgba(116,164,188,0.1)]"
+                    className="h-10 w-10 rounded-2xl border border-[var(--line)] bg-[rgba(255,255,255,0.88)]"
                   >
                     +
                   </button>
@@ -133,7 +133,7 @@ export function CartScreen() {
           </div>
         </div>
 
-        {loading ? <p className="mt-4 text-sm text-[var(--ink-soft)]">금액 계산 중...</p> : null}
+        {loading ? <p className="mt-4 text-sm text-[var(--ink-soft)]">금액을 계산하고 있습니다.</p> : null}
         {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
 
         <Link

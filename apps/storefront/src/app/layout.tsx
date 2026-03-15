@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Noto_Sans_KR, Noto_Serif_KR } from "next/font/google";
+import { Noto_Sans_KR } from "next/font/google";
 
 import { SiteFooter } from "@/components/shell/site-footer";
 import { SiteHeader } from "@/components/shell/site-header";
@@ -14,15 +14,9 @@ const notoSans = Noto_Sans_KR({
   weight: ["400", "500", "700"],
 });
 
-const notoSerif = Noto_Serif_KR({
-  variable: "--font-noto-serif",
-  subsets: ["latin"],
-  weight: ["500", "700"],
-});
-
 export const metadata: Metadata = {
   title: "Vibe Shop",
-  description: "감도 높은 리빙 셀렉션을 담은 한국어 쇼핑몰 MVP",
+  description: "차분한 일상을 위한 리빙 셀렉션 스토어",
 };
 
 export default async function RootLayout({
@@ -34,7 +28,7 @@ export default async function RootLayout({
 
   return (
     <html lang="ko">
-      <body className={`${notoSans.variable} ${notoSerif.variable} antialiased`}>
+      <body className={`${notoSans.variable} antialiased`}>
         <CartProvider>
           <div className="min-h-screen bg-[var(--surface)] text-[var(--ink)]">
             <SiteHeader categories={categories} />

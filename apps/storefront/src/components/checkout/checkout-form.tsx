@@ -62,6 +62,7 @@ export function CheckoutForm() {
     return (
       <div className="surface-card rounded-[28px] p-8 text-center">
         <p className="display-heading text-3xl font-semibold">주문할 상품이 없습니다.</p>
+        <p className="mt-3 text-sm text-[var(--ink-soft)]">장바구니에 상품을 담은 뒤 주문서를 작성해 주세요.</p>
       </div>
     );
   }
@@ -71,6 +72,9 @@ export function CheckoutForm() {
       <section className="surface-card rounded-[28px] p-6 sm:p-8">
         <p className="display-eyebrow">Checkout</p>
         <h1 className="display-heading mt-3 text-3xl font-semibold">주문서 작성</h1>
+        <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--ink-soft)]">
+          받는 분 정보와 배송지를 입력한 뒤 주문 내용을 확인해 주세요.
+        </p>
 
         <form
           className="mt-8 grid gap-5"
@@ -107,7 +111,7 @@ export function CheckoutForm() {
               onChange={(event) =>
                 setForm((current) => ({ ...current, customerName: event.target.value }))
               }
-              className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,243,0.92)] px-4 py-3"
+              className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,255,0.9)] px-4 py-3"
             />
           </label>
 
@@ -119,7 +123,7 @@ export function CheckoutForm() {
               onChange={(event) =>
                 setForm((current) => ({ ...current, phone: event.target.value }))
               }
-              className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,243,0.92)] px-4 py-3"
+              className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,255,0.9)] px-4 py-3"
             />
           </label>
 
@@ -132,7 +136,7 @@ export function CheckoutForm() {
                 onChange={(event) =>
                   setForm((current) => ({ ...current, postalCode: event.target.value }))
                 }
-                className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,243,0.92)] px-4 py-3"
+                className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,255,0.9)] px-4 py-3"
               />
             </label>
             <label className="grid gap-2">
@@ -143,7 +147,7 @@ export function CheckoutForm() {
                 onChange={(event) =>
                   setForm((current) => ({ ...current, address1: event.target.value }))
                 }
-                className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,243,0.92)] px-4 py-3"
+                className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,255,0.9)] px-4 py-3"
               />
             </label>
           </div>
@@ -155,7 +159,7 @@ export function CheckoutForm() {
               onChange={(event) =>
                 setForm((current) => ({ ...current, address2: event.target.value }))
               }
-              className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,243,0.92)] px-4 py-3"
+              className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,255,0.9)] px-4 py-3"
             />
           </label>
 
@@ -167,7 +171,7 @@ export function CheckoutForm() {
               onChange={(event) =>
                 setForm((current) => ({ ...current, note: event.target.value }))
               }
-              className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,243,0.92)] px-4 py-3"
+              className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,255,0.9)] px-4 py-3"
             />
           </label>
 
@@ -176,14 +180,14 @@ export function CheckoutForm() {
           <button
             type="submit"
             disabled={isPending}
-            className="button-hot px-5 py-3 disabled:opacity-60"
+            className="button-primary px-5 py-3 disabled:opacity-60"
           >
-            {isPending ? "주문 생성 중..." : "주문 완료하기"}
+            {isPending ? "주문을 처리하고 있습니다." : "주문하기"}
           </button>
         </form>
       </section>
 
-      <aside className="surface-card rounded-[28px] border-[rgba(41,51,155,0.14)] bg-[linear-gradient(180deg,rgba(41,51,155,0.06),rgba(255,255,243,0.88))] p-6 sm:p-8">
+      <aside className="surface-card rounded-[28px] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(241,239,233,0.76))] p-6 sm:p-8">
         <p className="display-eyebrow">Order Summary</p>
         <h2 className="display-heading mt-3 text-2xl font-semibold">최종 확인</h2>
         <div className="mt-6 space-y-3 text-sm">

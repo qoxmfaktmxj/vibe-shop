@@ -37,7 +37,7 @@ test("storefront MVP smoke flow", async ({ page }) => {
   });
 
   await page.getByRole("button", { name: "장바구니 담기" }).click();
-  await expect(page.getByRole("button", { name: "장바구니에 담았어요" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "담기 완료" })).toBeVisible();
 
   await expect
     .poll(async () => {
@@ -67,7 +67,7 @@ test("storefront MVP smoke flow", async ({ page }) => {
     fullPage: true,
   });
 
-  await page.getByRole("button", { name: "주문 완료하기" }).click();
+  await page.getByRole("button", { name: "주문하기" }).click();
   await expect(page).toHaveURL(/\/orders\//, { timeout: NAVIGATION_TIMEOUT });
   await page.waitForLoadState("domcontentloaded");
   await page.screenshot({
@@ -83,21 +83,21 @@ test("storefront MVP smoke flow", async ({ page }) => {
     receiptLines: await page.locator("aside .space-y-4 > div").allTextContents(),
   };
 
-  await page.getByRole("button", { name: "주문 취소하기" }).click();
-  await expect(page.getByText("CANCELLED")).toBeVisible({ timeout: NAVIGATION_TIMEOUT });
+  await page.getByRole("button", { name: "주문 취소" }).click();
+  await expect(page.getByText("주문 취소")).toBeVisible({ timeout: NAVIGATION_TIMEOUT });
 
   await page.getByRole("link", { name: "비회원 주문조회" }).click();
   await expect(page).toHaveURL(/\/lookup-order$/, { timeout: NAVIGATION_TIMEOUT });
   await page.getByLabel("주문번호").fill(result.orderNumber);
   await page.getByLabel("연락처").fill("01012345678");
-  await page.getByRole("button", { name: "주문 조회하기" }).click();
+  await page.getByRole("button", { name: "주문 조회" }).click();
   await expect(page).toHaveURL(new RegExp(`/orders/${result.orderNumber}$`), {
     timeout: NAVIGATION_TIMEOUT,
   });
 
   await page.getByRole("link", { name: "검색" }).click();
   await expect(page).toHaveURL(/\/search$/, { timeout: NAVIGATION_TIMEOUT });
-  await page.getByPlaceholder("상품명, 카테고리, 요약으로 검색").fill("린넨");
+  await page.getByPlaceholder("상품명이나 카테고리로 검색해 보세요").fill("린넨");
   await page.getByRole("button", { name: "검색" }).click();
   await expect(page).toHaveURL(/\/search\?q=%EB%A6%B0%EB%84%A8$/, {
     timeout: NAVIGATION_TIMEOUT,
@@ -107,8 +107,8 @@ test("storefront MVP smoke flow", async ({ page }) => {
 
   await page.getByRole("link", { name: "주문내역" }).click();
   await expect(page).toHaveURL(/\/orders$/, { timeout: NAVIGATION_TIMEOUT });
-  await page.getByPlaceholder("주문 연락처 입력").fill("01012345678");
-  await page.getByRole("button", { name: "주문내역 보기" }).click();
+  await page.getByPlaceholder("주문할 때 사용한 연락처를 입력해 주세요").fill("01012345678");
+  await page.getByRole("button", { name: "주문내역 조회" }).click();
   await expect(page).toHaveURL(/\/orders\?phone=01012345678$/, {
     timeout: NAVIGATION_TIMEOUT,
   });

@@ -42,7 +42,7 @@ export function GuestOrderLookupForm() {
           onChange={(event) =>
             setForm((current) => ({ ...current, orderNumber: event.target.value }))
           }
-          className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,243,0.92)] px-4 py-3"
+          className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,255,0.9)] px-4 py-3"
         />
       </label>
 
@@ -54,7 +54,7 @@ export function GuestOrderLookupForm() {
           onChange={(event) =>
             setForm((current) => ({ ...current, phone: event.target.value }))
           }
-          className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,243,0.92)] px-4 py-3"
+          className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,255,0.9)] px-4 py-3"
         />
       </label>
 
@@ -65,7 +65,7 @@ export function GuestOrderLookupForm() {
         disabled={isPending}
         className="button-primary px-5 py-3 disabled:opacity-60"
       >
-        {isPending ? "조회 중..." : "주문 조회하기"}
+        {isPending ? "주문을 조회하고 있습니다." : "주문 조회"}
       </button>
     </form>
   );

@@ -4,7 +4,7 @@ const FAQ_ITEMS = [
   {
     question: "현재 주문은 실제 결제까지 연결되나요?",
     answer:
-      "아직은 아닙니다. 현재 단계에서는 주문 생성, 주문 상태, 취소, 주문조회 흐름까지를 우선 검증하고 있습니다.",
+      "아직 결제 승인까지 연결되지는 않습니다. 지금은 주문 접수, 주문 상태 확인, 취소, 주문 조회 흐름을 먼저 제공하고 있습니다.",
   },
   {
     question: "비회원도 주문을 다시 확인할 수 있나요?",
@@ -23,10 +23,10 @@ export default function FaqPage() {
     <ContentPage
       eyebrow="FAQ"
       title="자주 묻는 질문"
-      description="현재 MVP 단계에서 자주 확인하는 질문과 답변을 먼저 정리했습니다."
+      description="주문과 조회 흐름에서 자주 확인하는 내용을 간단히 정리했습니다."
     >
       {FAQ_ITEMS.map((item) => (
-        <article key={item.question} className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,243,0.72)] p-5">
+        <article key={item.question} className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
           <h2 className="display-heading text-xl font-semibold text-[var(--ink)]">
             {item.question}
           </h2>
