@@ -107,5 +107,9 @@ public class CustomerOrder {
         lines.add(line);
         line.attach(this);
     }
+
+    public void changeStatus(OrderStatus status) {
+        this.status = status;
+    }
 }
 

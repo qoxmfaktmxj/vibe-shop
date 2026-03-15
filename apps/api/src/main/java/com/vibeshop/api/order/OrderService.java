@@ -21,6 +21,7 @@ import com.vibeshop.api.order.OrderDtos.CheckoutItemRequest;
 import com.vibeshop.api.order.OrderDtos.CheckoutLineResponse;
 import com.vibeshop.api.order.OrderDtos.CheckoutPreviewRequest;
 import com.vibeshop.api.order.OrderDtos.CheckoutPreviewResponse;
+import com.vibeshop.api.order.OrderDtos.CancelOrderResponse;
 import com.vibeshop.api.order.OrderDtos.CreateOrderRequest;
 import com.vibeshop.api.order.OrderDtos.CreateOrderResponse;
 import com.vibeshop.api.order.OrderDtos.GuestOrderLookupRequest;
@@ -129,6 +130,19 @@ public class OrderService {
         }
 
         return new GuestOrderLookupResponse(order.getOrderNumber());
+    }
+
+    @Transactional
+    public CancelOrderResponse cancel(String orderNumber) {
+        CustomerOrder order = customerOrderRepository.findByOrderNumber(orderNumber)
+            .orElseThrow(() -> new ResourceNotFoundException("주문 정보를 찾을 수 없습니다."));
+
+        if (order.getStatus() != OrderStatus.RECEIVED) {
+            throw new IllegalArgumentException("현재 상태에서는 주문을 취소할 수 없습니다.");
+        }
+
+        order.changeStatus(OrderStatus.CANCELLED);
+        return new CancelOrderResponse(order.getOrderNumber(), order.getStatus().name());
     }
 
     private ResolvedOrder resolveOrder(List<CheckoutItemRequest> items) {

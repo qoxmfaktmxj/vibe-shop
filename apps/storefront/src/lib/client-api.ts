@@ -1,4 +1,5 @@
 import type {
+  CancelOrderResponse,
   CartItem,
   CartResponse,
   CheckoutPreview,
@@ -95,5 +96,11 @@ export async function lookupGuestOrder(
   return fetchJson<GuestOrderLookupResponse>("/api/v1/orders/lookup", {
     method: "POST",
     body: JSON.stringify(payload),
+  });
+}
+
+export async function cancelOrder(orderNumber: string): Promise<CancelOrderResponse> {
+  return fetchJson<CancelOrderResponse>(`/api/v1/orders/${orderNumber}/cancel`, {
+    method: "POST",
   });
 }

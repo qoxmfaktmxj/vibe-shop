@@ -75,6 +75,11 @@ export type GuestOrderLookupResponse = {
   orderNumber: string;
 };
 
+export type CancelOrderResponse = {
+  orderNumber: string;
+  status: string;
+};
+
 export type OrderResponse = {
   orderNumber: string;
   status: string;

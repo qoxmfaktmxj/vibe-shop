@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
+import { CancelOrderButton } from "@/components/order/cancel-order-button";
 import { formatPrice } from "@/lib/currency";
 import { ApiNotFoundError, getOrder } from "@/lib/server-api";
 
@@ -61,6 +62,8 @@ export default async function OrderPage({
             </div>
           </dl>
         </div>
+
+        {order.status === "RECEIVED" ? <CancelOrderButton orderNumber={order.orderNumber} /> : null}
       </section>
 
       <aside className="surface-card rounded-[36px] border-[rgba(41,51,155,0.14)] bg-[linear-gradient(180deg,rgba(41,51,155,0.06),rgba(255,255,243,0.88))] p-8 sm:p-10">

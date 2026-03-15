@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.CookieValue;
 import com.vibeshop.api.cart.CartService;
 import com.vibeshop.api.order.OrderDtos.CheckoutPreviewRequest;
 import com.vibeshop.api.order.OrderDtos.CheckoutPreviewResponse;
+import com.vibeshop.api.order.OrderDtos.CancelOrderResponse;
 import com.vibeshop.api.order.OrderDtos.CreateOrderRequest;
 import com.vibeshop.api.order.OrderDtos.CreateOrderResponse;
 import com.vibeshop.api.order.OrderDtos.GuestOrderLookupRequest;
@@ -64,6 +65,11 @@ public class OrderController {
     @PostMapping("/lookup")
     GuestOrderLookupResponse lookup(@Valid @RequestBody GuestOrderLookupRequest request) {
         return orderService.lookup(request);
+    }
+
+    @PostMapping("/{orderNumber}/cancel")
+    CancelOrderResponse cancel(@PathVariable String orderNumber) {
+        return orderService.cancel(orderNumber);
     }
 
     @GetMapping("/{orderNumber}")
