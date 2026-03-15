@@ -59,6 +59,7 @@ public class OrderService {
         }
 
         ResolvedOrder resolvedOrder = resolveOrder(request.items());
+        reserveStock(resolvedOrder.lines());
 
         CustomerOrder order = new CustomerOrder(
             generateOrderNumber(),
@@ -141,6 +142,7 @@ public class OrderService {
             throw new IllegalArgumentException("현재 상태에서는 주문을 취소할 수 없습니다.");
         }
 
+        restoreStock(order);
         order.changeStatus(OrderStatus.CANCELLED);
         return new CancelOrderResponse(order.getOrderNumber(), order.getStatus().name());
     }
@@ -188,6 +190,33 @@ public class OrderService {
 
     private String generateOrderNumber() {
         return "VS" + OffsetDateTime.now(SEOUL).format(ORDER_FORMAT) + ThreadLocalRandom.current().nextInt(100, 999);
+    }
+
+    private void reserveStock(List<CheckoutLineResponse> lines) {
+        Map<Long, Product> products = productRepository.findAllByIdIn(
+            lines.stream().map(CheckoutLineResponse::productId).toList()
+        ).stream().collect(Collectors.toMap(Product::getId, Function.identity()));
+
+        for (CheckoutLineResponse line : lines) {
+            Product product = products.get(line.productId());
+            if (product == null) {
+                throw new ResourceNotFoundException("상품을 찾을 수 없습니다.");
+            }
+            product.decreaseStock(line.quantity());
+        }
+    }
+
+    private void restoreStock(CustomerOrder order) {
+        Map<Long, Product> products = productRepository.findAllByIdIn(
+            order.getLines().stream().map(CustomerOrderLine::getProductId).toList()
+        ).stream().collect(Collectors.toMap(Product::getId, Function.identity()));
+
+        for (CustomerOrderLine line : order.getLines()) {
+            Product product = products.get(line.getProductId());
+            if (product != null) {
+                product.increaseStock(line.getQuantity());
+            }
+        }
     }
 
     private record ResolvedOrder(

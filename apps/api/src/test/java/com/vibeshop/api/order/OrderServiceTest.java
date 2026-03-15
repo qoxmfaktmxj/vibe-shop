@@ -134,4 +134,36 @@ class OrderServiceTest {
         assertThat(cancelled.status()).isEqualTo("CANCELLED");
         assertThat(orderService.get(created.orderNumber()).status()).isEqualTo("CANCELLED");
     }
+
+    @Test
+    void createAndCancelAdjustProductStock() {
+        orderService.create(new CreateOrderRequest(
+            "idem-order-stock",
+            "Kim Minsu",
+            "01012345678",
+            "06236",
+            "Teheran-ro 123",
+            "8F",
+            "Leave at the door.",
+            List.of(new CheckoutItemRequest(10L, 2))
+        ));
+
+        Integer stockAfterCreate = jdbcClient.sql("SELECT stock FROM products WHERE id = 10")
+            .query(Integer.class)
+            .single();
+
+        CancelOrderResponse cancelled = orderService.cancel(
+            jdbcClient.sql("SELECT order_number FROM customer_orders WHERE idempotency_key = 'idem-order-stock'")
+                .query(String.class)
+                .single()
+        );
+
+        Integer stockAfterCancel = jdbcClient.sql("SELECT stock FROM products WHERE id = 10")
+            .query(Integer.class)
+            .single();
+
+        assertThat(cancelled.status()).isEqualTo("CANCELLED");
+        assertThat(stockAfterCreate).isEqualTo(8);
+        assertThat(stockAfterCancel).isEqualTo(10);
+    }
 }
