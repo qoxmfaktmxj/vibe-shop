@@ -1,15 +1,17 @@
 import { ProductCard } from "@/components/catalog/product-card";
+import { ProductSortTabs } from "@/components/catalog/product-sort-tabs";
 import { SearchForm } from "@/components/search/search-form";
 import { searchProducts } from "@/lib/server-api";
 
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; sort?: string }>;
 }) {
-  const { q } = await searchParams;
+  const { q, sort } = await searchParams;
   const keyword = q?.trim() ?? "";
-  const products = keyword ? await searchProducts(keyword) : [];
+  const currentSort = sort?.trim() || "recommended";
+  const products = keyword ? await searchProducts(keyword, currentSort) : [];
 
   return (
     <div className="grid-shell">
@@ -36,6 +38,13 @@ export default async function SearchPage({
             <p className="text-sm text-[var(--ink-soft)]">
               {products.length}개 상품
             </p>
+          </div>
+          <div className="mt-6">
+            <ProductSortTabs
+              pathname="/search"
+              searchParams={{ q: keyword, sort }}
+              currentSort={currentSort}
+            />
           </div>
 
           {products.length > 0 ? (

@@ -20,6 +20,9 @@ test("storefront MVP smoke flow", async ({ page }) => {
   await page.getByRole("link", { name: "대표 카테고리 보기" }).click();
   await expect(page).toHaveURL(/\/category\//, { timeout: NAVIGATION_TIMEOUT });
   await page.waitForLoadState("networkidle");
+  await page.getByRole("link", { name: "가격 높은순" }).click();
+  await expect(page).toHaveURL(/sort=price-desc/, { timeout: NAVIGATION_TIMEOUT });
+  await expect(page.locator("section.grid article").first()).toContainText("커브 플로어 램프");
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "02-category.png"),
     fullPage: true,

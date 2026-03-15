@@ -31,9 +31,10 @@ public class CatalogController {
     @GetMapping("/products")
     List<ProductSummary> products(
         @RequestParam(required = false) String category,
-        @RequestParam(required = false, name = "q") String keyword
+        @RequestParam(required = false, name = "q") String keyword,
+        @RequestParam(required = false) String sort
     ) {
-        return catalogService.getProducts(category, keyword);
+        return catalogService.getProducts(category, keyword, sort);
     }
 
     @GetMapping("/products/{slug}")

@@ -35,13 +35,25 @@ export const getHomeData = cache(async () => fetchFromApi<HomeResponse>("/api/v1
 
 export const getCategories = cache(async () => fetchFromApi<Category[]>("/api/v1/categories"));
 
-export const getProducts = cache(async (category?: string) => {
-  const query = category ? `?category=${encodeURIComponent(category)}` : "";
+export const getProducts = cache(async (category?: string, sort?: string) => {
+  const params = new URLSearchParams();
+  if (category) {
+    params.set("category", category);
+  }
+  if (sort && sort !== "recommended") {
+    params.set("sort", sort);
+  }
+  const query = params.toString() ? `?${params.toString()}` : "";
   return fetchFromApi<ProductSummary[]>(`/api/v1/products${query}`);
 });
 
-export const searchProducts = cache(async (keyword: string) => {
-  const query = `?q=${encodeURIComponent(keyword)}`;
+export const searchProducts = cache(async (keyword: string, sort?: string) => {
+  const params = new URLSearchParams();
+  params.set("q", keyword);
+  if (sort && sort !== "recommended") {
+    params.set("sort", sort);
+  }
+  const query = `?${params.toString()}`;
   return fetchFromApi<ProductSummary[]>(`/api/v1/products${query}`);
 });
 
