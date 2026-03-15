@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.vibeshop.api.cart.CartService;
 import com.vibeshop.api.order.OrderDtos.CheckoutPreviewRequest;
@@ -22,6 +23,7 @@ import com.vibeshop.api.order.OrderDtos.CreateOrderResponse;
 import com.vibeshop.api.order.OrderDtos.GuestOrderLookupRequest;
 import com.vibeshop.api.order.OrderDtos.GuestOrderLookupResponse;
 import com.vibeshop.api.order.OrderDtos.OrderResponse;
+import com.vibeshop.api.order.OrderDtos.OrderSummaryResponse;
 
 @RestController
 @RequestMapping("/api/v1/orders")
@@ -75,5 +77,10 @@ public class OrderController {
     @GetMapping("/{orderNumber}")
     OrderResponse order(@PathVariable String orderNumber) {
         return orderService.get(orderNumber);
+    }
+
+    @GetMapping
+    java.util.List<OrderSummaryResponse> orders(@RequestParam String phone) {
+        return orderService.listByPhone(phone);
     }
 }

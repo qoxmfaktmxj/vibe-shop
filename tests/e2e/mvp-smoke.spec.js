@@ -105,6 +105,16 @@ test("storefront MVP smoke flow", async ({ page }) => {
   await expect(page.getByText('"린넨" 검색 결과')).toBeVisible();
   await expect(page.getByText("린넨 베드 세트")).toBeVisible();
 
+  await page.getByRole("link", { name: "주문내역" }).click();
+  await expect(page).toHaveURL(/\/orders$/, { timeout: NAVIGATION_TIMEOUT });
+  await page.getByPlaceholder("주문 연락처 입력").fill("01012345678");
+  await page.getByRole("button", { name: "주문내역 보기" }).click();
+  await expect(page).toHaveURL(/\/orders\?phone=01012345678$/, {
+    timeout: NAVIGATION_TIMEOUT,
+  });
+  await expect(page.getByRole("heading", { name: /주문내역 \d+건/ })).toBeVisible();
+  await expect(page.getByText(result.orderNumber)).toBeVisible();
+
   fs.writeFileSync(
     path.join(OUTPUT_DIR, "qa-result.json"),
     JSON.stringify(result, null, 2),
