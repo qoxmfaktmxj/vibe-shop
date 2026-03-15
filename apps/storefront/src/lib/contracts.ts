@@ -80,6 +80,15 @@ export type CancelOrderResponse = {
   status: string;
 };
 
+export type OrderSummaryResponse = {
+  orderNumber: string;
+  status: string;
+  customerName: string;
+  total: number;
+  createdAt: string;
+  itemCount: number;
+};
+
 export type OrderResponse = {
   orderNumber: string;
   status: string;

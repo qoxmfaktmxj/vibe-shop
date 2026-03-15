@@ -27,6 +27,7 @@ import com.vibeshop.api.order.OrderDtos.CreateOrderResponse;
 import com.vibeshop.api.order.OrderDtos.GuestOrderLookupRequest;
 import com.vibeshop.api.order.OrderDtos.GuestOrderLookupResponse;
 import com.vibeshop.api.order.OrderDtos.OrderResponse;
+import com.vibeshop.api.order.OrderDtos.OrderSummaryResponse;
 
 @Service
 public class OrderService {
@@ -145,6 +146,24 @@ public class OrderService {
         restoreStock(order);
         order.changeStatus(OrderStatus.CANCELLED);
         return new CancelOrderResponse(order.getOrderNumber(), order.getStatus().name());
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderSummaryResponse> listByPhone(String phone) {
+        if (phone == null || phone.isBlank()) {
+            throw new IllegalArgumentException("연락처를 입력해주세요.");
+        }
+
+        return customerOrderRepository.findByPhoneOrderByCreatedAtDesc(phone.trim()).stream()
+            .map(order -> new OrderSummaryResponse(
+                order.getOrderNumber(),
+                order.getStatus().name(),
+                order.getCustomerName(),
+                order.getTotal(),
+                order.getCreatedAt(),
+                order.getLines().stream().mapToInt(CustomerOrderLine::getQuantity).sum()
+            ))
+            .toList();
     }
 
     private ResolvedOrder resolveOrder(List<CheckoutItemRequest> items) {

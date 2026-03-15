@@ -76,6 +76,16 @@ public final class OrderDtos {
     ) {
     }
 
+    public record OrderSummaryResponse(
+        String orderNumber,
+        String status,
+        String customerName,
+        BigDecimal total,
+        OffsetDateTime createdAt,
+        int itemCount
+    ) {
+    }
+
     public record OrderResponse(
         String orderNumber,
         String status,

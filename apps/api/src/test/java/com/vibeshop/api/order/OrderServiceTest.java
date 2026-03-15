@@ -16,6 +16,7 @@ import com.vibeshop.api.order.OrderDtos.CreateOrderRequest;
 import com.vibeshop.api.order.OrderDtos.CreateOrderResponse;
 import com.vibeshop.api.order.OrderDtos.GuestOrderLookupRequest;
 import com.vibeshop.api.order.OrderDtos.GuestOrderLookupResponse;
+import com.vibeshop.api.order.OrderDtos.OrderSummaryResponse;
 
 @SpringBootTest
 class OrderServiceTest {
@@ -165,5 +166,36 @@ class OrderServiceTest {
         assertThat(cancelled.status()).isEqualTo("CANCELLED");
         assertThat(stockAfterCreate).isEqualTo(8);
         assertThat(stockAfterCancel).isEqualTo(10);
+    }
+
+    @Test
+    void listByPhoneReturnsLatestOrdersFirst() {
+        orderService.create(new CreateOrderRequest(
+            "idem-order-list-1",
+            "Kim Minsu",
+            "01012345678",
+            "06236",
+            "Teheran-ro 123",
+            "8F",
+            "Leave at the door.",
+            List.of(new CheckoutItemRequest(10L, 1))
+        ));
+
+        orderService.create(new CreateOrderRequest(
+            "idem-order-list-2",
+            "Kim Minsu",
+            "01012345678",
+            "06236",
+            "Teheran-ro 123",
+            "8F",
+            "Leave at the door.",
+            List.of(new CheckoutItemRequest(10L, 1))
+        ));
+
+        List<OrderSummaryResponse> orders = orderService.listByPhone("01012345678");
+
+        assertThat(orders).hasSize(2);
+        assertThat(orders.getFirst().createdAt()).isAfterOrEqualTo(orders.get(1).createdAt());
+        assertThat(orders.getFirst().itemCount()).isEqualTo(1);
     }
 }

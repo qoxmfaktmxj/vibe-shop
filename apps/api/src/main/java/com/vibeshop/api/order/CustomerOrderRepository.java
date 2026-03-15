@@ -1,5 +1,6 @@
 package com.vibeshop.api.order;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -12,5 +13,8 @@ public interface CustomerOrderRepository extends JpaRepository<CustomerOrder, Lo
 
     @EntityGraph(attributePaths = "lines")
     Optional<CustomerOrder> findByIdempotencyKey(String idempotencyKey);
+
+    @EntityGraph(attributePaths = "lines")
+    List<CustomerOrder> findByPhoneOrderByCreatedAtDesc(String phone);
 }
 

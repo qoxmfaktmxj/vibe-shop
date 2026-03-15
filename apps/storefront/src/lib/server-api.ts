@@ -4,6 +4,7 @@ import type {
   Category,
   HomeResponse,
   OrderResponse,
+  OrderSummaryResponse,
   ProductDetail,
   ProductSummary,
 } from "@/lib/contracts";
@@ -63,4 +64,8 @@ export const getProduct = cache(async (slug: string) =>
 
 export const getOrder = cache(async (orderNumber: string) =>
   fetchFromApi<OrderResponse>(`/api/v1/orders/${orderNumber}`),
+);
+
+export const listOrders = cache(async (phone: string) =>
+  fetchFromApi<OrderSummaryResponse[]>(`/api/v1/orders?phone=${encodeURIComponent(phone)}`),
 );
