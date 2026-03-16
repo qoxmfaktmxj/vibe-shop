@@ -17,10 +17,9 @@ export function AddToCartButton({ product }: { product: CartProduct }) {
         setAdded(true);
         window.setTimeout(() => setAdded(false), 1400);
       }}
-      className={`${added ? "button-secondary" : "button-ink"} px-4 py-2`}
+      className={`${added ? "button-secondary" : "button-hot"} px-4 py-3 text-[11px]`}
     >
-      {added ? "담기 완료" : "장바구니 담기"}
+      {added ? "담기 완료" : "Add to Bag"}
     </button>
   );
 }
-

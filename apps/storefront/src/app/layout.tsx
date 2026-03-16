@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Noto_Sans_KR } from "next/font/google";
+import { Manrope, Noto_Sans_KR } from "next/font/google";
 
 import { SiteFooter } from "@/components/shell/site-footer";
 import { SiteHeader } from "@/components/shell/site-header";
@@ -8,15 +8,21 @@ import { getCategories } from "@/lib/server-api";
 
 import "./globals.css";
 
+const manrope = Manrope({
+  variable: "--font-manrope",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+});
+
 const notoSans = Noto_Sans_KR({
-  variable: "--font-noto-sans",
+  variable: "--font-body",
   subsets: ["latin"],
   weight: ["400", "500", "700"],
 });
 
 export const metadata: Metadata = {
   title: "Vibe Shop",
-  description: "차분한 일상을 위한 리빙 셀렉션 스토어",
+  description: "차분한 리듬과 미니멀한 큐레이션을 담은 라이프스타일 스토어",
 };
 
 export default async function RootLayout({
@@ -28,11 +34,11 @@ export default async function RootLayout({
 
   return (
     <html lang="ko">
-      <body className={`${notoSans.variable} antialiased`}>
+      <body className={`${manrope.variable} ${notoSans.variable} antialiased`}>
         <CartProvider>
           <div className="min-h-screen bg-[var(--surface)] text-[var(--ink)]">
             <SiteHeader categories={categories} />
-            <main className="mx-auto flex w-full max-w-7xl flex-col px-5 pb-16 pt-6 sm:px-8">
+            <main className="mx-auto flex w-full max-w-[1280px] flex-col px-5 pb-24 pt-8 sm:px-8 lg:px-10">
               {children}
             </main>
             <SiteFooter />

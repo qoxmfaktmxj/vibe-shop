@@ -25,6 +25,38 @@
 - [apps/api/README.md](./apps/api/README.md)
 - [apps/admin/README.md](./apps/admin/README.md)
 
+## 화면 예시
+
+### 홈 화면
+
+에디토리얼 히어로와 큐레이션 블록을 중심으로 재정비한 storefront 첫 화면이다.
+
+![홈 화면](./docs/screenshots/readme/home.png)
+
+### 카테고리 화면
+
+슬레이트 톤 레이아웃과 정렬 UI를 적용한 리빙 카테고리 목록 화면이다.
+
+![카테고리 화면](./docs/screenshots/readme/category-living.png)
+
+### 상품 상세 화면
+
+대표 상품을 기준으로 새 카드 톤과 상세 콘텐츠 밀도를 확인할 수 있는 상품 상세 화면이다.
+
+![상품 상세 화면](./docs/screenshots/readme/product-linen-bed-set.png)
+
+### 장바구니 화면
+
+선택 상품과 요약 패널을 한 번에 읽을 수 있도록 재구성한 서버 장바구니 화면이다.
+
+![장바구니 화면](./docs/screenshots/readme/cart.png)
+
+### 체크아웃 화면
+
+배송지 입력과 주문 요약을 분리해 구매 완료 직전 단계의 가독성을 높인 체크아웃 화면이다.
+
+![체크아웃 화면](./docs/screenshots/readme/checkout.png)
+
 ## 현재 구현 범위
 
 현재는 아래 흐름을 MVP로 검증하고 있다.

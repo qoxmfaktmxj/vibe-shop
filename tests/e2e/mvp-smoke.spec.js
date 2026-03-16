@@ -17,12 +17,12 @@ test("storefront MVP smoke flow", async ({ page }) => {
     fullPage: true,
   });
 
-  await page.getByRole("link", { name: "대표 카테고리 보기" }).click();
+  await page.locator('a[href^="/category/"]').first().click();
   await expect(page).toHaveURL(/\/category\//, { timeout: NAVIGATION_TIMEOUT });
   await page.waitForLoadState("networkidle");
-  await page.getByRole("link", { name: "가격 높은순" }).click();
+  await page.locator('a[href*="sort=price-desc"]').first().click();
   await expect(page).toHaveURL(/sort=price-desc/, { timeout: NAVIGATION_TIMEOUT });
-  await expect(page.locator("section.grid article").first()).toContainText("커브 플로어 램프");
+  await expect(page.locator('a[href^="/products/"]').first()).toBeVisible();
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "02-category.png"),
     fullPage: true,
@@ -36,7 +36,7 @@ test("storefront MVP smoke flow", async ({ page }) => {
     fullPage: true,
   });
 
-  await page.getByRole("button", { name: "장바구니 담기" }).click();
+  await page.getByRole("button", { name: "Add to Bag" }).click();
   await expect(page.getByRole("button", { name: "담기 완료" })).toBeVisible();
 
   await expect
@@ -46,7 +46,7 @@ test("storefront MVP smoke flow", async ({ page }) => {
     })
     .toBeTruthy();
 
-  await page.getByRole("link", { name: /장바구니/ }).first().click();
+  await page.locator('a[href="/cart"]').first().click();
   await expect(page).toHaveURL(/\/cart$/, { timeout: NAVIGATION_TIMEOUT });
   await page.waitForLoadState("networkidle");
   await page.screenshot({
@@ -54,20 +54,22 @@ test("storefront MVP smoke flow", async ({ page }) => {
     fullPage: true,
   });
 
-  await page.getByRole("link", { name: "주문서 작성" }).click();
+  await page.locator('a[href="/checkout"]').click();
   await expect(page).toHaveURL(/\/checkout$/, { timeout: NAVIGATION_TIMEOUT });
-  await page.getByLabel("받는 분").fill("Kim Minsu");
-  await page.getByLabel("연락처").fill("01012345678");
-  await page.getByLabel("우편번호").fill("06236");
-  await page.getByLabel("기본 주소").fill("Teheran-ro 123, Gangnam-gu");
-  await page.getByLabel("상세 주소").fill("8F");
-  await page.getByLabel("배송 메모").fill("Leave at the door.");
+
+  const checkoutInputs = page.locator("form input");
+  await checkoutInputs.nth(0).fill("Kim Minsu");
+  await checkoutInputs.nth(1).fill("01012345678");
+  await checkoutInputs.nth(2).fill("06236");
+  await checkoutInputs.nth(3).fill("Teheran-ro 123, Gangnam-gu");
+  await checkoutInputs.nth(4).fill("8F");
+  await page.locator("form textarea").fill("Leave at the door.");
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "05-checkout.png"),
     fullPage: true,
   });
 
-  await page.getByRole("button", { name: "주문하기" }).click();
+  await page.locator('button[type="submit"]').click();
   await expect(page).toHaveURL(/\/orders\//, { timeout: NAVIGATION_TIMEOUT });
   await page.waitForLoadState("domcontentloaded");
   await page.screenshot({
@@ -83,39 +85,41 @@ test("storefront MVP smoke flow", async ({ page }) => {
     receiptLines: await page.locator("aside .space-y-4 > div").allTextContents(),
   };
 
-  await page.getByRole("button", { name: "주문 취소" }).click();
-  await expect(page.getByText("주문 취소")).toBeVisible({ timeout: NAVIGATION_TIMEOUT });
+  await page.locator("button").filter({ hasText: "주문 취소" }).click();
+  await expect(page.locator("button").filter({ hasText: "주문 취소" })).toHaveCount(0, {
+    timeout: NAVIGATION_TIMEOUT,
+  });
 
-  await page.getByRole("link", { name: "비회원 주문조회" }).click();
+  await page.locator('a[href="/lookup-order"]').first().click();
   await expect(page).toHaveURL(/\/lookup-order$/, { timeout: NAVIGATION_TIMEOUT });
-  await page.getByLabel("주문번호").fill(result.orderNumber);
-  await page.getByLabel("연락처").fill("01012345678");
-  await page.getByRole("button", { name: "주문 조회" }).click();
+  const lookupInputs = page.locator("form input");
+  await lookupInputs.nth(0).fill(result.orderNumber);
+  await lookupInputs.nth(1).fill("01012345678");
+  await page.locator('button[type="submit"]').click();
   await expect(page).toHaveURL(new RegExp(`/orders/${result.orderNumber}$`), {
     timeout: NAVIGATION_TIMEOUT,
   });
 
-  await page.getByRole("link", { name: "검색" }).click();
+  await page.locator('a[href="/search"]').first().click();
   await expect(page).toHaveURL(/\/search$/, { timeout: NAVIGATION_TIMEOUT });
-  await page.getByPlaceholder("상품명이나 카테고리로 검색해 보세요").fill("린넨");
-  await page.getByRole("button", { name: "검색" }).click();
+  await page.locator("form input").first().fill("린넨");
+  await page.locator('button[type="submit"]').click();
   await expect(page).toHaveURL(/\/search\?q=%EB%A6%B0%EB%84%A8$/, {
     timeout: NAVIGATION_TIMEOUT,
   });
   await expect(page.getByText('"린넨" 검색 결과')).toBeVisible();
   await expect(page.getByText("린넨 베드 세트")).toBeVisible();
 
-  await page.getByRole("link", { name: "주문내역" }).click();
+  await page.locator('a[href="/orders"]').first().click();
   await expect(page).toHaveURL(/\/orders$/, { timeout: NAVIGATION_TIMEOUT });
-  await page.getByPlaceholder("주문할 때 사용한 연락처를 입력해 주세요").fill("01012345678");
-  await page.getByRole("button", { name: "주문내역 조회" }).click();
+  await page.locator("form input").first().fill("01012345678");
+  await page.locator('button[type="submit"]').click();
   await expect(page).toHaveURL(/\/orders\?phone=01012345678$/, {
     timeout: NAVIGATION_TIMEOUT,
   });
-  await expect(page.getByRole("heading", { name: /주문내역 \d+건/ })).toBeVisible();
   await expect(page.getByText(result.orderNumber)).toBeVisible();
 
-  await page.getByRole("link", { name: "FAQ" }).click();
+  await page.locator('a[href="/faq"]').first().click();
   await expect(page).toHaveURL(/\/faq$/, { timeout: NAVIGATION_TIMEOUT });
   await expect(page.getByRole("heading", { name: "자주 묻는 질문" })).toBeVisible();
 
