@@ -31,7 +31,7 @@ test("member auth flow keeps session and scopes orders to the account", async ({
   await page.locator('button[type="submit"]').click();
 
   await expect(page).toHaveURL(/\/account$/);
-  await expect(page.getByText(email)).toBeVisible();
+  await expect(page.locator('input[name="profileEmail"]')).toHaveValue(email);
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "07-account.png"),
     fullPage: true,

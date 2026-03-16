@@ -42,6 +42,7 @@ class AuthControllerTest {
         jdbcClient.sql("DELETE FROM customer_order_lines").update();
         jdbcClient.sql("DELETE FROM order_payments").update();
         jdbcClient.sql("DELETE FROM customer_orders").update();
+        jdbcClient.sql("DELETE FROM shipping_addresses").update();
         jdbcClient.sql("DELETE FROM user_sessions").update();
         jdbcClient.sql("DELETE FROM users").update();
         jdbcClient.sql("DELETE FROM products").update();

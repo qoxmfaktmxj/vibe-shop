@@ -22,5 +22,7 @@ public interface CustomerOrderRepository extends JpaRepository<CustomerOrder, Lo
 
     @EntityGraph(attributePaths = "lines")
     List<CustomerOrder> findByUserIdOrderByCreatedAtDesc(Long userId);
+
+    long countByUserId(Long userId);
 }
 

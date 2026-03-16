@@ -1,4 +1,5 @@
 import type {
+  AccountProfile,
   AuthSession,
   CancelOrderResponse,
   CartItem,
@@ -6,10 +7,14 @@ import type {
   CheckoutPreview,
   CreateOrderPayload,
   CreateOrderResponse,
+  DeleteShippingAddressResponse,
   GuestOrderLookupPayload,
   GuestOrderLookupResponse,
   LoginPayload,
+  ShippingAddress,
+  ShippingAddressPayload,
   SignUpPayload,
+  UpdateAccountProfilePayload,
 } from "@/lib/contracts";
 
 function getApiBaseUrl() {
@@ -95,6 +100,48 @@ export async function signIn(payload: LoginPayload): Promise<AuthSession> {
 export async function signOut(): Promise<AuthSession> {
   return fetchJson<AuthSession>("/api/v1/auth/logout", {
     method: "POST",
+  });
+}
+
+export async function updateAccountProfile(
+  payload: UpdateAccountProfilePayload,
+): Promise<AccountProfile> {
+  return fetchJson<AccountProfile>("/api/v1/account", {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function listShippingAddresses(): Promise<ShippingAddress[]> {
+  return fetchJson<ShippingAddress[]>("/api/v1/account/addresses", {
+    method: "GET",
+  });
+}
+
+export async function createShippingAddress(
+  payload: ShippingAddressPayload,
+): Promise<ShippingAddress> {
+  return fetchJson<ShippingAddress>("/api/v1/account/addresses", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateShippingAddress(
+  addressId: number,
+  payload: ShippingAddressPayload,
+): Promise<ShippingAddress> {
+  return fetchJson<ShippingAddress>(`/api/v1/account/addresses/${addressId}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteShippingAddress(
+  addressId: number,
+): Promise<DeleteShippingAddressResponse> {
+  return fetchJson<DeleteShippingAddressResponse>(`/api/v1/account/addresses/${addressId}`, {
+    method: "DELETE",
   });
 }
 

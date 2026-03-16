@@ -2,6 +2,7 @@ import { cache } from "react";
 import { cookies } from "next/headers";
 
 import type {
+  AccountProfile,
   AuthSession,
   Category,
   HomeResponse,
@@ -9,6 +10,7 @@ import type {
   OrderSummaryResponse,
   ProductDetail,
   ProductSummary,
+  ShippingAddress,
 } from "@/lib/contracts";
 
 const API_BASE_URL =
@@ -95,6 +97,18 @@ export async function listOrders(phone?: string) {
 
 export async function getAuthSession(): Promise<AuthSession> {
   return fetchFromApi<AuthSession>("/api/v1/auth/session", {
+    headers: await getCookieHeaders(),
+  });
+}
+
+export async function getAccountProfile(): Promise<AccountProfile> {
+  return fetchFromApi<AccountProfile>("/api/v1/account", {
+    headers: await getCookieHeaders(),
+  });
+}
+
+export async function getShippingAddresses(): Promise<ShippingAddress[]> {
+  return fetchFromApi<ShippingAddress[]>("/api/v1/account/addresses", {
     headers: await getCookieHeaders(),
   });
 }

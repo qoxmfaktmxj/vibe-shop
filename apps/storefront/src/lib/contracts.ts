@@ -47,6 +47,45 @@ export type AuthSession = {
   sessionToken?: string | null;
 };
 
+export type AccountProfile = {
+  id: number;
+  name: string;
+  email: string;
+  provider: string;
+  createdAt: string;
+  orderCount: number;
+  addressCount: number;
+};
+
+export type UpdateAccountProfilePayload = {
+  name: string;
+};
+
+export type ShippingAddress = {
+  id: number;
+  label: string;
+  recipientName: string;
+  phone: string;
+  postalCode: string;
+  address1: string;
+  address2: string;
+  isDefault: boolean;
+};
+
+export type ShippingAddressPayload = {
+  label: string;
+  recipientName: string;
+  phone: string;
+  postalCode: string;
+  address1: string;
+  address2: string;
+  isDefault: boolean;
+};
+
+export type DeleteShippingAddressResponse = {
+  addressId: number;
+};
+
 export type SignUpPayload = {
   name: string;
   email: string;

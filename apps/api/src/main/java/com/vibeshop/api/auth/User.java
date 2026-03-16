@@ -54,4 +54,8 @@ public class User {
         this.provider = provider;
         this.createdAt = createdAt;
     }
+
+    public void rename(String name) {
+        this.name = name;
+    }
 }
