@@ -12,9 +12,19 @@ test("member can manage my page profile and shipping addresses", async ({ page }
   const email = `mypage-${uniqueId}@example.com`;
 
   await page.goto("/", { waitUntil: "networkidle" });
+  await page.locator('a[href^="/category/"]').first().click();
+  await expect(page).toHaveURL(/\/category\//);
+  await page.waitForLoadState("networkidle");
   await page.locator('a[href^="/products/"]').first().click();
   await expect(page).toHaveURL(/\/products\//);
+  await page.waitForLoadState("networkidle");
   await page.getByRole("button", { name: "Add to Bag" }).click();
+
+  await expect
+    .poll(async () => {
+      return (await page.getByRole("link", { name: /Bag/i }).textContent()) ?? "";
+    })
+    .toContain("Bag 1");
 
   await page.goto("/signup", { waitUntil: "networkidle" });
   const signupInputs = page.locator("form input");
@@ -24,6 +34,8 @@ test("member can manage my page profile and shipping addresses", async ({ page }
   await page.locator('button[type="submit"]').click();
 
   await expect(page).toHaveURL(/\/account$/);
+  await page.goto("/cart", { waitUntil: "networkidle" });
+  await expect(page.getByRole("button", { name: "Remove" })).toBeVisible();
   await page.goto("/checkout", { waitUntil: "networkidle" });
 
   const checkoutInputs = page.locator("form input");

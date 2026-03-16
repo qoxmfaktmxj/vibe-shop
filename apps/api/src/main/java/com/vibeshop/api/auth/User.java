@@ -75,6 +75,11 @@ public class User {
         this.name = name;
     }
 
+    public void syncSocialProfile(String name, AuthProviderType provider) {
+        this.name = name;
+        this.provider = provider;
+    }
+
     public boolean isAdmin() {
         return role != UserRole.CUSTOMER;
     }

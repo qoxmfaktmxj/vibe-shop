@@ -16,6 +16,7 @@ module.exports = defineConfig({
     timeout: 10_000,
   },
   fullyParallel: false,
+  workers: 1,
   retries: process.env.CI ? 2 : 0,
   reporter: [
     ["list"],
@@ -59,6 +60,12 @@ module.exports = defineConfig({
         ...process.env,
         API_BASE_URL: apiBaseUrl,
         NEXT_PUBLIC_API_BASE_URL: apiBaseUrl,
+        NEXT_PUBLIC_APP_URL: storefrontUrl,
+        APP_ORIGIN: storefrontUrl,
+        GOOGLE_CLIENT_ID: process.env.E2E_GOOGLE_CLIENT_ID ?? "",
+        GOOGLE_CLIENT_SECRET: process.env.E2E_GOOGLE_CLIENT_SECRET ?? "",
+        KAKAO_CLIENT_ID: process.env.E2E_KAKAO_CLIENT_ID ?? "",
+        KAKAO_CLIENT_SECRET: process.env.E2E_KAKAO_CLIENT_SECRET ?? "",
       },
     },
     {

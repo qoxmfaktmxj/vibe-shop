@@ -12,16 +12,19 @@ test("member auth flow keeps session and scopes orders to the account", async ({
   const email = `auth-${uniqueId}@example.com`;
 
   await page.goto("/", { waitUntil: "networkidle" });
+  await page.locator('a[href^="/category/"]').first().click();
+  await expect(page).toHaveURL(/\/category\//);
+  await page.waitForLoadState("networkidle");
   await page.locator('a[href^="/products/"]').first().click();
   await expect(page).toHaveURL(/\/products\//);
+  await page.waitForLoadState("networkidle");
   await page.getByRole("button", { name: "Add to Bag" }).click();
 
   await expect
     .poll(async () => {
-      const cartCookies = await page.context().cookies("http://127.0.0.1:8180");
-      return cartCookies.some((cookie) => cookie.name === "vibe_shop_cart");
+      return (await page.getByRole("link", { name: /Bag/i }).textContent()) ?? "";
     })
-    .toBeTruthy();
+    .toContain("Bag 1");
 
   await page.goto("/signup", { waitUntil: "networkidle" });
   const signupInputs = page.locator("form input");

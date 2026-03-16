@@ -2,16 +2,19 @@ const { expect, test } = require("playwright/test");
 
 test("mobile payment failure keeps the cart for retry", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
+  await page.locator('a[href^="/category/"]').first().click();
+  await expect(page).toHaveURL(/\/category\//);
+  await page.waitForLoadState("networkidle");
   await page.locator('a[href^="/products/"]').first().click();
   await expect(page).toHaveURL(/\/products\//);
+  await page.waitForLoadState("networkidle");
   await page.getByRole("button", { name: "Add to Bag" }).click();
 
   await expect
     .poll(async () => {
-      const cartCookies = await page.context().cookies("http://127.0.0.1:8180");
-      return cartCookies.some((cookie) => cookie.name === "vibe_shop_cart");
+      return (await page.getByRole("link", { name: /Bag/i }).textContent()) ?? "";
     })
-    .toBeTruthy();
+    .toContain("Bag 1");
 
   await page.goto("/cart", { waitUntil: "networkidle" });
   await expect(page.getByRole("button", { name: "Remove" })).toBeVisible();

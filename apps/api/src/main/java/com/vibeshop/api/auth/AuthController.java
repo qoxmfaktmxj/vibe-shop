@@ -18,6 +18,7 @@ import com.vibeshop.api.auth.AuthDtos.AuthSessionResponse;
 import com.vibeshop.api.auth.AuthDtos.AuthenticatedUserResponse;
 import com.vibeshop.api.auth.AuthDtos.LoginRequest;
 import com.vibeshop.api.auth.AuthDtos.SignUpRequest;
+import com.vibeshop.api.auth.AuthDtos.SocialExchangeRequest;
 import com.vibeshop.api.cart.CartService;
 
 @RestController
@@ -55,6 +56,18 @@ public class AuthController {
         HttpServletResponse response
     ) {
         AuthService.AuthenticatedSession session = authService.login(request);
+        applyAuthenticatedSession(response, session);
+        mergeGuestCartIfPresent(cartSessionToken, session.user().getId());
+        return toResponse(session.user(), session.rawSessionToken());
+    }
+
+    @PostMapping("/social/exchange")
+    AuthSessionResponse socialExchange(
+        @Valid @RequestBody SocialExchangeRequest request,
+        @CookieValue(value = CART_SESSION_COOKIE, required = false) String cartSessionToken,
+        HttpServletResponse response
+    ) {
+        AuthService.AuthenticatedSession session = authService.socialExchange(request);
         applyAuthenticatedSession(response, session);
         mergeGuestCartIfPresent(cartSessionToken, session.user().getId());
         return toResponse(session.user(), session.rawSessionToken());

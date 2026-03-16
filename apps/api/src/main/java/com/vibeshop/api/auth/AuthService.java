@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.vibeshop.api.auth.AuthDtos.LoginRequest;
 import com.vibeshop.api.auth.AuthDtos.SignUpRequest;
+import com.vibeshop.api.auth.AuthDtos.SocialExchangeRequest;
 
 @Service
 public class AuthService {
@@ -68,6 +69,30 @@ public class AuthService {
     public AuthenticatedSession loginAdmin(LoginRequest request) {
         User user = authenticateAdminUser(request);
         return createSession(user, OffsetDateTime.now(SEOUL));
+    }
+
+    @Transactional
+    public AuthenticatedSession socialExchange(SocialExchangeRequest request) {
+        AuthProviderType provider = parseSocialProvider(request.provider());
+        String normalizedEmail = normalizeEmail(request.email());
+        String displayName = request.displayName().trim();
+        OffsetDateTime now = OffsetDateTime.now(SEOUL);
+
+        User user = userRepository.findByEmailIgnoreCase(normalizedEmail)
+            .map(existingUser -> {
+                existingUser.syncSocialProfile(displayName, provider);
+                return existingUser;
+            })
+            .orElseGet(() -> userRepository.save(new User(
+                displayName,
+                normalizedEmail,
+                passwordEncoder.encode(buildSocialPassword(provider, request.providerUserId())),
+                provider,
+                UserRole.CUSTOMER,
+                now
+            )));
+
+        return createSession(user, now);
     }
 
     @Transactional(readOnly = true)
@@ -154,6 +179,21 @@ public class AuthService {
             UserRole.OWNER,
             now
         ));
+    }
+
+    private AuthProviderType parseSocialProvider(String provider) {
+        String normalizedProvider = provider.trim().toUpperCase();
+        if ("GOOGLE".equals(normalizedProvider)) {
+            return AuthProviderType.GOOGLE;
+        }
+        if ("KAKAO".equals(normalizedProvider)) {
+            return AuthProviderType.KAKAO;
+        }
+        throw new IllegalArgumentException("지원하지 않는 소셜 로그인 공급자입니다.");
+    }
+
+    private String buildSocialPassword(AuthProviderType provider, String providerUserId) {
+        return "social-" + provider.name().toLowerCase() + "-" + providerUserId.trim();
     }
 
     private AuthenticatedSession createSession(User user, OffsetDateTime now) {

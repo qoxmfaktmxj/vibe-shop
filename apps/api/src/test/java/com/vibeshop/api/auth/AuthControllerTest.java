@@ -157,6 +157,25 @@ class AuthControllerTest {
     }
 
     @Test
+    void socialExchangeCreatesAuthenticatedSessionCookie() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/social/exchange")
+                .contentType("application/json")
+                .content("""
+                    {
+                      "provider": "GOOGLE",
+                      "providerUserId": "google-user-1",
+                      "email": "social@example.com",
+                      "displayName": "Social Shopper"
+                    }
+                    """))
+            .andExpect(status().isOk())
+            .andExpect(cookie().exists("vibe_shop_session"))
+            .andExpect(jsonPath("$.authenticated").value(true))
+            .andExpect(jsonPath("$.user.email").value("social@example.com"))
+            .andExpect(jsonPath("$.user.provider").value("GOOGLE"));
+    }
+
+    @Test
     void logoutClearsSession() throws Exception {
         MvcResult signUpResult = mockMvc.perform(post("/api/v1/auth/signup")
                 .contentType("application/json")

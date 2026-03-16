@@ -23,7 +23,12 @@ const notoSans = Noto_Sans_KR({
 
 export const metadata: Metadata = {
   title: "Vibe Shop",
-  description: "차분한 리듬과 미니멀한 큐레이션을 담은 라이프스타일 스토어",
+  description: "리빙, 키친, 웰니스 셀렉션을 담은 감도 높은 라이프스타일 쇼핑몰.",
+  icons: {
+    icon: "/vibe-shop-favicon.svg",
+    shortcut: "/vibe-shop-favicon.svg",
+    apple: "/vibe-shop-favicon.svg",
+  },
 };
 
 export default async function RootLayout({
