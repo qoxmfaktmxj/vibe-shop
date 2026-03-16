@@ -55,7 +55,9 @@ class OrderControllerTest {
                 image_url,
                 image_alt,
                 featured,
-                stock
+                stock,
+                popularity_score,
+                created_at
             ) VALUES (
                 10,
                 1,
@@ -69,7 +71,9 @@ class OrderControllerTest {
                 '/images/products/living-01.jpg',
                 'Linen Bed Set image',
                 TRUE,
-                10
+                10,
+                900,
+                CURRENT_TIMESTAMP
             )
             """).update();
     }

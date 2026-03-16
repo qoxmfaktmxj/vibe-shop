@@ -1,6 +1,7 @@
 package com.vibeshop.api.catalog;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -63,6 +64,12 @@ public class Product {
     @Column(nullable = false)
     private int stock;
 
+    @Column(name = "popularity_score", nullable = false)
+    private int popularityScore;
+
+    @Column(name = "created_at", nullable = false)
+    private OffsetDateTime createdAt;
+
     public void decreaseStock(int quantity) {
         if (quantity < 1) {
             throw new IllegalArgumentException("수량은 1개 이상이어야 합니다.");
@@ -80,4 +87,3 @@ public class Product {
         this.stock += quantity;
     }
 }
-

@@ -62,9 +62,12 @@ export const getProducts = cache(async (category?: string, sort?: string) => {
   return fetchFromApi<ProductSummary[]>(`/api/v1/products${query}`);
 });
 
-export const searchProducts = cache(async (keyword: string, sort?: string) => {
+export const searchProducts = cache(async (keyword: string, sort?: string, category?: string) => {
   const params = new URLSearchParams();
   params.set("q", keyword);
+  if (category) {
+    params.set("category", category);
+  }
   if (sort && sort !== "recommended") {
     params.set("sort", sort);
   }

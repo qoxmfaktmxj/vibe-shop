@@ -13,9 +13,9 @@ import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
@@ -40,6 +40,7 @@ class AuthControllerTest {
     void setUp() {
         jdbcClient.sql("DELETE FROM shopping_cart_items").update();
         jdbcClient.sql("DELETE FROM customer_order_lines").update();
+        jdbcClient.sql("DELETE FROM order_payments").update();
         jdbcClient.sql("DELETE FROM customer_orders").update();
         jdbcClient.sql("DELETE FROM user_sessions").update();
         jdbcClient.sql("DELETE FROM users").update();
@@ -65,7 +66,9 @@ class AuthControllerTest {
                 image_url,
                 image_alt,
                 featured,
-                stock
+                stock,
+                popularity_score,
+                created_at
             ) VALUES (
                 10,
                 1,
@@ -79,7 +82,9 @@ class AuthControllerTest {
                 '/images/products/living-01.jpg',
                 'Linen Bed Set image',
                 TRUE,
-                10
+                10,
+                900,
+                CURRENT_TIMESTAMP
             )
             """).update();
     }

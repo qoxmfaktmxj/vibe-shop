@@ -29,7 +29,9 @@ export type HomeResponse = {
   heroTitle: string;
   heroSubtitle: string;
   featuredCategories: Category[];
-  featuredProducts: ProductSummary[];
+  curatedPicks: ProductSummary[];
+  newArrivals: ProductSummary[];
+  bestSellers: ProductSummary[];
 };
 
 export type AuthenticatedUser = {

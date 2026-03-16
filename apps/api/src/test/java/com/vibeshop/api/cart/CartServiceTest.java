@@ -23,6 +23,7 @@ class CartServiceTest {
     void setUp() {
         jdbcClient.sql("DELETE FROM shopping_cart_items").update();
         jdbcClient.sql("DELETE FROM customer_order_lines").update();
+        jdbcClient.sql("DELETE FROM order_payments").update();
         jdbcClient.sql("DELETE FROM customer_orders").update();
         jdbcClient.sql("DELETE FROM user_sessions").update();
         jdbcClient.sql("DELETE FROM users").update();
@@ -48,21 +49,25 @@ class CartServiceTest {
                 image_url,
                 image_alt,
                 featured,
-                stock
+                stock,
+                popularity_score,
+                created_at
             ) VALUES (
                 10,
                 1,
                 'linen-bed-set',
-                '린넨 베드 세트',
-                '대표 상품',
-                '대표 상품 설명',
+                '리넨 베드 세트',
+                '테스트 상품',
+                '테스트 상품 설명',
                 89000,
                 'BEST',
                 '#29339b',
                 '/images/products/living-01.jpg',
-                '린넨 베드 세트 상품 이미지',
+                '리넨 베드 세트 상품 이미지',
                 TRUE,
-                10
+                10,
+                900,
+                CURRENT_TIMESTAMP
             )
             """).update();
     }

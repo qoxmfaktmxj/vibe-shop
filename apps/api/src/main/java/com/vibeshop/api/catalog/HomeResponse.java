@@ -6,7 +6,8 @@ public record HomeResponse(
     String heroTitle,
     String heroSubtitle,
     List<CategorySummary> featuredCategories,
-    List<ProductSummary> featuredProducts
+    List<ProductSummary> curatedPicks,
+    List<ProductSummary> newArrivals,
+    List<ProductSummary> bestSellers
 ) {
 }
-

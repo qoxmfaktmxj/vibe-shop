@@ -12,6 +12,31 @@ import com.vibeshop.api.common.ResourceNotFoundException;
 @Transactional(readOnly = true)
 public class CatalogService {
 
+    private static final Comparator<Product> RECOMMENDED_ORDER = Comparator
+        .comparing(Product::isFeatured)
+        .reversed()
+        .thenComparing(Product::getPopularityScore, Comparator.reverseOrder())
+        .thenComparing(Product::getCreatedAt, Comparator.reverseOrder())
+        .thenComparing(Product::getId);
+
+    private static final Comparator<Product> NEWEST_ORDER = Comparator
+        .comparing(Product::getCreatedAt, Comparator.reverseOrder())
+        .thenComparing(Product::getId, Comparator.reverseOrder());
+
+    private static final Comparator<Product> POPULAR_ORDER = Comparator
+        .comparing(Product::getPopularityScore, Comparator.reverseOrder())
+        .thenComparing(Product::isFeatured, Comparator.reverseOrder())
+        .thenComparing(Product::getCreatedAt, Comparator.reverseOrder())
+        .thenComparing(Product::getId);
+
+    private static final Comparator<Product> PRICE_ASC_ORDER = Comparator
+        .comparing(Product::getPrice)
+        .thenComparing(Product::getId);
+
+    private static final Comparator<Product> PRICE_DESC_ORDER = Comparator
+        .comparing(Product::getPrice, Comparator.reverseOrder())
+        .thenComparing(Product::getId);
+
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
 
@@ -21,11 +46,31 @@ public class CatalogService {
     }
 
     public HomeResponse getHome() {
+        List<CategorySummary> categories = categoryRepository.findAllByOrderByIdAsc().stream()
+            .map(this::toCategorySummary)
+            .toList();
+        List<Product> allProducts = productRepository.findAllByOrderByFeaturedDescIdAsc();
+
         return new HomeResponse(
-            "차분한 일상을 위한 셀렉션",
-            "리빙, 키친, 웰니스 카테고리에서 오래 곁에 두기 좋은 제품을 소개합니다.",
-            categoryRepository.findAllByOrderByIdAsc().stream().map(this::toCategorySummary).toList(),
-            productRepository.findTop4ByFeaturedTrueOrderByIdAsc().stream().map(this::toProductSummary).toList()
+            "리빙의 결을 따라 고른 이번 시즌 셀렉션",
+            "리빙, 키친, 웰니스 카테고리에서 지금 살펴보기 좋은 신상품과 인기 상품을 함께 제안합니다.",
+            categories,
+            allProducts.stream()
+                .filter(Product::isFeatured)
+                .sorted(POPULAR_ORDER)
+                .limit(6)
+                .map(this::toProductSummary)
+                .toList(),
+            allProducts.stream()
+                .sorted(NEWEST_ORDER)
+                .limit(8)
+                .map(this::toProductSummary)
+                .toList(),
+            allProducts.stream()
+                .sorted(POPULAR_ORDER)
+                .limit(8)
+                .map(this::toProductSummary)
+                .toList()
         );
     }
 
@@ -106,13 +151,14 @@ public class CatalogService {
     }
 
     private void applySort(List<Product> products, String sort) {
-        if ("price-asc".equals(sort)) {
-            products.sort(Comparator.comparing(Product::getPrice).thenComparing(Product::getId));
-            return;
-        }
+        Comparator<Product> comparator = switch (sort) {
+            case "newest" -> NEWEST_ORDER;
+            case "popular" -> POPULAR_ORDER;
+            case "price-asc" -> PRICE_ASC_ORDER;
+            case "price-desc" -> PRICE_DESC_ORDER;
+            default -> RECOMMENDED_ORDER;
+        };
 
-        if ("price-desc".equals(sort)) {
-            products.sort(Comparator.comparing(Product::getPrice).reversed().thenComparing(Product::getId));
-        }
+        products.sort(comparator);
     }
 }

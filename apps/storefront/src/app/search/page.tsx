@@ -1,50 +1,67 @@
+import Link from "next/link";
+
 import { ProductCard } from "@/components/catalog/product-card";
 import { ProductSortTabs } from "@/components/catalog/product-sort-tabs";
 import { SearchForm } from "@/components/search/search-form";
-import { searchProducts } from "@/lib/server-api";
+import { getCategories, getProducts, searchProducts } from "@/lib/server-api";
 
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; sort?: string }>;
+  searchParams: Promise<{ q?: string; sort?: string; category?: string }>;
 }) {
-  const { q, sort } = await searchParams;
+  const { q, sort, category } = await searchParams;
   const keyword = q?.trim() ?? "";
   const currentSort = sort?.trim() || "recommended";
-  const products = keyword ? await searchProducts(keyword, currentSort) : [];
+  const currentCategory = category?.trim() ?? "";
+  const categories = await getCategories();
+  const selectedCategory = categories.find((item) => item.slug === currentCategory);
+  const shouldRenderResults = Boolean(keyword || currentCategory);
+  const products = keyword
+    ? await searchProducts(keyword, currentSort, currentCategory || undefined)
+    : currentCategory
+      ? await getProducts(currentCategory, currentSort)
+      : [];
 
   return (
-    <div className="grid-shell">
+    <div className="grid-shell space-y-8">
       <section className="surface-card rounded-[36px] p-8 sm:p-10">
         <p className="display-eyebrow">Search</p>
-        <h1 className="display-heading mt-4 text-4xl font-semibold">
-          상품 검색
-        </h1>
+        <h1 className="display-heading mt-4 text-4xl font-semibold">상품 검색</h1>
         <p className="mt-4 max-w-2xl text-base leading-8 text-[var(--ink-soft)]">
-          상품명과 카테고리, 상품 설명을 기준으로 원하는 제품을 찾아보세요.
+          상품명과 카테고리, 분위기 키워드를 함께 사용해 원하는 아이템을 빠르게 찾아보세요.
         </p>
-        <SearchForm />
+        <SearchForm categories={categories} initialCategory={currentCategory} />
       </section>
 
-      {keyword ? (
+      {shouldRenderResults ? (
         <section className="surface-card rounded-[36px] p-6 sm:p-8">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="display-eyebrow">Results</p>
               <h2 className="display-heading mt-3 text-3xl font-semibold">
-                &quot;{keyword}&quot; 검색 결과
+                {keyword
+                  ? `“${keyword}” 검색 결과`
+                  : `${selectedCategory?.name ?? "카테고리"} 전시 결과`}
               </h2>
+              <p className="mt-3 text-sm text-[var(--ink-soft)]">
+                {selectedCategory ? `${selectedCategory.name} 카테고리만 표시 중` : "전체 카테고리"}
+              </p>
             </div>
-            <p className="text-sm text-[var(--ink-soft)]">
-              {products.length}개 상품
-            </p>
+            <p className="text-sm text-[var(--ink-soft)]">{products.length}개 상품</p>
           </div>
-          <div className="mt-6">
+
+          <div className="mt-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <ProductSortTabs
               pathname="/search"
-              searchParams={{ q: keyword, sort }}
+              searchParams={{ q: keyword || undefined, sort, category: currentCategory || undefined }}
               currentSort={currentSort}
             />
+            {currentCategory ? (
+              <Link href="/search" className="text-sm font-medium text-[var(--primary)]">
+                필터 초기화
+              </Link>
+            ) : null}
           </div>
 
           {products.length > 0 ? (
@@ -55,11 +72,26 @@ export default async function SearchPage({
             </div>
           ) : (
             <div className="mt-8 rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm text-[var(--ink-soft)]">
-              검색 결과가 없습니다. 다른 키워드로 다시 시도해 주세요.
+              검색 결과가 없습니다. 다른 키워드나 카테고리 조합으로 다시 시도해 주세요.
             </div>
           )}
         </section>
-      ) : null}
+      ) : (
+        <section className="grid gap-5 md:grid-cols-3">
+          {categories.map((item) => (
+            <Link
+              key={item.id}
+              href={`/search?category=${item.slug}`}
+              className="surface-card rounded-[28px] p-6 transition hover:-translate-y-1"
+            >
+              <p className="display-eyebrow">{item.name}</p>
+              <p className="display-heading mt-4 text-2xl font-semibold text-[var(--ink)]">
+                {item.description}
+              </p>
+            </Link>
+          ))}
+        </section>
+      )}
     </div>
   );
 }

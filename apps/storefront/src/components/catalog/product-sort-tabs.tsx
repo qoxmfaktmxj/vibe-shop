@@ -2,8 +2,10 @@ import Link from "next/link";
 
 const SORT_OPTIONS = [
   { value: "recommended", label: "추천순" },
-  { value: "price-asc", label: "가격 낮은순" },
-  { value: "price-desc", label: "가격 높은순" },
+  { value: "newest", label: "최신순" },
+  { value: "popular", label: "인기순" },
+  { value: "price-asc", label: "낮은 가격순" },
+  { value: "price-desc", label: "높은 가격순" },
 ] as const;
 
 export function ProductSortTabs({
