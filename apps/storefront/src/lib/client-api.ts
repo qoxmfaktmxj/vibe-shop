@@ -1,4 +1,5 @@
 import type {
+  AuthSession,
   CancelOrderResponse,
   CartItem,
   CartResponse,
@@ -7,6 +8,8 @@ import type {
   CreateOrderResponse,
   GuestOrderLookupPayload,
   GuestOrderLookupResponse,
+  LoginPayload,
+  SignUpPayload,
 } from "@/lib/contracts";
 
 function getApiBaseUrl() {
@@ -66,6 +69,32 @@ export async function removeCartItem(productId: number): Promise<CartResponse> {
 export async function clearCartItems(): Promise<CartResponse> {
   return fetchJson<CartResponse>("/api/v1/cart", {
     method: "DELETE",
+  });
+}
+
+export async function getAuthSession(): Promise<AuthSession> {
+  return fetchJson<AuthSession>("/api/v1/auth/session", {
+    method: "GET",
+  });
+}
+
+export async function signUp(payload: SignUpPayload): Promise<AuthSession> {
+  return fetchJson<AuthSession>("/api/v1/auth/signup", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function signIn(payload: LoginPayload): Promise<AuthSession> {
+  return fetchJson<AuthSession>("/api/v1/auth/login", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function signOut(): Promise<AuthSession> {
+  return fetchJson<AuthSession>("/api/v1/auth/logout", {
+    method: "POST",
   });
 }
 

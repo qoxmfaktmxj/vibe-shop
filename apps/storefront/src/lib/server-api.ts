@@ -1,6 +1,8 @@
 import { cache } from "react";
+import { cookies } from "next/headers";
 
 import type {
+  AuthSession,
   Category,
   HomeResponse,
   OrderResponse,
@@ -16,9 +18,10 @@ const API_BASE_URL =
 
 export class ApiNotFoundError extends Error {}
 
-async function fetchFromApi<T>(path: string): Promise<T> {
+async function fetchFromApi<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     cache: "no-store",
+    ...init,
   });
 
   if (response.status === 404) {
@@ -69,3 +72,16 @@ export const getOrder = cache(async (orderNumber: string) =>
 export const listOrders = cache(async (phone: string) =>
   fetchFromApi<OrderSummaryResponse[]>(`/api/v1/orders?phone=${encodeURIComponent(phone)}`),
 );
+
+export async function getAuthSession(): Promise<AuthSession> {
+  const cookieStore = await cookies();
+  const cookieHeader = cookieStore.toString();
+
+  return fetchFromApi<AuthSession>("/api/v1/auth/session", {
+    headers: cookieHeader
+      ? {
+          Cookie: cookieHeader,
+        }
+      : undefined,
+  });
+}

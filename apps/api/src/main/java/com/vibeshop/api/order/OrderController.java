@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.vibeshop.api.auth.AuthService;
 import com.vibeshop.api.cart.CartService;
 import com.vibeshop.api.order.OrderDtos.CheckoutPreviewRequest;
 import com.vibeshop.api.order.OrderDtos.CheckoutPreviewResponse;
@@ -30,13 +31,16 @@ import com.vibeshop.api.order.OrderDtos.OrderSummaryResponse;
 public class OrderController {
 
     private static final String CART_SESSION_COOKIE = "vibe_shop_cart";
+    private static final String AUTH_SESSION_COOKIE = "vibe_shop_session";
 
     private final OrderService orderService;
     private final CartService cartService;
+    private final AuthService authService;
 
-    public OrderController(OrderService orderService, CartService cartService) {
+    public OrderController(OrderService orderService, CartService cartService, AuthService authService) {
         this.orderService = orderService;
         this.cartService = cartService;
+        this.authService = authService;
     }
 
     @PostMapping("/preview")
@@ -48,9 +52,16 @@ public class OrderController {
     CreateOrderResponse create(
         @Valid @RequestBody CreateOrderRequest request,
         @CookieValue(value = CART_SESSION_COOKIE, required = false) String sessionToken,
+        @CookieValue(value = AUTH_SESSION_COOKIE, required = false) String authSessionToken,
         HttpServletResponse response
     ) {
         CreateOrderResponse createdOrder = orderService.create(request);
+        Long userId = authService.resolveAuthenticatedUserId(authSessionToken);
+        if (userId != null) {
+            cartService.clearMemberCart(userId);
+            return createdOrder;
+        }
+
         if (sessionToken != null && !sessionToken.isBlank()) {
             cartService.clear(sessionToken);
             response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from(CART_SESSION_COOKIE, "")

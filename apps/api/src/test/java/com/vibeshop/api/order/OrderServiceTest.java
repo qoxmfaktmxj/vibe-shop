@@ -29,6 +29,8 @@ class OrderServiceTest {
 
     @BeforeEach
     void setUp() {
+        jdbcClient.sql("DELETE FROM user_sessions").update();
+        jdbcClient.sql("DELETE FROM users").update();
         jdbcClient.sql("DELETE FROM shopping_cart_items").update();
         jdbcClient.sql("DELETE FROM customer_order_lines").update();
         jdbcClient.sql("DELETE FROM customer_orders").update();

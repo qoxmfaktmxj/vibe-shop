@@ -32,6 +32,30 @@ export type HomeResponse = {
   featuredProducts: ProductSummary[];
 };
 
+export type AuthenticatedUser = {
+  id: number;
+  name: string;
+  email: string;
+  provider: string;
+};
+
+export type AuthSession = {
+  authenticated: boolean;
+  user: AuthenticatedUser | null;
+  sessionToken?: string | null;
+};
+
+export type SignUpPayload = {
+  name: string;
+  email: string;
+  password: string;
+};
+
+export type LoginPayload = {
+  email: string;
+  password: string;
+};
+
 export type CheckoutItem = {
   productId: number;
   quantity: number;

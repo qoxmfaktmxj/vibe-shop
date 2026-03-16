@@ -84,8 +84,81 @@ public class CartService {
         return UUID.randomUUID().toString().replace("-", "");
     }
 
+    @Transactional(readOnly = true)
+    public CartResponse getForUser(Long userId) {
+        return get(memberCartKey(userId));
+    }
+
+    @Transactional
+    public CartResponse putItemForUser(Long userId, Long productId, int quantity) {
+        return putItem(memberCartKey(userId), productId, quantity);
+    }
+
+    @Transactional
+    public CartResponse removeItemForUser(Long userId, Long productId) {
+        return removeItem(memberCartKey(userId), productId);
+    }
+
+    @Transactional
+    public CartResponse clearMemberCart(Long userId) {
+        return clear(memberCartKey(userId));
+    }
+
+    @Transactional
+    public void mergeGuestCartIntoMemberCart(String guestSessionToken, Long userId) {
+        if (guestSessionToken == null || guestSessionToken.isBlank() || userId == null) {
+            return;
+        }
+
+        String memberCartKey = memberCartKey(userId);
+        if (memberCartKey.equals(guestSessionToken)) {
+            return;
+        }
+
+        OffsetDateTime now = OffsetDateTime.now(SEOUL);
+        List<StoredCartItem> guestItems = storedCartItemRepository.findAllBySessionTokenOrderByIdAsc(guestSessionToken);
+        for (StoredCartItem guestItem : guestItems) {
+            int mergedQuantity = guestItem.getQuantity();
+            StoredCartItem existingItem = storedCartItemRepository.findBySessionTokenAndProduct_Id(
+                memberCartKey,
+                guestItem.getProduct().getId()
+            ).orElse(null);
+
+            if (existingItem != null) {
+                mergedQuantity += existingItem.getQuantity();
+            }
+
+            int adjustedQuantity = Math.min(mergedQuantity, guestItem.getProduct().getStock());
+            if (adjustedQuantity < 1) {
+                if (existingItem != null) {
+                    storedCartItemRepository.delete(existingItem);
+                }
+                continue;
+            }
+
+            if (existingItem == null) {
+                storedCartItemRepository.save(new StoredCartItem(
+                    memberCartKey,
+                    guestItem.getProduct(),
+                    adjustedQuantity,
+                    now
+                ));
+                continue;
+            }
+
+            existingItem.changeQuantity(adjustedQuantity, now);
+            storedCartItemRepository.save(existingItem);
+        }
+
+        storedCartItemRepository.deleteAllBySessionToken(guestSessionToken);
+    }
+
     public CartResponse empty() {
         return new CartResponse(List.of(), 0, BigDecimal.ZERO);
+    }
+
+    private String memberCartKey(Long userId) {
+        return "member:" + userId;
     }
 
     private CartResponse toResponse(List<StoredCartItem> items) {

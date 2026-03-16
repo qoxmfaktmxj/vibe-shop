@@ -13,6 +13,7 @@ import {
   removeCartItem,
   setCartItemQuantity,
 } from "@/lib/client-api";
+import { useAuth } from "@/lib/auth-store";
 import type { CartItem, CartProduct, CartResponse } from "@/lib/contracts";
 
 type CartContextValue = {
@@ -31,6 +32,7 @@ const CartContext = createContext<CartContextValue | null>(null);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  const { session } = useAuth();
 
   useEffect(() => {
     let cancelled = false;
@@ -54,7 +56,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [session.authenticated, session.user?.id]);
 
   const syncCart = async (request: () => Promise<CartResponse>) => {
     try {

@@ -21,6 +21,8 @@ class CartServiceTest {
 
     @BeforeEach
     void setUp() {
+        jdbcClient.sql("DELETE FROM user_sessions").update();
+        jdbcClient.sql("DELETE FROM users").update();
         jdbcClient.sql("DELETE FROM shopping_cart_items").update();
         jdbcClient.sql("DELETE FROM customer_order_lines").update();
         jdbcClient.sql("DELETE FROM customer_orders").update();
@@ -90,5 +92,16 @@ class CartServiceTest {
         assertThat(clearedCart.itemCount()).isZero();
         assertThat(clearedCart.subtotal()).isEqualByComparingTo("0");
         assertThat(cartService.get(sessionToken).items()).isEmpty();
+    }
+
+    @Test
+    void mergeGuestCartIntoMemberCartMovesItemsToMemberBucket() {
+        cartService.putItem("guest-session-3", 10L, 2);
+
+        cartService.mergeGuestCartIntoMemberCart("guest-session-3", 77L);
+
+        assertThat(cartService.get("guest-session-3").items()).isEmpty();
+        assertThat(cartService.getForUser(77L).items()).hasSize(1);
+        assertThat(cartService.getForUser(77L).items().getFirst().quantity()).isEqualTo(2);
     }
 }

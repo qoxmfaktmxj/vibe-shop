@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
+import { useTransition } from "react";
 
+import { useAuth } from "@/lib/auth-store";
 import type { Category } from "@/lib/contracts";
 import { useCart } from "@/lib/cart-store";
 
@@ -31,7 +34,10 @@ function HeaderLink({
 
 export function SiteHeader({ categories }: { categories: Category[] }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { itemCount, hydrated } = useCart();
+  const { session, signOut } = useAuth();
+  const [isPending, startTransition] = useTransition();
 
   return (
     <header className="sticky top-0 z-40 glass-nav border-b border-black/5">
@@ -55,6 +61,44 @@ export function SiteHeader({ categories }: { categories: Category[] }) {
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">
+            {session.authenticated ? (
+              <>
+                <Link
+                  href="/account"
+                  className="hidden items-center gap-2 rounded-lg border border-[var(--line)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-soft)] lg:inline-flex"
+                >
+                  {session.user?.name}
+                </Link>
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={() =>
+                    startTransition(async () => {
+                      await signOut();
+                      router.refresh();
+                    })
+                  }
+                  className="hidden rounded-lg border border-[var(--line)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-soft)] lg:inline-flex disabled:opacity-60"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="hidden rounded-lg border border-[var(--line)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-soft)] lg:inline-flex"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/signup"
+                  className="hidden items-center gap-2 rounded-lg bg-[var(--surface-low)] px-4 py-2 text-xs font-medium text-[var(--ink-soft)] lg:inline-flex"
+                >
+                  Join
+                </Link>
+              </>
+            )}
             <Link
               href="/search"
               className="hidden items-center gap-2 rounded-lg bg-[var(--surface-low)] px-4 py-2 text-xs font-medium text-[var(--ink-soft)] md:inline-flex"
@@ -81,6 +125,11 @@ export function SiteHeader({ categories }: { categories: Category[] }) {
           <HeaderLink href="/search" label="Search" active={pathname.startsWith("/search")} />
           <HeaderLink href="/orders" label="Orders" active={pathname === "/orders"} />
           <HeaderLink href="/lookup-order" label="Lookup" active={pathname === "/lookup-order"} />
+          {session.authenticated ? (
+            <HeaderLink href="/account" label="Account" active={pathname === "/account"} />
+          ) : (
+            <HeaderLink href="/login" label="Login" active={pathname === "/login"} />
+          )}
         </nav>
 
         <nav className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-black/5 pt-4">

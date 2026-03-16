@@ -24,6 +24,12 @@ public class ApiExceptionHandler {
             .body(new ApiErrorResponse("bad_request", exception.getMessage()));
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    ResponseEntity<ApiErrorResponse> handleUnauthorized(UnauthorizedException exception) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body(new ApiErrorResponse("unauthorized", exception.getMessage()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ResponseEntity<ApiErrorResponse> handleValidation(MethodArgumentNotValidException exception) {
         FieldError fieldError = exception.getBindingResult().getFieldErrors().stream().findFirst().orElse(null);
