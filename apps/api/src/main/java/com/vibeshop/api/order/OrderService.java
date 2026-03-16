@@ -17,11 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vibeshop.api.catalog.Product;
 import com.vibeshop.api.catalog.ProductRepository;
 import com.vibeshop.api.common.ResourceNotFoundException;
+import com.vibeshop.api.order.OrderDtos.CancelOrderResponse;
 import com.vibeshop.api.order.OrderDtos.CheckoutItemRequest;
 import com.vibeshop.api.order.OrderDtos.CheckoutLineResponse;
 import com.vibeshop.api.order.OrderDtos.CheckoutPreviewRequest;
 import com.vibeshop.api.order.OrderDtos.CheckoutPreviewResponse;
-import com.vibeshop.api.order.OrderDtos.CancelOrderResponse;
 import com.vibeshop.api.order.OrderDtos.CreateOrderRequest;
 import com.vibeshop.api.order.OrderDtos.CreateOrderResponse;
 import com.vibeshop.api.order.OrderDtos.GuestOrderLookupRequest;
@@ -53,6 +53,11 @@ public class OrderService {
 
     @Transactional
     public CreateOrderResponse create(CreateOrderRequest request) {
+        return create(request, null);
+    }
+
+    @Transactional
+    public CreateOrderResponse create(CreateOrderRequest request, Long userId) {
         String idempotencyKey = request.idempotencyKey().trim();
         CustomerOrder existingOrder = customerOrderRepository.findByIdempotencyKey(idempotencyKey).orElse(null);
         if (existingOrder != null) {
@@ -65,6 +70,8 @@ public class OrderService {
         CustomerOrder order = new CustomerOrder(
             generateOrderNumber(),
             idempotencyKey,
+            userId != null ? CustomerType.MEMBER : CustomerType.GUEST,
+            userId,
             request.customerName().trim(),
             request.phone().trim(),
             request.postalCode().trim(),
@@ -95,11 +102,72 @@ public class OrderService {
     @Transactional(readOnly = true)
     public OrderResponse get(String orderNumber) {
         CustomerOrder order = customerOrderRepository.findByOrderNumber(orderNumber)
-            .orElseThrow(() -> new ResourceNotFoundException("주문 정보를 찾을 수 없습니다."));
+            .orElseThrow(() -> new ResourceNotFoundException("二쇰Ц ?뺣낫瑜?李얠쓣 ???놁뒿?덈떎."));
+        return toOrderResponse(order);
+    }
 
+    @Transactional(readOnly = true)
+    public OrderResponse getForUser(String orderNumber, Long userId) {
+        return toOrderResponse(findMemberOrder(orderNumber, userId));
+    }
+
+    @Transactional(readOnly = true)
+    public OrderResponse getGuest(String orderNumber, String phone) {
+        return toOrderResponse(findGuestOrder(orderNumber, phone));
+    }
+
+    @Transactional(readOnly = true)
+    public GuestOrderLookupResponse lookup(GuestOrderLookupRequest request) {
+        CustomerOrder order = findGuestOrder(request.orderNumber(), request.phone());
+        return new GuestOrderLookupResponse(order.getOrderNumber());
+    }
+
+    @Transactional
+    public CancelOrderResponse cancel(String orderNumber) {
+        CustomerOrder order = customerOrderRepository.findByOrderNumber(orderNumber)
+            .orElseThrow(() -> new ResourceNotFoundException("二쇰Ц ?뺣낫瑜?李얠쓣 ???놁뒿?덈떎."));
+        return cancel(order);
+    }
+
+    @Transactional
+    public CancelOrderResponse cancelForUser(String orderNumber, Long userId) {
+        return cancel(findMemberOrder(orderNumber, userId));
+    }
+
+    @Transactional
+    public CancelOrderResponse cancelGuest(String orderNumber, String phone) {
+        return cancel(findGuestOrder(orderNumber, phone));
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderSummaryResponse> listByPhone(String phone) {
+        if (phone == null || phone.isBlank()) {
+            throw new IllegalArgumentException("?곕씫泥섎? ?낅젰?댁＜?몄슂.");
+        }
+
+        return customerOrderRepository.findByPhoneOrderByCreatedAtDesc(phone.trim()).stream()
+            .filter(order -> order.getCustomerType() == CustomerType.GUEST)
+            .map(this::toSummaryResponse)
+            .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderSummaryResponse> listByUserId(Long userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("濡쒓렇???뺣낫媛 ?꾩슂?⑸땲??");
+        }
+
+        return customerOrderRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
+            .filter(order -> order.getCustomerType() == CustomerType.MEMBER)
+            .map(this::toSummaryResponse)
+            .toList();
+    }
+
+    private OrderResponse toOrderResponse(CustomerOrder order) {
         return new OrderResponse(
             order.getOrderNumber(),
             order.getStatus().name(),
+            order.getCustomerType().name(),
             order.getCustomerName(),
             order.getPhone(),
             order.getPostalCode(),
@@ -122,25 +190,21 @@ public class OrderService {
         );
     }
 
-    @Transactional(readOnly = true)
-    public GuestOrderLookupResponse lookup(GuestOrderLookupRequest request) {
-        CustomerOrder order = customerOrderRepository.findByOrderNumber(request.orderNumber().trim())
-            .orElseThrow(() -> new ResourceNotFoundException("주문 정보를 찾을 수 없습니다."));
-
-        if (!order.getPhone().equals(request.phone().trim())) {
-            throw new ResourceNotFoundException("주문 정보를 찾을 수 없습니다.");
-        }
-
-        return new GuestOrderLookupResponse(order.getOrderNumber());
+    private OrderSummaryResponse toSummaryResponse(CustomerOrder order) {
+        return new OrderSummaryResponse(
+            order.getOrderNumber(),
+            order.getStatus().name(),
+            order.getCustomerType().name(),
+            order.getCustomerName(),
+            order.getTotal(),
+            order.getCreatedAt(),
+            order.getLines().stream().mapToInt(CustomerOrderLine::getQuantity).sum()
+        );
     }
 
-    @Transactional
-    public CancelOrderResponse cancel(String orderNumber) {
-        CustomerOrder order = customerOrderRepository.findByOrderNumber(orderNumber)
-            .orElseThrow(() -> new ResourceNotFoundException("주문 정보를 찾을 수 없습니다."));
-
+    private CancelOrderResponse cancel(CustomerOrder order) {
         if (order.getStatus() != OrderStatus.RECEIVED) {
-            throw new IllegalArgumentException("현재 상태에서는 주문을 취소할 수 없습니다.");
+            throw new IllegalArgumentException("?꾩옱 ?곹깭?먯꽌??二쇰Ц??痍⑥냼?????놁뒿?덈떎.");
         }
 
         restoreStock(order);
@@ -148,22 +212,29 @@ public class OrderService {
         return new CancelOrderResponse(order.getOrderNumber(), order.getStatus().name());
     }
 
-    @Transactional(readOnly = true)
-    public List<OrderSummaryResponse> listByPhone(String phone) {
-        if (phone == null || phone.isBlank()) {
-            throw new IllegalArgumentException("연락처를 입력해주세요.");
+    private CustomerOrder findMemberOrder(String orderNumber, Long userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("濡쒓렇???뺣낫媛 ?꾩슂?⑸땲??");
         }
 
-        return customerOrderRepository.findByPhoneOrderByCreatedAtDesc(phone.trim()).stream()
-            .map(order -> new OrderSummaryResponse(
-                order.getOrderNumber(),
-                order.getStatus().name(),
-                order.getCustomerName(),
-                order.getTotal(),
-                order.getCreatedAt(),
-                order.getLines().stream().mapToInt(CustomerOrderLine::getQuantity).sum()
-            ))
-            .toList();
+        return customerOrderRepository.findByOrderNumberAndUserId(orderNumber.trim(), userId)
+            .filter(order -> order.getCustomerType() == CustomerType.MEMBER)
+            .orElseThrow(() -> new ResourceNotFoundException("二쇰Ц ?뺣낫瑜?李얠쓣 ???놁뒿?덈떎."));
+    }
+
+    private CustomerOrder findGuestOrder(String orderNumber, String phone) {
+        if (phone == null || phone.isBlank()) {
+            throw new IllegalArgumentException("鍮꾪쉶??二쇰Ц???뚯쑀 議고쉶瑜?위빐 ?곕씫泥섎? ?낅젰?댁＜?몄슂.");
+        }
+
+        CustomerOrder order = customerOrderRepository.findByOrderNumber(orderNumber.trim())
+            .orElseThrow(() -> new ResourceNotFoundException("二쇰Ц ?뺣낫瑜?李얠쓣 ???놁뒿?덈떎."));
+
+        if (order.getCustomerType() != CustomerType.GUEST || !order.getPhone().equals(phone.trim())) {
+            throw new ResourceNotFoundException("二쇰Ц ?뺣낫瑜?李얠쓣 ???놁뒿?덈떎.");
+        }
+
+        return order;
     }
 
     private ResolvedOrder resolveOrder(List<CheckoutItemRequest> items) {
@@ -172,7 +243,7 @@ public class OrderService {
         Map<Long, Product> productMap = products.stream().collect(Collectors.toMap(Product::getId, Function.identity()));
 
         if (productMap.size() != normalizedItems.size()) {
-            throw new IllegalArgumentException("일부 상품을 찾을 수 없습니다.");
+            throw new IllegalArgumentException("?쇰? ?곹뭹??李얠쓣 ???놁뒿?덈떎.");
         }
 
         List<CheckoutLineResponse> lines = normalizedItems.entrySet().stream()
@@ -197,10 +268,10 @@ public class OrderService {
 
     private CheckoutLineResponse toLine(Product product, int quantity) {
         if (quantity < 1) {
-            throw new IllegalArgumentException("수량은 1개 이상이어야 합니다.");
+            throw new IllegalArgumentException("?섎웾? 1媛??댁긽?댁뼱???⑸땲??");
         }
         if (product.getStock() < quantity) {
-            throw new IllegalArgumentException(product.getName() + " 재고가 부족합니다.");
+            throw new IllegalArgumentException(product.getName() + " ?ш퀬媛 遺議깊빀?덈떎.");
         }
 
         BigDecimal lineTotal = product.getPrice().multiply(BigDecimal.valueOf(quantity));
@@ -219,7 +290,7 @@ public class OrderService {
         for (CheckoutLineResponse line : lines) {
             Product product = products.get(line.productId());
             if (product == null) {
-                throw new ResourceNotFoundException("상품을 찾을 수 없습니다.");
+                throw new ResourceNotFoundException("?곹뭹??李얠쓣 ???놁뒿?덈떎.");
             }
             product.decreaseStock(line.quantity());
         }

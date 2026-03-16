@@ -36,6 +36,13 @@ public class CustomerOrder {
     @Column(name = "idempotency_key", nullable = false, unique = true, length = 64)
     private String idempotencyKey;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "customer_type", nullable = false, length = 20)
+    private CustomerType customerType;
+
+    @Column(name = "user_id")
+    private Long userId;
+
     @Column(name = "customer_name", nullable = false, length = 80)
     private String customerName;
 
@@ -76,6 +83,8 @@ public class CustomerOrder {
     public CustomerOrder(
         String orderNumber,
         String idempotencyKey,
+        CustomerType customerType,
+        Long userId,
         String customerName,
         String phone,
         String postalCode,
@@ -90,6 +99,8 @@ public class CustomerOrder {
     ) {
         this.orderNumber = orderNumber;
         this.idempotencyKey = idempotencyKey;
+        this.customerType = customerType;
+        this.userId = userId;
         this.customerName = customerName;
         this.phone = phone;
         this.postalCode = postalCode;

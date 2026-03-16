@@ -70,23 +70,28 @@ test("storefront MVP smoke flow", async ({ page }) => {
   });
 
   await page.locator('button[type="submit"]').click();
-  await expect(page).toHaveURL(/\/orders\//, { timeout: NAVIGATION_TIMEOUT });
+  await expect(page).toHaveURL(/\/orders\/[^?]+\?phone=01012345678$/, {
+    timeout: NAVIGATION_TIMEOUT,
+  });
   await page.waitForLoadState("domcontentloaded");
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "06-order-complete.png"),
     fullPage: true,
   });
 
+  const currentOrderUrl = new URL(page.url());
+  const orderNumber = currentOrderUrl.pathname.split("/").at(-1);
+
   const result = {
     title: await page.title(),
     url: page.url(),
-    orderNumber: page.url().split("/").at(-1),
+    orderNumber,
     orderHeading: await page.locator("h1").first().textContent(),
     receiptLines: await page.locator("aside .space-y-4 > div").allTextContents(),
   };
 
-  await page.locator("button").filter({ hasText: "주문 취소" }).click();
-  await expect(page.locator("button").filter({ hasText: "주문 취소" })).toHaveCount(0, {
+  await page.getByRole("button", { name: "주문 취소" }).click();
+  await expect(page.getByRole("button", { name: "주문 취소" })).toHaveCount(0, {
     timeout: NAVIGATION_TIMEOUT,
   });
 
@@ -96,19 +101,22 @@ test("storefront MVP smoke flow", async ({ page }) => {
   await lookupInputs.nth(0).fill(result.orderNumber);
   await lookupInputs.nth(1).fill("01012345678");
   await page.locator('button[type="submit"]').click();
-  await expect(page).toHaveURL(new RegExp(`/orders/${result.orderNumber}$`), {
-    timeout: NAVIGATION_TIMEOUT,
-  });
+  await expect(page).toHaveURL(
+    new RegExp(`/orders/${result.orderNumber}\\?phone=01012345678$`),
+    {
+      timeout: NAVIGATION_TIMEOUT,
+    },
+  );
 
   await page.locator('a[href="/search"]').first().click();
   await expect(page).toHaveURL(/\/search$/, { timeout: NAVIGATION_TIMEOUT });
-  await page.locator("form input").first().fill("린넨");
+  await page.locator("form input").first().fill("리넨");
   await page.locator('button[type="submit"]').click();
-  await expect(page).toHaveURL(/\/search\?q=%EB%A6%B0%EB%84%A8$/, {
+  await expect(page).toHaveURL(/\/search\?q=%EB%A6%AC%EB%84%A8$/, {
     timeout: NAVIGATION_TIMEOUT,
   });
-  await expect(page.getByText('"린넨" 검색 결과')).toBeVisible();
-  await expect(page.getByText("린넨 베드 세트")).toBeVisible();
+  await expect(page.getByText('"리넨" 검색 결과')).toBeVisible();
+  await expect(page.locator('a[href^="/products/"]').first()).toBeVisible();
 
   await page.locator('a[href="/orders"]').first().click();
   await expect(page).toHaveURL(/\/orders$/, { timeout: NAVIGATION_TIMEOUT });

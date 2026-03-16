@@ -2,6 +2,8 @@ package com.vibeshop.api.order;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +23,8 @@ import com.vibeshop.api.order.OrderDtos.OrderSummaryResponse;
 @SpringBootTest
 class OrderServiceTest {
 
+    private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
+
     @Autowired
     private OrderService orderService;
 
@@ -29,11 +33,11 @@ class OrderServiceTest {
 
     @BeforeEach
     void setUp() {
-        jdbcClient.sql("DELETE FROM user_sessions").update();
-        jdbcClient.sql("DELETE FROM users").update();
         jdbcClient.sql("DELETE FROM shopping_cart_items").update();
         jdbcClient.sql("DELETE FROM customer_order_lines").update();
         jdbcClient.sql("DELETE FROM customer_orders").update();
+        jdbcClient.sql("DELETE FROM user_sessions").update();
+        jdbcClient.sql("DELETE FROM users").update();
         jdbcClient.sql("DELETE FROM products").update();
         jdbcClient.sql("DELETE FROM categories").update();
 
@@ -202,6 +206,48 @@ class OrderServiceTest {
 
         assertThat(orders).hasSize(2);
         assertThat(orders.getFirst().createdAt()).isAfterOrEqualTo(orders.get(1).createdAt());
+        assertThat(orders.getFirst().customerType()).isEqualTo("GUEST");
         assertThat(orders.getFirst().itemCount()).isEqualTo(1);
+    }
+
+    @Test
+    void listByUserIdReturnsOnlyMemberOrders() {
+        OffsetDateTime now = OffsetDateTime.now(SEOUL);
+        jdbcClient.sql("""
+            INSERT INTO users (id, name, email, password_hash, provider, created_at)
+            VALUES (301, 'Kim Minsu', 'member@example.com', 'encoded-password', 'LOCAL', ?)
+            """)
+            .param(now)
+            .update();
+
+        orderService.create(new CreateOrderRequest(
+            "idem-member-order",
+            "Kim Minsu",
+            "01012345678",
+            "06236",
+            "Teheran-ro 123",
+            "8F",
+            "Leave at the door.",
+            List.of(new CheckoutItemRequest(10L, 1))
+        ), 301L);
+
+        orderService.create(new CreateOrderRequest(
+            "idem-guest-order",
+            "Guest User",
+            "01012345678",
+            "06236",
+            "Teheran-ro 123",
+            "8F",
+            "Leave at the door.",
+            List.of(new CheckoutItemRequest(10L, 1))
+        ));
+
+        List<OrderSummaryResponse> memberOrders = orderService.listByUserId(301L);
+        List<OrderSummaryResponse> guestOrders = orderService.listByPhone("01012345678");
+
+        assertThat(memberOrders).hasSize(1);
+        assertThat(memberOrders.getFirst().customerType()).isEqualTo("MEMBER");
+        assertThat(guestOrders).hasSize(1);
+        assertThat(guestOrders.getFirst().customerType()).isEqualTo("GUEST");
     }
 }

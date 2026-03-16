@@ -79,6 +79,7 @@ public final class OrderDtos {
     public record OrderSummaryResponse(
         String orderNumber,
         String status,
+        String customerType,
         String customerName,
         BigDecimal total,
         OffsetDateTime createdAt,
@@ -89,6 +90,7 @@ public final class OrderDtos {
     public record OrderResponse(
         String orderNumber,
         String status,
+        String customerType,
         String customerName,
         String phone,
         String postalCode,

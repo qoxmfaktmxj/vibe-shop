@@ -7,8 +7,10 @@ import { cancelOrder } from "@/lib/client-api";
 
 export function CancelOrderButton({
   orderNumber,
+  phone,
 }: {
   orderNumber: string;
+  phone?: string;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -22,7 +24,7 @@ export function CancelOrderButton({
         onClick={() => {
           startTransition(async () => {
             try {
-              await cancelOrder(orderNumber);
+              await cancelOrder(orderNumber, phone);
               setError("");
               router.refresh();
             } catch (cancelError) {

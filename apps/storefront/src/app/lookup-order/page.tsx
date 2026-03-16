@@ -1,6 +1,13 @@
 import { GuestOrderLookupForm } from "@/components/order/guest-order-lookup-form";
 
-export default function GuestOrderLookupPage() {
+export default async function GuestOrderLookupPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ orderNumber?: string }>;
+}) {
+  const { orderNumber } = await searchParams;
+  const initialOrderNumber = orderNumber?.trim() ?? "";
+
   return (
     <div className="grid-shell lg:grid-cols-[1.15fr_0.85fr]">
       <section className="surface-card rounded-[36px] p-8 sm:p-10">
@@ -11,7 +18,7 @@ export default function GuestOrderLookupPage() {
         <p className="mt-4 max-w-2xl text-base leading-8 text-[var(--ink-soft)]">
           주문 완료 화면에서 확인한 주문번호와 주문 시 입력한 연락처로 주문 상태를 다시 조회할 수 있습니다.
         </p>
-        <GuestOrderLookupForm />
+        <GuestOrderLookupForm initialOrderNumber={initialOrderNumber} />
       </section>
 
       <aside className="surface-card rounded-[36px] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(241,239,233,0.76))] p-8 sm:p-10">

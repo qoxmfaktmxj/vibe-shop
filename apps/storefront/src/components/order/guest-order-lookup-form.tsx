@@ -5,12 +5,12 @@ import { useState, useTransition } from "react";
 
 import { lookupGuestOrder } from "@/lib/client-api";
 
-export function GuestOrderLookupForm() {
+export function GuestOrderLookupForm({ initialOrderNumber = "" }: { initialOrderNumber?: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
   const [form, setForm] = useState({
-    orderNumber: "",
+    orderNumber: initialOrderNumber,
     phone: "",
   });
 
@@ -23,7 +23,9 @@ export function GuestOrderLookupForm() {
           try {
             const result = await lookupGuestOrder(form);
             setError("");
-            router.push(`/orders/${result.orderNumber}`);
+            router.push(
+              `/orders/${result.orderNumber}?phone=${encodeURIComponent(form.phone.trim())}`,
+            );
           } catch (lookupError) {
             setError(
               lookupError instanceof Error

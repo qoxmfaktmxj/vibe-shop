@@ -109,6 +109,7 @@ export type CancelOrderResponse = {
 export type OrderSummaryResponse = {
   orderNumber: string;
   status: string;
+  customerType: string;
   customerName: string;
   total: number;
   createdAt: string;
@@ -118,6 +119,7 @@ export type OrderSummaryResponse = {
 export type OrderResponse = {
   orderNumber: string;
   status: string;
+  customerType: string;
   customerName: string;
   phone: string;
   postalCode: string;

@@ -18,6 +18,17 @@ const API_BASE_URL =
 
 export class ApiNotFoundError extends Error {}
 
+async function getCookieHeaders() {
+  const cookieStore = await cookies();
+  const cookieHeader = cookieStore.toString();
+
+  return cookieHeader
+    ? {
+        Cookie: cookieHeader,
+      }
+    : undefined;
+}
+
 async function fetchFromApi<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     cache: "no-store",
@@ -65,23 +76,22 @@ export const getProduct = cache(async (slug: string) =>
   fetchFromApi<ProductDetail>(`/api/v1/products/${slug}`),
 );
 
-export const getOrder = cache(async (orderNumber: string) =>
-  fetchFromApi<OrderResponse>(`/api/v1/orders/${orderNumber}`),
-);
+export async function getOrder(orderNumber: string, phone?: string) {
+  const query = phone ? `?phone=${encodeURIComponent(phone)}` : "";
+  return fetchFromApi<OrderResponse>(`/api/v1/orders/${orderNumber}${query}`, {
+    headers: await getCookieHeaders(),
+  });
+}
 
-export const listOrders = cache(async (phone: string) =>
-  fetchFromApi<OrderSummaryResponse[]>(`/api/v1/orders?phone=${encodeURIComponent(phone)}`),
-);
+export async function listOrders(phone?: string) {
+  const query = phone ? `?phone=${encodeURIComponent(phone)}` : "";
+  return fetchFromApi<OrderSummaryResponse[]>(`/api/v1/orders${query}`, {
+    headers: await getCookieHeaders(),
+  });
+}
 
 export async function getAuthSession(): Promise<AuthSession> {
-  const cookieStore = await cookies();
-  const cookieHeader = cookieStore.toString();
-
   return fetchFromApi<AuthSession>("/api/v1/auth/session", {
-    headers: cookieHeader
-      ? {
-          Cookie: cookieHeader,
-        }
-      : undefined,
+    headers: await getCookieHeaders(),
   });
 }

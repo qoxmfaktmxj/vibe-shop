@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useEffectEvent, useState, useTransition } from "react";
 
+import { useAuth } from "@/lib/auth-store";
 import { createOrder, previewOrder } from "@/lib/client-api";
 import type { CheckoutPreview } from "@/lib/contracts";
 import { useCart } from "@/lib/cart-store";
@@ -18,13 +19,14 @@ function makeIdempotencyKey() {
 
 export function CheckoutForm() {
   const router = useRouter();
+  const { session } = useAuth();
   const { items, clearCart, hydrated } = useCart();
   const [preview, setPreview] = useState<CheckoutPreview | null>(null);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
   const [idempotencyKey, setIdempotencyKey] = useState(() => makeIdempotencyKey());
   const [form, setForm] = useState({
-    customerName: "",
+    customerName: session.user?.name ?? "",
     phone: "",
     postalCode: "",
     address1: "",
@@ -62,7 +64,9 @@ export function CheckoutForm() {
     return (
       <div className="surface-card rounded-[28px] p-8 text-center">
         <p className="display-heading text-3xl font-semibold">주문할 상품이 없습니다.</p>
-        <p className="mt-3 text-sm text-[var(--ink-soft)]">장바구니에 상품을 담은 뒤 주문서를 작성해 주세요.</p>
+        <p className="mt-3 text-sm text-[var(--ink-soft)]">
+          장바구니에 상품을 담은 뒤 주문서를 작성해 주세요.
+        </p>
       </div>
     );
   }
@@ -73,7 +77,12 @@ export function CheckoutForm() {
         <p className="display-eyebrow">Checkout</p>
         <h1 className="display-heading mt-3 text-3xl font-semibold">주문서 작성</h1>
         <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--ink-soft)]">
-          받는 분 정보와 배송지를 입력한 뒤 주문 내용을 확인해 주세요.
+          받는 분 정보와 배송지를 입력하고 주문 내용을 확인해 주세요.
+        </p>
+        <p className="mt-3 text-sm text-[var(--ink-soft)]">
+          {session.authenticated
+            ? "현재 주문은 로그인한 회원 계정에 연결됩니다."
+            : "비회원 주문은 주문번호와 연락처로 다시 조회할 수 있습니다."}
         </p>
 
         <form
@@ -92,7 +101,10 @@ export function CheckoutForm() {
                 });
                 clearCart();
                 setIdempotencyKey(makeIdempotencyKey());
-                router.push(`/orders/${result.orderNumber}`);
+                const nextUrl = session.authenticated
+                  ? `/orders/${result.orderNumber}`
+                  : `/orders/${result.orderNumber}?phone=${encodeURIComponent(form.phone.trim())}`;
+                router.push(nextUrl);
               } catch (submitError) {
                 setError(
                   submitError instanceof Error

@@ -1,21 +1,31 @@
-import { notFound } from "next/navigation";
 import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
 
 import { CancelOrderButton } from "@/components/order/cancel-order-button";
 import { formatPrice } from "@/lib/currency";
 import { formatOrderStatus } from "@/lib/order-status";
-import { ApiNotFoundError, getOrder } from "@/lib/server-api";
+import { ApiNotFoundError, getAuthSession, getOrder } from "@/lib/server-api";
 
 export default async function OrderPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ orderNumber: string }>;
+  searchParams: Promise<{ phone?: string }>;
 }) {
+  const session = await getAuthSession().catch(() => ({ authenticated: false, user: null }));
   const { orderNumber } = await params;
+  const { phone } = await searchParams;
+  const guestPhone = phone?.trim() ?? "";
+
+  if (!session.authenticated && !guestPhone) {
+    redirect(`/lookup-order?orderNumber=${encodeURIComponent(orderNumber)}`);
+  }
+
   let order;
 
   try {
-    order = await getOrder(orderNumber);
+    order = await getOrder(orderNumber, session.authenticated ? undefined : guestPhone);
   } catch (error) {
     if (error instanceof ApiNotFoundError) {
       notFound();
@@ -23,15 +33,18 @@ export default async function OrderPage({
     throw error;
   }
 
+  const backHref = session.authenticated
+    ? "/orders"
+    : `/orders?phone=${encodeURIComponent(guestPhone)}`;
+
   return (
     <div className="grid-shell lg:grid-cols-[1.2fr_0.8fr]">
       <section className="surface-card rounded-[36px] p-8 sm:p-10">
         <p className="display-eyebrow">Order</p>
-        <h1 className="display-heading mt-4 text-4xl font-semibold">
-          주문이 접수되었습니다.
-        </h1>
+        <h1 className="display-heading mt-4 text-4xl font-semibold">주문이 접수되었습니다.</h1>
         <p className="mt-4 text-base leading-8 text-[var(--ink-soft)]">
-          주문번호 <strong className="text-[var(--ink)]">{order.orderNumber}</strong>로 주문 상태와 배송 정보를 확인할 수 있습니다.
+          주문번호 <strong className="text-[var(--ink)]">{order.orderNumber}</strong>로 주문 상태와
+          배송 정보를 확인할 수 있습니다.
         </p>
 
         <div className="mt-8 rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.76)] p-6">
@@ -39,6 +52,12 @@ export default async function OrderPage({
             <div>
               <dt className="text-[var(--ink-soft)]">주문 상태</dt>
               <dd className="mt-1 font-semibold">{formatOrderStatus(order.status)}</dd>
+            </div>
+            <div>
+              <dt className="text-[var(--ink-soft)]">주문 유형</dt>
+              <dd className="mt-1 font-semibold">
+                {order.customerType === "MEMBER" ? "회원 주문" : "비회원 주문"}
+              </dd>
             </div>
             <div>
               <dt className="text-[var(--ink-soft)]">받는 분</dt>
@@ -63,7 +82,12 @@ export default async function OrderPage({
           </dl>
         </div>
 
-        {order.status === "RECEIVED" ? <CancelOrderButton orderNumber={order.orderNumber} /> : null}
+        {order.status === "RECEIVED" ? (
+          <CancelOrderButton
+            orderNumber={order.orderNumber}
+            phone={session.authenticated ? undefined : guestPhone}
+          />
+        ) : null}
       </section>
 
       <aside className="surface-card rounded-[36px] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(241,239,233,0.76))] p-8 sm:p-10">
@@ -94,10 +118,10 @@ export default async function OrderPage({
           </div>
         </div>
 
-        <Link
-          href="/"
-          className="button-primary mt-8 px-5 py-3"
-        >
+        <Link href={backHref} className="button-secondary mt-8 px-5 py-3">
+          주문 목록으로 이동
+        </Link>
+        <Link href="/" className="button-primary mt-4 px-5 py-3">
           메인으로 돌아가기
         </Link>
       </aside>

@@ -16,5 +16,11 @@ public interface CustomerOrderRepository extends JpaRepository<CustomerOrder, Lo
 
     @EntityGraph(attributePaths = "lines")
     List<CustomerOrder> findByPhoneOrderByCreatedAtDesc(String phone);
+
+    @EntityGraph(attributePaths = "lines")
+    Optional<CustomerOrder> findByOrderNumberAndUserId(String orderNumber, Long userId);
+
+    @EntityGraph(attributePaths = "lines")
+    List<CustomerOrder> findByUserIdOrderByCreatedAtDesc(Long userId);
 }
 

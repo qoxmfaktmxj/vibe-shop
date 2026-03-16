@@ -55,8 +55,8 @@ public class OrderController {
         @CookieValue(value = AUTH_SESSION_COOKIE, required = false) String authSessionToken,
         HttpServletResponse response
     ) {
-        CreateOrderResponse createdOrder = orderService.create(request);
         Long userId = authService.resolveAuthenticatedUserId(authSessionToken);
+        CreateOrderResponse createdOrder = orderService.create(request, userId);
         if (userId != null) {
             cartService.clearMemberCart(userId);
             return createdOrder;
@@ -81,17 +81,35 @@ public class OrderController {
     }
 
     @PostMapping("/{orderNumber}/cancel")
-    CancelOrderResponse cancel(@PathVariable String orderNumber) {
-        return orderService.cancel(orderNumber);
+    CancelOrderResponse cancel(
+        @PathVariable String orderNumber,
+        @RequestParam(required = false) String phone,
+        @CookieValue(value = AUTH_SESSION_COOKIE, required = false) String authSessionToken
+    ) {
+        Long userId = authService.resolveAuthenticatedUserId(authSessionToken);
+        return userId != null
+            ? orderService.cancelForUser(orderNumber, userId)
+            : orderService.cancelGuest(orderNumber, phone);
     }
 
     @GetMapping("/{orderNumber}")
-    OrderResponse order(@PathVariable String orderNumber) {
-        return orderService.get(orderNumber);
+    OrderResponse order(
+        @PathVariable String orderNumber,
+        @RequestParam(required = false) String phone,
+        @CookieValue(value = AUTH_SESSION_COOKIE, required = false) String authSessionToken
+    ) {
+        Long userId = authService.resolveAuthenticatedUserId(authSessionToken);
+        return userId != null
+            ? orderService.getForUser(orderNumber, userId)
+            : orderService.getGuest(orderNumber, phone);
     }
 
     @GetMapping
-    java.util.List<OrderSummaryResponse> orders(@RequestParam String phone) {
-        return orderService.listByPhone(phone);
+    java.util.List<OrderSummaryResponse> orders(
+        @RequestParam(required = false) String phone,
+        @CookieValue(value = AUTH_SESSION_COOKIE, required = false) String authSessionToken
+    ) {
+        Long userId = authService.resolveAuthenticatedUserId(authSessionToken);
+        return userId != null ? orderService.listByUserId(userId) : orderService.listByPhone(phone);
     }
 }
