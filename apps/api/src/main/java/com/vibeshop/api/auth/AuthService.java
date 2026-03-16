@@ -20,6 +20,9 @@ import com.vibeshop.api.auth.AuthDtos.SignUpRequest;
 public class AuthService {
 
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
+    private static final String BOOTSTRAP_ADMIN_EMAIL = "admin@vibeshop.local";
+    private static final String BOOTSTRAP_ADMIN_PASSWORD = "admin1234!";
+    private static final String BOOTSTRAP_ADMIN_NAME = "Vibe Shop Admin";
 
     private final UserRepository userRepository;
     private final UserSessionRepository userSessionRepository;
@@ -39,7 +42,7 @@ public class AuthService {
     public AuthenticatedSession signUp(SignUpRequest request) {
         String normalizedEmail = normalizeEmail(request.email());
         if (userRepository.findByEmailIgnoreCase(normalizedEmail).isPresent()) {
-            throw new IllegalArgumentException("이미 가입된 이메일입니다.");
+            throw new IllegalArgumentException("이미 가입한 이메일입니다.");
         }
 
         OffsetDateTime now = OffsetDateTime.now(SEOUL);
@@ -48,6 +51,7 @@ public class AuthService {
             normalizedEmail,
             passwordEncoder.encode(request.password()),
             AuthProviderType.LOCAL,
+            UserRole.CUSTOMER,
             now
         ));
 
@@ -56,14 +60,13 @@ public class AuthService {
 
     @Transactional
     public AuthenticatedSession login(LoginRequest request) {
-        String normalizedEmail = normalizeEmail(request.email());
-        User user = userRepository.findByEmailIgnoreCase(normalizedEmail)
-            .orElseThrow(() -> new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다."));
+        User user = authenticateUser(request);
+        return createSession(user, OffsetDateTime.now(SEOUL));
+    }
 
-        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
-            throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
-        }
-
+    @Transactional
+    public AuthenticatedSession loginAdmin(LoginRequest request) {
+        User user = authenticateAdminUser(request);
         return createSession(user, OffsetDateTime.now(SEOUL));
     }
 
@@ -87,6 +90,11 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
+    public Optional<User> resolveAdminUser(String rawSessionToken) {
+        return resolveUser(rawSessionToken).filter(User::isAdmin);
+    }
+
+    @Transactional(readOnly = true)
     public Long resolveAuthenticatedUserId(String rawSessionToken) {
         return resolveUser(rawSessionToken).map(User::getId).orElse(null);
     }
@@ -102,6 +110,50 @@ public class AuthService {
     @Transactional
     public void clearExpiredSessions() {
         userSessionRepository.deleteAllByExpiresAtBefore(OffsetDateTime.now(SEOUL));
+    }
+
+    private User authenticateUser(LoginRequest request) {
+        String normalizedEmail = normalizeEmail(request.email());
+        User user = userRepository.findByEmailIgnoreCase(normalizedEmail)
+            .orElseThrow(() -> new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다."));
+
+        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+            throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
+        }
+
+        return user;
+    }
+
+    private User authenticateAdminUser(LoginRequest request) {
+        String normalizedEmail = normalizeEmail(request.email());
+        User user = userRepository.findByEmailIgnoreCase(normalizedEmail)
+            .orElseGet(() -> maybeCreateBootstrapAdmin(normalizedEmail, request.password()));
+
+        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+            throw new IllegalArgumentException("관리자 이메일 또는 비밀번호가 올바르지 않습니다.");
+        }
+
+        if (!user.isAdmin()) {
+            throw new IllegalArgumentException("관리자 권한이 없습니다.");
+        }
+
+        return user;
+    }
+
+    private User maybeCreateBootstrapAdmin(String normalizedEmail, String rawPassword) {
+        if (!BOOTSTRAP_ADMIN_EMAIL.equals(normalizedEmail) || !BOOTSTRAP_ADMIN_PASSWORD.equals(rawPassword)) {
+            throw new IllegalArgumentException("관리자 이메일 또는 비밀번호가 올바르지 않습니다.");
+        }
+
+        OffsetDateTime now = OffsetDateTime.now(SEOUL);
+        return userRepository.save(new User(
+            BOOTSTRAP_ADMIN_NAME,
+            normalizedEmail,
+            passwordEncoder.encode(rawPassword),
+            AuthProviderType.LOCAL,
+            UserRole.OWNER,
+            now
+        ));
     }
 
     private AuthenticatedSession createSession(User user, OffsetDateTime now) {

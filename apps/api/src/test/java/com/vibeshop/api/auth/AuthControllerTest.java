@@ -119,8 +119,8 @@ class AuthControllerTest {
     void loginMergesGuestCartIntoMemberCart() throws Exception {
         OffsetDateTime now = OffsetDateTime.now(SEOUL);
         jdbcClient.sql("""
-            INSERT INTO users (id, name, email, password_hash, provider, created_at)
-            VALUES (100, 'Kim Minsu', 'minsu@example.com', ?, 'LOCAL', ?)
+            INSERT INTO users (id, name, email, password_hash, provider, role, created_at)
+            VALUES (100, 'Kim Minsu', 'minsu@example.com', ?, 'LOCAL', 'CUSTOMER', ?)
             """)
             .param(passwordEncoder.encode("password123"))
             .param(now)

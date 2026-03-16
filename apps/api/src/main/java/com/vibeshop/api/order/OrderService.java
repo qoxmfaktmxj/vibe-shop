@@ -191,6 +191,30 @@ public class OrderService {
             .toList();
     }
 
+    @Transactional
+    public OrderResponse updateStatusForAdmin(String orderNumber, OrderStatus nextStatus) {
+        CustomerOrder order = customerOrderRepository.findByOrderNumber(orderNumber.trim())
+            .orElseThrow(() -> new ResourceNotFoundException("주문 정보를 찾을 수 없습니다."));
+        OrderPayment payment = findPayment(order);
+        OffsetDateTime now = OffsetDateTime.now(SEOUL);
+
+        if (order.getStatus() == nextStatus) {
+            return toOrderResponse(order, payment);
+        }
+
+        switch (nextStatus) {
+            case PAID -> markAsPaid(order, payment, now);
+            case PREPARING -> moveStatus(order, OrderStatus.PAID, OrderStatus.PREPARING);
+            case SHIPPED -> moveStatus(order, OrderStatus.PREPARING, OrderStatus.SHIPPED);
+            case DELIVERED -> moveStatus(order, OrderStatus.SHIPPED, OrderStatus.DELIVERED);
+            case REFUND_REQUESTED -> markRefundRequested(order);
+            case CANCELLED, REFUNDED -> cancel(order);
+            default -> throw new IllegalArgumentException("관리자 화면에서 변경할 수 없는 주문 상태입니다.");
+        }
+
+        return toOrderResponse(order, findPayment(order));
+    }
+
     private CreateOrderResponse toCreateResponse(CustomerOrder order, OrderPayment payment) {
         return new CreateOrderResponse(
             order.getOrderNumber(),
@@ -266,6 +290,37 @@ public class OrderService {
         }
 
         return new CancelOrderResponse(order.getOrderNumber(), order.getStatus().name());
+    }
+
+    private void markAsPaid(CustomerOrder order, OrderPayment payment, OffsetDateTime now) {
+        if (order.getStatus() != OrderStatus.PENDING_PAYMENT) {
+            throw new IllegalArgumentException("결제 대기 상태인 주문만 결제 완료로 변경할 수 있습니다.");
+        }
+
+        order.changeStatus(OrderStatus.PAID);
+        payment.markSucceeded("관리자 수동 승인", now, now);
+    }
+
+    private void moveStatus(CustomerOrder order, OrderStatus currentStatus, OrderStatus nextStatus) {
+        if (order.getStatus() != currentStatus) {
+            throw new IllegalArgumentException(
+                currentStatus.name() + " 상태의 주문만 " + nextStatus.name() + " 상태로 변경할 수 있습니다."
+            );
+        }
+
+        order.changeStatus(nextStatus);
+    }
+
+    private void markRefundRequested(CustomerOrder order) {
+        if (
+            order.getStatus() != OrderStatus.PAID
+                && order.getStatus() != OrderStatus.PREPARING
+                && order.getStatus() != OrderStatus.SHIPPED
+        ) {
+            throw new IllegalArgumentException("결제 완료 이후 주문만 환불 요청 상태로 변경할 수 있습니다.");
+        }
+
+        order.changeStatus(OrderStatus.REFUND_REQUESTED);
     }
 
     private void applyAuthorizationResult(

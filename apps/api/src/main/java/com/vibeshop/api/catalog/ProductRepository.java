@@ -18,6 +18,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByCategory_SlugOrderByFeaturedDescIdAsc(String categorySlug);
 
     @EntityGraph(attributePaths = "category")
+    List<Product> findAllByOrderByCreatedAtDescIdDesc();
+
+    @EntityGraph(attributePaths = "category")
     Optional<Product> findBySlug(String slug);
 
     @EntityGraph(attributePaths = "category")
@@ -44,5 +47,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
         @Param("categorySlug") String categorySlug,
         @Param("keyword") String keyword
     );
-}
 
+    long countByFeaturedTrue();
+
+    long countByStockLessThanEqual(int stock);
+}

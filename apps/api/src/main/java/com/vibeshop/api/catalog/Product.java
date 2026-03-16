@@ -86,4 +86,29 @@ public class Product {
         }
         this.stock += quantity;
     }
+
+    public void updateForAdmin(
+        String name,
+        String summary,
+        String badge,
+        BigDecimal price,
+        int stock,
+        int popularityScore,
+        boolean featured
+    ) {
+        if (stock < 0) {
+            throw new IllegalArgumentException("재고는 0 이상이어야 합니다.");
+        }
+        if (popularityScore < 0) {
+            throw new IllegalArgumentException("인기 점수는 0 이상이어야 합니다.");
+        }
+
+        this.name = name;
+        this.summary = summary;
+        this.badge = badge;
+        this.price = price;
+        this.stock = stock;
+        this.popularityScore = popularityScore;
+        this.featured = featured;
+    }
 }

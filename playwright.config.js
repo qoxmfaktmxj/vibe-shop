@@ -6,6 +6,7 @@ const apiBaseUrl =
   "http://127.0.0.1:8180";
 
 const storefrontUrl = process.env.E2E_STOREFRONT_URL ?? "http://127.0.0.1:3100";
+const adminUrl = process.env.E2E_ADMIN_URL ?? "http://127.0.0.1:3200";
 const reuseExistingServer = process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER === "1";
 
 module.exports = defineConfig({
@@ -45,13 +46,25 @@ module.exports = defineConfig({
         DB_PASSWORD: process.env.DB_PASSWORD ?? "vibeshop",
         CORS_ALLOWED_ORIGINS:
           process.env.CORS_ALLOWED_ORIGINS ??
-          "http://127.0.0.1:3100,http://127.0.0.1:3000,http://localhost:3000",
+          "http://127.0.0.1:3200,http://127.0.0.1:3100,http://127.0.0.1:3000,http://localhost:3000",
       },
     },
     {
       command: "node scripts/run-storefront-tool.mjs next dev --hostname 127.0.0.1 --port 3100",
       cwd: ".",
       url: storefrontUrl,
+      reuseExistingServer,
+      timeout: 120_000,
+      env: {
+        ...process.env,
+        API_BASE_URL: apiBaseUrl,
+        NEXT_PUBLIC_API_BASE_URL: apiBaseUrl,
+      },
+    },
+    {
+      command: "node scripts/run-admin-tool.mjs next dev --hostname 127.0.0.1 --port 3200",
+      cwd: ".",
+      url: adminUrl,
       reuseExistingServer,
       timeout: 120_000,
       env: {

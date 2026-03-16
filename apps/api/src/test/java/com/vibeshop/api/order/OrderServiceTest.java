@@ -241,8 +241,8 @@ class OrderServiceTest {
     void listByUserIdReturnsOnlyMemberOrders() {
         OffsetDateTime now = OffsetDateTime.now(SEOUL);
         jdbcClient.sql("""
-            INSERT INTO users (id, name, email, password_hash, provider, created_at)
-            VALUES (301, 'Kim Minsu', 'member@example.com', 'encoded-password', 'LOCAL', ?)
+            INSERT INTO users (id, name, email, password_hash, provider, role, created_at)
+            VALUES (301, 'Kim Minsu', 'member@example.com', 'encoded-password', 'LOCAL', 'CUSTOMER', ?)
             """)
             .param(now)
             .update();

@@ -38,6 +38,10 @@ public class User {
     @Column(nullable = false, length = 20)
     private AuthProviderType provider;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private UserRole role;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
@@ -48,14 +52,30 @@ public class User {
         AuthProviderType provider,
         OffsetDateTime createdAt
     ) {
+        this(name, email, passwordHash, provider, UserRole.CUSTOMER, createdAt);
+    }
+
+    public User(
+        String name,
+        String email,
+        String passwordHash,
+        AuthProviderType provider,
+        UserRole role,
+        OffsetDateTime createdAt
+    ) {
         this.name = name;
         this.email = email;
         this.passwordHash = passwordHash;
         this.provider = provider;
+        this.role = role;
         this.createdAt = createdAt;
     }
 
     public void rename(String name) {
         this.name = name;
+    }
+
+    public boolean isAdmin() {
+        return role != UserRole.CUSTOMER;
     }
 }

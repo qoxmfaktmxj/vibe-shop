@@ -1,0 +1,136 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f4efe7;
+  --panel: #fbf7f1;
+  --panel-strong: #102127;
+  --ink: #1d2522;
+  --ink-soft: #5f6a65;
+  --line: rgba(29, 37, 34, 0.12);
+  --line-strong: rgba(29, 37, 34, 0.2);
+  --accent: #d6512d;
+  --accent-strong: #b83c1c;
+  --teal: #245d5a;
+  --shadow: 0 28px 60px rgba(29, 37, 34, 0.08);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--ink);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-space);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(214, 81, 45, 0.1), transparent 28%),
+    linear-gradient(180deg, #f4efe7 0%, #ebe4da 100%);
+  color: var(--ink);
+  font-family: var(--font-body), sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.admin-shell {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.admin-card {
+  border: 1px solid rgba(29, 37, 34, 0.08);
+  background: rgba(251, 247, 241, 0.92);
+  box-shadow: var(--shadow);
+}
+
+.admin-dark {
+  background: linear-gradient(180deg, #17282d 0%, #102127 100%);
+  color: #edf4ef;
+}
+
+.eyebrow {
+  font-family: var(--font-space), sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.display {
+  font-family: var(--font-space), sans-serif;
+  letter-spacing: -0.05em;
+}
+
+.admin-input {
+  border-radius: 0.75rem;
+  border: 1px solid rgba(29, 37, 34, 0.14);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.admin-input:focus-visible {
+  outline: 1px solid rgba(214, 81, 45, 0.24);
+  outline-offset: 0;
+}
+
+.admin-button,
+.admin-button-secondary,
+.admin-button-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition:
+    transform 140ms ease,
+    background-color 140ms ease,
+    color 140ms ease,
+    border-color 140ms ease;
+}
+
+.admin-button:hover,
+.admin-button-secondary:hover,
+.admin-button-ghost:hover {
+  transform: translateY(-1px);
+}
+
+.admin-button {
+  background: var(--accent);
+  color: #fff8f2;
+}
+
+.admin-button:hover {
+  background: var(--accent-strong);
+}
+
+.admin-button-secondary {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--ink-soft);
+}
+
+.admin-button-secondary:hover {
+  border-color: var(--line-strong);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.admin-button-ghost {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(237, 244, 239, 0.86);
+}

@@ -2,10 +2,14 @@ package com.vibeshop.api.catalog;
 
 import java.util.Comparator;
 import java.util.List;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.vibeshop.api.admin.AdminDisplaySettings;
+import com.vibeshop.api.admin.AdminDisplaySettingsRepository;
 import com.vibeshop.api.common.ResourceNotFoundException;
 
 @Service
@@ -37,12 +41,24 @@ public class CatalogService {
         .comparing(Product::getPrice, Comparator.reverseOrder())
         .thenComparing(Product::getId);
 
+    private static final long DISPLAY_SETTINGS_ID = 1L;
+    private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
+    private static final String DEFAULT_HERO_TITLE = "리빙의 결을 따라 고른 이번 시즌 셀렉션";
+    private static final String DEFAULT_HERO_SUBTITLE =
+        "리빙, 키친, 웰니스 카테고리에서 지금 바로 보기 좋은 신상품과 인기 상품만 따로 제안합니다.";
+
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
+    private final AdminDisplaySettingsRepository adminDisplaySettingsRepository;
 
-    public CatalogService(CategoryRepository categoryRepository, ProductRepository productRepository) {
+    public CatalogService(
+        CategoryRepository categoryRepository,
+        ProductRepository productRepository,
+        AdminDisplaySettingsRepository adminDisplaySettingsRepository
+    ) {
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
+        this.adminDisplaySettingsRepository = adminDisplaySettingsRepository;
     }
 
     public HomeResponse getHome() {
@@ -50,10 +66,17 @@ public class CatalogService {
             .map(this::toCategorySummary)
             .toList();
         List<Product> allProducts = productRepository.findAllByOrderByFeaturedDescIdAsc();
+        AdminDisplaySettings displaySettings = adminDisplaySettingsRepository.findById(DISPLAY_SETTINGS_ID)
+            .orElseGet(() -> adminDisplaySettingsRepository.save(new AdminDisplaySettings(
+                DISPLAY_SETTINGS_ID,
+                DEFAULT_HERO_TITLE,
+                DEFAULT_HERO_SUBTITLE,
+                OffsetDateTime.now(SEOUL)
+            )));
 
         return new HomeResponse(
-            "리빙의 결을 따라 고른 이번 시즌 셀렉션",
-            "리빙, 키친, 웰니스 카테고리에서 지금 살펴보기 좋은 신상품과 인기 상품을 함께 제안합니다.",
+            displaySettings.getHeroTitle(),
+            displaySettings.getHeroSubtitle(),
             categories,
             allProducts.stream()
                 .filter(Product::isFeatured)
