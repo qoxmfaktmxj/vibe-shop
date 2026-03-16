@@ -73,6 +73,8 @@ public class CatalogService {
             product.getPrice(),
             product.getBadge(),
             product.getAccentColor(),
+            product.getImageUrl(),
+            product.getImageAlt(),
             product.getStock()
         );
     }
@@ -97,7 +99,9 @@ public class CatalogService {
             product.getSummary(),
             product.getPrice(),
             product.getBadge(),
-            product.getAccentColor()
+            product.getAccentColor(),
+            product.getImageUrl(),
+            product.getImageAlt()
         );
     }
 

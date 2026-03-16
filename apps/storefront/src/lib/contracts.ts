@@ -16,6 +16,8 @@ export type ProductSummary = {
   price: number;
   badge: string;
   accentColor: string;
+  imageUrl: string;
+  imageAlt: string;
 };
 
 export type ProductDetail = ProductSummary & {
@@ -111,6 +113,8 @@ export type CartProduct = {
   name: string;
   price: number;
   accentColor: string;
+  imageUrl: string;
+  imageAlt: string;
 };
 
 export type CartItem = CartProduct & {

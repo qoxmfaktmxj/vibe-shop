@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { ProductCard } from "@/components/catalog/product-card";
@@ -58,27 +59,37 @@ export default async function HomePage() {
 
         <div className="relative">
           <div
-            className="editorial-shadow min-h-[34rem] overflow-hidden rounded-xl p-8 lg:p-10"
+            className="editorial-shadow relative min-h-[34rem] overflow-hidden rounded-xl p-8 lg:p-10"
             style={{ background: productGradient(heroProduct?.accentColor) }}
           >
-            <div className="flex h-full flex-col justify-between">
+            {heroProduct ? (
+              <Image
+                src={heroProduct.imageUrl}
+                alt={heroProduct.imageAlt}
+                fill
+                sizes="(min-width: 1024px) 32rem, 100vw"
+                className="object-cover"
+              />
+            ) : null}
+            <div className="absolute inset-0 bg-gradient-to-t from-[rgba(11,14,22,0.58)] via-[rgba(11,14,22,0.12)] to-transparent" />
+            <div className="relative flex h-full flex-col justify-between">
               <div className="flex items-start justify-between gap-4">
-                <span className="rounded-lg bg-white/70 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]">
+                <span className="rounded-lg bg-white/78 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]">
                   Curated Piece
                 </span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--ink-soft)]">
+                <span className="rounded-lg bg-[rgba(255,255,255,0.18)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-white backdrop-blur-sm">
                   {heroProduct?.categoryName}
                 </span>
               </div>
 
-              <div className="space-y-4">
+              <div className="max-w-sm rounded-[28px] bg-[rgba(255,255,255,0.78)] p-6 shadow-[var(--shadow-soft)] backdrop-blur-sm">
                 <p className="display-heading max-w-xs text-4xl font-semibold leading-[1.02] text-[var(--ink)]">
                   {heroProduct?.name}
                 </p>
-                <p className="max-w-sm leading-7 text-[var(--ink-soft)]">
+                <p className="mt-3 max-w-sm leading-7 text-[var(--ink-soft)]">
                   {heroProduct?.summary}
                 </p>
-                <p className="text-base font-semibold text-[var(--primary)]">
+                <p className="mt-4 text-base font-semibold text-[var(--primary)]">
                   {heroProduct ? formatPrice(heroProduct.price) : ""}
                 </p>
               </div>

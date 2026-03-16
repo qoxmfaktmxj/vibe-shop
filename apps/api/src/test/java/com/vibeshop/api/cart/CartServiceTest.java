@@ -43,6 +43,8 @@ class CartServiceTest {
                 price,
                 badge,
                 accent_color,
+                image_url,
+                image_alt,
                 featured,
                 stock
             ) VALUES (
@@ -55,6 +57,8 @@ class CartServiceTest {
                 89000,
                 'BEST',
                 '#29339b',
+                '/images/products/living-01.jpg',
+                '린넨 베드 세트 상품 이미지',
                 TRUE,
                 10
             )

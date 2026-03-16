@@ -76,6 +76,8 @@
 - 주문 생성 시 `idempotency key`로 중복 제출 방지
 - 주문 상태 필드 추가
 - 비회원 주문번호 + 연락처 조회 API 및 화면 추가
+- `리빙`, `키친`, `웰니스` 카테고리에 테스트 상품을 각각 20개씩 확장
+- 테스트 상품 이미지를 로컬 자산으로 고정하고 카드, 상세, 장바구니 화면에 반영
 
 아직 없는 범위:
 
@@ -261,6 +263,7 @@ E2E 전용 포트:
 - 재베이스라인 로드맵: [docs/saleson-rebaseline-roadmap-2026-03-14.md](./docs/saleson-rebaseline-roadmap-2026-03-14.md)
 - 현재 API 계약: [docs/api-contract-v1.md](./docs/api-contract-v1.md)
 - 현재 ERD 초안: [docs/erd-v1.md](./docs/erd-v1.md)
+- 테스트 이미지 출처: [docs/test-product-image-sources.md](./docs/test-product-image-sources.md)
 
 ## 현재 판단
 

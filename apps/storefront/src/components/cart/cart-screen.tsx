@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useEffectEvent, useState } from "react";
 
@@ -84,21 +85,19 @@ export function CartScreen() {
               key={item.productId}
               className="grid gap-6 border-b border-black/6 pb-10 sm:grid-cols-[10rem_minmax(0,1fr)]"
             >
-              <div
-                className="aspect-[4/5] overflow-hidden rounded-xl"
-                style={{
-                  background: `linear-gradient(135deg, ${item.accentColor}2a 0%, rgba(255,255,255,0.96) 100%)`,
-                }}
-              >
-                <div className="flex h-full flex-col justify-between p-5">
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--ink-soft)]">
+              <div className="relative aspect-[4/5] overflow-hidden rounded-xl">
+                <Image
+                  src={item.imageUrl}
+                  alt={item.imageAlt}
+                  fill
+                  sizes="10rem"
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(11,14,22,0.35)] to-transparent" />
+                <div className="absolute inset-x-0 top-0 p-4">
+                  <span className="rounded-lg bg-white/82 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--ink-soft)]">
                     Curated Item
                   </span>
-                  <div>
-                    <p className="display-heading text-2xl font-semibold text-[var(--ink)]">
-                      {item.name.split(" ").slice(0, 2).join(" ")}
-                    </p>
-                  </div>
                 </div>
               </div>
 

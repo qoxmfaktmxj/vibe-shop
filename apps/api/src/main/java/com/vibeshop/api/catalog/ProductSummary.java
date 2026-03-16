@@ -11,7 +11,8 @@ public record ProductSummary(
     String summary,
     BigDecimal price,
     String badge,
-    String accentColor
+    String accentColor,
+    String imageUrl,
+    String imageAlt
 ) {
 }
-

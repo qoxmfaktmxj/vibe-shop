@@ -13,7 +13,8 @@ public record ProductDetailResponse(
     BigDecimal price,
     String badge,
     String accentColor,
+    String imageUrl,
+    String imageAlt,
     int stock
 ) {
 }
-

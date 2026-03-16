@@ -51,6 +51,12 @@ public class Product {
     @Column(name = "accent_color", nullable = false, length = 20)
     private String accentColor;
 
+    @Column(name = "image_url", nullable = false, length = 255)
+    private String imageUrl;
+
+    @Column(name = "image_alt", nullable = false, length = 255)
+    private String imageAlt;
+
     @Column(nullable = false)
     private boolean featured;
 

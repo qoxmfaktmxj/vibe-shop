@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
@@ -10,26 +11,38 @@ export function ProductCard({ product }: { product: ProductSummary }) {
     <article className="group w-full">
       <Link
         href={`/products/${product.slug}`}
-        className="block overflow-hidden rounded-xl"
+        className="block overflow-hidden rounded-xl border border-black/5 bg-white"
         style={{ background: productGradient(product.accentColor) }}
       >
-        <div className="flex aspect-[4/5] min-h-80 flex-col justify-between p-6 transition duration-500 group-hover:scale-[1.02]">
-          <div className="flex items-start justify-between gap-4">
-            <span className="rounded-lg bg-white/85 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]">
-              {product.badge}
-            </span>
-            <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--ink-soft)]">
-              {product.categoryName}
-            </span>
-          </div>
+        <div className="transition duration-500 group-hover:scale-[1.02]">
+          <div className="relative aspect-[4/5] overflow-hidden">
+            <Image
+              src={product.imageUrl}
+              alt={product.imageAlt}
+              fill
+              sizes="(min-width: 1280px) 22rem, (min-width: 768px) 45vw, 100vw"
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[rgba(11,14,22,0.62)] via-transparent to-[rgba(255,255,255,0.06)]" />
+            <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-4 p-5">
+              <span className="rounded-lg bg-white/88 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]">
+                {product.badge}
+              </span>
+              <span className="rounded-lg bg-[rgba(255,255,255,0.18)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-white backdrop-blur-sm">
+                {product.categoryName}
+              </span>
+            </div>
 
-          <div className="space-y-4">
-            <p className="display-heading max-w-[12rem] text-3xl font-semibold leading-[1.05] text-[var(--ink)]">
-              {product.name}
-            </p>
-            <p className="max-w-xs text-sm leading-6 text-[var(--ink-soft)]">
-              {product.summary}
-            </p>
+            <div className="absolute inset-x-0 bottom-0 p-5">
+              <div className="rounded-xl bg-[rgba(255,255,255,0.82)] p-4 shadow-[var(--shadow-soft)] backdrop-blur-sm">
+                <p className="display-heading max-w-[14rem] text-3xl font-semibold leading-[1.05] text-[var(--ink)]">
+                  {product.name}
+                </p>
+                <p className="mt-2 max-w-xs text-sm leading-6 text-[var(--ink-soft)]">
+                  {product.summary}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </Link>
@@ -51,6 +64,8 @@ export function ProductCard({ product }: { product: ProductSummary }) {
               name: product.name,
               price: product.price,
               accentColor: product.accentColor,
+              imageUrl: product.imageUrl,
+              imageAlt: product.imageAlt,
             }}
           />
         </div>

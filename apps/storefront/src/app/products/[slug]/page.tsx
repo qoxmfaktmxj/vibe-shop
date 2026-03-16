@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
@@ -27,42 +28,57 @@ export default async function ProductPage({
     <div className="grid-shell lg:grid-cols-[1.1fr_0.9fr]">
       <section
         className="surface-card min-h-[420px] rounded-[36px] p-8 sm:p-10"
-        style={{ background: productGradient() }}
+        style={{ background: productGradient(product.accentColor) }}
       >
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="display-eyebrow">{product.categoryName}</p>
-            <h1 className="display-heading mt-4 text-4xl font-semibold sm:text-5xl">
-              {product.name}
-            </h1>
+        <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+          <div className="relative aspect-[4/5] overflow-hidden rounded-[28px]">
+            <Image
+              src={product.imageUrl}
+              alt={product.imageAlt}
+              fill
+              sizes="(min-width: 1024px) 36vw, 100vw"
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[rgba(11,14,22,0.42)] via-transparent to-[rgba(255,255,255,0.08)]" />
           </div>
-          <span className="rounded-[999px] border border-[var(--line)] bg-[rgba(255,255,255,0.88)] px-3 py-1 text-xs font-semibold text-[var(--ink)]">
-            {product.badge}
-          </span>
-        </div>
 
-        <p className="mt-8 max-w-xl text-base leading-8 text-[var(--ink-soft)]">
-          {product.summary}
-        </p>
+          <div>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="display-eyebrow">{product.categoryName}</p>
+                <h1 className="display-heading mt-4 text-4xl font-semibold sm:text-5xl">
+                  {product.name}
+                </h1>
+              </div>
+              <span className="rounded-[999px] border border-[var(--line)] bg-[rgba(255,255,255,0.88)] px-3 py-1 text-xs font-semibold text-[var(--ink)]">
+                {product.badge}
+              </span>
+            </div>
 
-        <div className="mt-16 grid gap-4 text-sm text-[var(--ink-soft)] sm:grid-cols-3">
-          <div>
-            <p className="font-semibold">가격</p>
-            <p className="mt-2 text-lg font-semibold text-[var(--ink)]">
-              {formatPrice(product.price)}원
+            <p className="mt-8 max-w-xl text-base leading-8 text-[var(--ink-soft)]">
+              {product.summary}
             </p>
-          </div>
-          <div>
-            <p className="font-semibold">재고</p>
-            <p className="mt-2 text-lg font-semibold text-[var(--ink)]">
-              {product.stock}개
-            </p>
-          </div>
-          <div>
-            <p className="font-semibold">주문 단계</p>
-            <p className="mt-2 text-lg font-semibold text-[var(--ink)]">
-              상품 확인 → 장바구니 → 주문서 작성
-            </p>
+
+            <div className="mt-16 grid gap-4 text-sm text-[var(--ink-soft)] sm:grid-cols-3">
+              <div>
+                <p className="font-semibold">가격</p>
+                <p className="mt-2 text-lg font-semibold text-[var(--ink)]">
+                  {formatPrice(product.price)}원
+                </p>
+              </div>
+              <div>
+                <p className="font-semibold">재고</p>
+                <p className="mt-2 text-lg font-semibold text-[var(--ink)]">
+                  {product.stock}개
+                </p>
+              </div>
+              <div>
+                <p className="font-semibold">주문 단계</p>
+                <p className="mt-2 text-lg font-semibold text-[var(--ink)]">
+                  상품 확인 → 장바구니 → 주문서 작성
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -86,6 +102,8 @@ export default async function ProductPage({
                 name: product.name,
                 price: product.price,
                 accentColor: product.accentColor,
+                imageUrl: product.imageUrl,
+                imageAlt: product.imageAlt,
               }}
             />
             <Link

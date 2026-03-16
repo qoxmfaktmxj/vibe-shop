@@ -23,6 +23,8 @@ public final class CartDtos {
         String name,
         BigDecimal price,
         String accentColor,
+        String imageUrl,
+        String imageAlt,
         int quantity
     ) {
     }

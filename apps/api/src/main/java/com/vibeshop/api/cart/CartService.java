@@ -96,6 +96,8 @@ public class CartService {
                 item.getProduct().getName(),
                 item.getProduct().getPrice(),
                 item.getProduct().getAccentColor(),
+                item.getProduct().getImageUrl(),
+                item.getProduct().getImageAlt(),
                 item.getQuantity()
             ))
             .toList();
