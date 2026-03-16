@@ -76,6 +76,13 @@ export type CheckoutPreview = {
   total: number;
 };
 
+export type PaymentMethod =
+  | "CARD"
+  | "BANK_TRANSFER"
+  | "VIRTUAL_ACCOUNT"
+  | "MOBILE"
+  | "EASY_PAY";
+
 export type CreateOrderPayload = {
   idempotencyKey: string;
   customerName: string;
@@ -84,12 +91,15 @@ export type CreateOrderPayload = {
   address1: string;
   address2: string;
   note: string;
+  paymentMethod: PaymentMethod;
   items: CheckoutItem[];
 };
 
 export type CreateOrderResponse = {
   orderNumber: string;
   status: string;
+  paymentStatus: string;
+  paymentMethod: PaymentMethod;
 };
 
 export type GuestOrderLookupPayload = {
@@ -120,6 +130,9 @@ export type OrderResponse = {
   orderNumber: string;
   status: string;
   customerType: string;
+  paymentStatus: string;
+  paymentMethod: PaymentMethod;
+  paymentMessage: string;
   customerName: string;
   phone: string;
   postalCode: string;

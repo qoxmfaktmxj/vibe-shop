@@ -57,6 +57,10 @@ public class OrderController {
     ) {
         Long userId = authService.resolveAuthenticatedUserId(authSessionToken);
         CreateOrderResponse createdOrder = orderService.create(request, userId);
+        if ("FAILED".equals(createdOrder.paymentStatus())) {
+            return createdOrder;
+        }
+
         if (userId != null) {
             cartService.clearMemberCart(userId);
             return createdOrder;

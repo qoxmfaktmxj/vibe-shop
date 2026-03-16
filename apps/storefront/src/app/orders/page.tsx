@@ -19,7 +19,7 @@ export default async function OrderHistoryPage({
       ? await listOrders(normalizedPhone)
       : [];
 
-  const title = session.authenticated ? "회원 주문 내역" : "주문내역 조회";
+  const title = session.authenticated ? "회원 주문 내역" : "주문 내역 조회";
   const description = session.authenticated
     ? "로그인한 계정에 연결된 주문만 확인할 수 있습니다."
     : "주문 시 입력한 연락처로 비회원 주문 내역을 다시 확인할 수 있습니다.";
@@ -29,7 +29,9 @@ export default async function OrderHistoryPage({
       <section className="surface-card rounded-[36px] p-8 sm:p-10">
         <p className="display-eyebrow">Orders</p>
         <h1 className="display-heading mt-4 text-4xl font-semibold">{title}</h1>
-        <p className="mt-4 max-w-2xl text-base leading-8 text-[var(--ink-soft)]">{description}</p>
+        <p className="mt-4 max-w-2xl text-base leading-8 text-[var(--ink-soft)]">
+          {description}
+        </p>
         {session.authenticated ? (
           <div className="mt-8 rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm text-[var(--ink-soft)]">
             {session.user?.name} 계정에 연결된 주문만 표시됩니다.
@@ -45,7 +47,7 @@ export default async function OrderHistoryPage({
             <div>
               <p className="display-eyebrow">History</p>
               <h2 className="display-heading mt-3 text-3xl font-semibold">
-                주문내역 {orders.length}건
+                주문 내역 {orders.length}건
               </h2>
             </div>
             <p className="text-sm text-[var(--ink-soft)]">

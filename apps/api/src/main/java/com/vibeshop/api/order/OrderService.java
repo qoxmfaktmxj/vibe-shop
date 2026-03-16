@@ -39,10 +39,19 @@ public class OrderService {
 
     private final ProductRepository productRepository;
     private final CustomerOrderRepository customerOrderRepository;
+    private final OrderPaymentRepository orderPaymentRepository;
+    private final PaymentGatewayAdapter paymentGatewayAdapter;
 
-    public OrderService(ProductRepository productRepository, CustomerOrderRepository customerOrderRepository) {
+    public OrderService(
+        ProductRepository productRepository,
+        CustomerOrderRepository customerOrderRepository,
+        OrderPaymentRepository orderPaymentRepository,
+        PaymentGatewayAdapter paymentGatewayAdapter
+    ) {
         this.productRepository = productRepository;
         this.customerOrderRepository = customerOrderRepository;
+        this.orderPaymentRepository = orderPaymentRepository;
+        this.paymentGatewayAdapter = paymentGatewayAdapter;
     }
 
     @Transactional(readOnly = true)
@@ -61,12 +70,13 @@ public class OrderService {
         String idempotencyKey = request.idempotencyKey().trim();
         CustomerOrder existingOrder = customerOrderRepository.findByIdempotencyKey(idempotencyKey).orElse(null);
         if (existingOrder != null) {
-            return new CreateOrderResponse(existingOrder.getOrderNumber(), existingOrder.getStatus().name());
+            return toCreateResponse(existingOrder, findPayment(existingOrder));
         }
 
         ResolvedOrder resolvedOrder = resolveOrder(request.items());
         reserveStock(resolvedOrder.lines());
 
+        OffsetDateTime now = OffsetDateTime.now(SEOUL);
         CustomerOrder order = new CustomerOrder(
             generateOrderNumber(),
             idempotencyKey,
@@ -81,8 +91,8 @@ public class OrderService {
             resolvedOrder.subtotal(),
             resolvedOrder.shippingFee(),
             resolvedOrder.total(),
-            OrderStatus.RECEIVED,
-            OffsetDateTime.now(SEOUL)
+            OrderStatus.PENDING_PAYMENT,
+            now
         );
 
         for (CheckoutLineResponse line : resolvedOrder.lines()) {
@@ -96,24 +106,42 @@ public class OrderService {
         }
 
         customerOrderRepository.save(order);
-        return new CreateOrderResponse(order.getOrderNumber(), order.getStatus().name());
+
+        PaymentGatewayAdapter.AuthorizationResult paymentResult = paymentGatewayAdapter.authorize(
+            order,
+            request.paymentMethod()
+        );
+
+        OrderPayment payment = new OrderPayment(
+            order,
+            request.paymentMethod(),
+            paymentResult.providerCode(),
+            paymentResult.referenceCode(),
+            now
+        );
+        applyAuthorizationResult(order, payment, paymentResult);
+        orderPaymentRepository.save(payment);
+
+        return toCreateResponse(order, payment);
     }
 
     @Transactional(readOnly = true)
     public OrderResponse get(String orderNumber) {
-        CustomerOrder order = customerOrderRepository.findByOrderNumber(orderNumber)
-            .orElseThrow(() -> new ResourceNotFoundException("二쇰Ц ?뺣낫瑜?李얠쓣 ???놁뒿?덈떎."));
-        return toOrderResponse(order);
+        CustomerOrder order = customerOrderRepository.findByOrderNumber(orderNumber.trim())
+            .orElseThrow(() -> new ResourceNotFoundException("주문 정보를 찾을 수 없습니다."));
+        return toOrderResponse(order, findPayment(order));
     }
 
     @Transactional(readOnly = true)
     public OrderResponse getForUser(String orderNumber, Long userId) {
-        return toOrderResponse(findMemberOrder(orderNumber, userId));
+        CustomerOrder order = findMemberOrder(orderNumber, userId);
+        return toOrderResponse(order, findPayment(order));
     }
 
     @Transactional(readOnly = true)
     public OrderResponse getGuest(String orderNumber, String phone) {
-        return toOrderResponse(findGuestOrder(orderNumber, phone));
+        CustomerOrder order = findGuestOrder(orderNumber, phone);
+        return toOrderResponse(order, findPayment(order));
     }
 
     @Transactional(readOnly = true)
@@ -124,8 +152,8 @@ public class OrderService {
 
     @Transactional
     public CancelOrderResponse cancel(String orderNumber) {
-        CustomerOrder order = customerOrderRepository.findByOrderNumber(orderNumber)
-            .orElseThrow(() -> new ResourceNotFoundException("二쇰Ц ?뺣낫瑜?李얠쓣 ???놁뒿?덈떎."));
+        CustomerOrder order = customerOrderRepository.findByOrderNumber(orderNumber.trim())
+            .orElseThrow(() -> new ResourceNotFoundException("주문 정보를 찾을 수 없습니다."));
         return cancel(order);
     }
 
@@ -142,7 +170,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public List<OrderSummaryResponse> listByPhone(String phone) {
         if (phone == null || phone.isBlank()) {
-            throw new IllegalArgumentException("?곕씫泥섎? ?낅젰?댁＜?몄슂.");
+            throw new IllegalArgumentException("연락처를 입력해 주세요.");
         }
 
         return customerOrderRepository.findByPhoneOrderByCreatedAtDesc(phone.trim()).stream()
@@ -154,7 +182,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public List<OrderSummaryResponse> listByUserId(Long userId) {
         if (userId == null) {
-            throw new IllegalArgumentException("濡쒓렇???뺣낫媛 ?꾩슂?⑸땲??");
+            throw new IllegalArgumentException("로그인 정보가 필요합니다.");
         }
 
         return customerOrderRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
@@ -163,11 +191,23 @@ public class OrderService {
             .toList();
     }
 
-    private OrderResponse toOrderResponse(CustomerOrder order) {
+    private CreateOrderResponse toCreateResponse(CustomerOrder order, OrderPayment payment) {
+        return new CreateOrderResponse(
+            order.getOrderNumber(),
+            order.getStatus().name(),
+            payment.getPaymentStatus().name(),
+            payment.getPaymentMethod().name()
+        );
+    }
+
+    private OrderResponse toOrderResponse(CustomerOrder order, OrderPayment payment) {
         return new OrderResponse(
             order.getOrderNumber(),
             order.getStatus().name(),
             order.getCustomerType().name(),
+            payment.getPaymentStatus().name(),
+            payment.getPaymentMethod().name(),
+            payment.getMessage(),
             order.getCustomerName(),
             order.getPhone(),
             order.getPostalCode(),
@@ -203,38 +243,86 @@ public class OrderService {
     }
 
     private CancelOrderResponse cancel(CustomerOrder order) {
-        if (order.getStatus() != OrderStatus.RECEIVED) {
-            throw new IllegalArgumentException("?꾩옱 ?곹깭?먯꽌??二쇰Ц??痍⑥냼?????놁뒿?덈떎.");
+        if (order.getStatus() != OrderStatus.PAID && order.getStatus() != OrderStatus.PENDING_PAYMENT) {
+            throw new IllegalArgumentException("현재 상태에서는 주문을 취소할 수 없습니다.");
         }
 
         restoreStock(order);
-        order.changeStatus(OrderStatus.CANCELLED);
+        OrderPayment payment = findPayment(order);
+        PaymentGatewayAdapter.CancellationResult cancellationResult = paymentGatewayAdapter.cancel(order, payment);
+
+        switch (cancellationResult.paymentStatus()) {
+            case CANCELLED -> {
+                payment.markCancelled(cancellationResult.message(), cancellationResult.processedAt());
+                order.changeStatus(OrderStatus.CANCELLED);
+            }
+            case REFUNDED -> {
+                payment.markRefunded(cancellationResult.message(), cancellationResult.processedAt());
+                order.changeStatus(OrderStatus.REFUNDED);
+            }
+            default -> throw new IllegalStateException(
+                "Unsupported cancellation status: " + cancellationResult.paymentStatus()
+            );
+        }
+
         return new CancelOrderResponse(order.getOrderNumber(), order.getStatus().name());
+    }
+
+    private void applyAuthorizationResult(
+        CustomerOrder order,
+        OrderPayment payment,
+        PaymentGatewayAdapter.AuthorizationResult paymentResult
+    ) {
+        switch (paymentResult.paymentStatus()) {
+            case SUCCEEDED -> {
+                order.changeStatus(OrderStatus.PAID);
+                payment.markSucceeded(
+                    paymentResult.message(),
+                    paymentResult.processedAt(),
+                    paymentResult.processedAt()
+                );
+            }
+            case PENDING -> {
+                order.changeStatus(OrderStatus.PENDING_PAYMENT);
+                payment.markPending(paymentResult.message(), paymentResult.processedAt());
+            }
+            case FAILED -> {
+                order.changeStatus(OrderStatus.CANCELLED);
+                payment.markFailed(paymentResult.message(), paymentResult.processedAt());
+                restoreStock(order);
+            }
+            default -> throw new IllegalStateException("Unsupported payment status: " + paymentResult.paymentStatus());
+        }
     }
 
     private CustomerOrder findMemberOrder(String orderNumber, Long userId) {
         if (userId == null) {
-            throw new IllegalArgumentException("濡쒓렇???뺣낫媛 ?꾩슂?⑸땲??");
+            throw new IllegalArgumentException("로그인 정보가 필요합니다.");
         }
 
         return customerOrderRepository.findByOrderNumberAndUserId(orderNumber.trim(), userId)
             .filter(order -> order.getCustomerType() == CustomerType.MEMBER)
-            .orElseThrow(() -> new ResourceNotFoundException("二쇰Ц ?뺣낫瑜?李얠쓣 ???놁뒿?덈떎."));
+            .orElseThrow(() -> new ResourceNotFoundException("주문 정보를 찾을 수 없습니다."));
     }
 
     private CustomerOrder findGuestOrder(String orderNumber, String phone) {
         if (phone == null || phone.isBlank()) {
-            throw new IllegalArgumentException("鍮꾪쉶??二쇰Ц???뚯쑀 議고쉶瑜?위빐 ?곕씫泥섎? ?낅젰?댁＜?몄슂.");
+            throw new IllegalArgumentException("비회원 주문 조회에는 연락처가 필요합니다.");
         }
 
         CustomerOrder order = customerOrderRepository.findByOrderNumber(orderNumber.trim())
-            .orElseThrow(() -> new ResourceNotFoundException("二쇰Ц ?뺣낫瑜?李얠쓣 ???놁뒿?덈떎."));
+            .orElseThrow(() -> new ResourceNotFoundException("주문 정보를 찾을 수 없습니다."));
 
         if (order.getCustomerType() != CustomerType.GUEST || !order.getPhone().equals(phone.trim())) {
-            throw new ResourceNotFoundException("二쇰Ц ?뺣낫瑜?李얠쓣 ???놁뒿?덈떎.");
+            throw new ResourceNotFoundException("주문 정보를 찾을 수 없습니다.");
         }
 
         return order;
+    }
+
+    private OrderPayment findPayment(CustomerOrder order) {
+        return orderPaymentRepository.findByOrder_Id(order.getId())
+            .orElseThrow(() -> new ResourceNotFoundException("결제 정보를 찾을 수 없습니다."));
     }
 
     private ResolvedOrder resolveOrder(List<CheckoutItemRequest> items) {
@@ -243,7 +331,7 @@ public class OrderService {
         Map<Long, Product> productMap = products.stream().collect(Collectors.toMap(Product::getId, Function.identity()));
 
         if (productMap.size() != normalizedItems.size()) {
-            throw new IllegalArgumentException("?쇰? ?곹뭹??李얠쓣 ???놁뒿?덈떎.");
+            throw new IllegalArgumentException("일부 상품을 찾을 수 없습니다.");
         }
 
         List<CheckoutLineResponse> lines = normalizedItems.entrySet().stream()
@@ -268,10 +356,10 @@ public class OrderService {
 
     private CheckoutLineResponse toLine(Product product, int quantity) {
         if (quantity < 1) {
-            throw new IllegalArgumentException("?섎웾? 1媛??댁긽?댁뼱???⑸땲??");
+            throw new IllegalArgumentException("수량은 1개 이상이어야 합니다.");
         }
         if (product.getStock() < quantity) {
-            throw new IllegalArgumentException(product.getName() + " ?ш퀬媛 遺議깊빀?덈떎.");
+            throw new IllegalArgumentException(product.getName() + " 재고가 부족합니다.");
         }
 
         BigDecimal lineTotal = product.getPrice().multiply(BigDecimal.valueOf(quantity));
@@ -290,7 +378,7 @@ public class OrderService {
         for (CheckoutLineResponse line : lines) {
             Product product = products.get(line.productId());
             if (product == null) {
-                throw new ResourceNotFoundException("?곹뭹??李얠쓣 ???놁뒿?덈떎.");
+                throw new ResourceNotFoundException("상품을 찾을 수 없습니다.");
             }
             product.decreaseStock(line.quantity());
         }

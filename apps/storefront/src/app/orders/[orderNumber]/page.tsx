@@ -4,7 +4,43 @@ import { notFound, redirect } from "next/navigation";
 import { CancelOrderButton } from "@/components/order/cancel-order-button";
 import { formatPrice } from "@/lib/currency";
 import { formatOrderStatus } from "@/lib/order-status";
+import { formatPaymentMethod, formatPaymentStatus } from "@/lib/payment";
 import { ApiNotFoundError, getAuthSession, getOrder } from "@/lib/server-api";
+
+function getOrderHeading(orderStatus: string, paymentStatus: string) {
+  if (orderStatus === "REFUNDED") {
+    return {
+      title: "주문이 취소되고 환불이 완료되었습니다.",
+      description: "모의 환불이 완료되어 결제 상태와 재고가 함께 반영되었습니다.",
+    };
+  }
+
+  if (orderStatus === "CANCELLED" && paymentStatus === "FAILED") {
+    return {
+      title: "결제에 실패했습니다.",
+      description: "결제가 승인되지 않아 주문은 취소되었고 재고는 자동으로 복구되었습니다.",
+    };
+  }
+
+  if (orderStatus === "CANCELLED") {
+    return {
+      title: "주문이 취소되었습니다.",
+      description: "취소 처리 후 주문 상태와 결제 상태가 함께 갱신되었습니다.",
+    };
+  }
+
+  if (paymentStatus === "PENDING") {
+    return {
+      title: "결제 대기 상태입니다.",
+      description: "입금 또는 승인 확인 전까지 주문은 결제 대기로 유지됩니다.",
+    };
+  }
+
+  return {
+    title: "결제가 완료되었습니다.",
+    description: "주문번호로 결제 상태와 배송 정보를 계속 확인할 수 있습니다.",
+  };
+}
 
 export default async function OrderPage({
   params,
@@ -33,19 +69,18 @@ export default async function OrderPage({
     throw error;
   }
 
+  const heading = getOrderHeading(order.status, order.paymentStatus);
   const backHref = session.authenticated
     ? "/orders"
     : `/orders?phone=${encodeURIComponent(guestPhone)}`;
+  const canCancel = order.status === "PAID" || order.status === "PENDING_PAYMENT";
 
   return (
     <div className="grid-shell lg:grid-cols-[1.2fr_0.8fr]">
       <section className="surface-card rounded-[36px] p-8 sm:p-10">
         <p className="display-eyebrow">Order</p>
-        <h1 className="display-heading mt-4 text-4xl font-semibold">주문이 접수되었습니다.</h1>
-        <p className="mt-4 text-base leading-8 text-[var(--ink-soft)]">
-          주문번호 <strong className="text-[var(--ink)]">{order.orderNumber}</strong>로 주문 상태와
-          배송 정보를 확인할 수 있습니다.
-        </p>
+        <h1 className="display-heading mt-4 text-4xl font-semibold">{heading.title}</h1>
+        <p className="mt-4 text-base leading-8 text-[var(--ink-soft)]">{heading.description}</p>
 
         <div className="mt-8 rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.76)] p-6">
           <dl className="grid gap-4 text-sm sm:grid-cols-2">
@@ -54,10 +89,18 @@ export default async function OrderPage({
               <dd className="mt-1 font-semibold">{formatOrderStatus(order.status)}</dd>
             </div>
             <div>
+              <dt className="text-[var(--ink-soft)]">결제 상태</dt>
+              <dd className="mt-1 font-semibold">{formatPaymentStatus(order.paymentStatus)}</dd>
+            </div>
+            <div>
               <dt className="text-[var(--ink-soft)]">주문 유형</dt>
               <dd className="mt-1 font-semibold">
                 {order.customerType === "MEMBER" ? "회원 주문" : "비회원 주문"}
               </dd>
+            </div>
+            <div>
+              <dt className="text-[var(--ink-soft)]">결제 수단</dt>
+              <dd className="mt-1 font-semibold">{formatPaymentMethod(order.paymentMethod)}</dd>
             </div>
             <div>
               <dt className="text-[var(--ink-soft)]">받는 분</dt>
@@ -74,7 +117,11 @@ export default async function OrderPage({
               </dd>
             </div>
             <div className="sm:col-span-2">
-              <dt className="text-[var(--ink-soft)]">메모</dt>
+              <dt className="text-[var(--ink-soft)]">결제 메모</dt>
+              <dd className="mt-1 font-semibold">{order.paymentMessage}</dd>
+            </div>
+            <div className="sm:col-span-2">
+              <dt className="text-[var(--ink-soft)]">배송 메모</dt>
               <dd className="mt-1 font-semibold">
                 {order.note || "배송 메모가 없습니다."}
               </dd>
@@ -82,7 +129,7 @@ export default async function OrderPage({
           </dl>
         </div>
 
-        {order.status === "RECEIVED" ? (
+        {canCancel ? (
           <CancelOrderButton
             orderNumber={order.orderNumber}
             phone={session.authenticated ? undefined : guestPhone}
@@ -91,7 +138,7 @@ export default async function OrderPage({
       </section>
 
       <aside className="surface-card rounded-[36px] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(241,239,233,0.76))] p-8 sm:p-10">
-        <p className="display-eyebrow">주문 내역</p>
+        <p className="display-eyebrow">Order Lines</p>
         <div className="mt-6 space-y-4 text-sm">
           {order.lines.map((line) => (
             <div key={`${line.productId}-${line.productName}`} className="flex justify-between gap-4">

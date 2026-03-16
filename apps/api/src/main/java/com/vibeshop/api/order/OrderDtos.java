@@ -16,14 +16,14 @@ public final class OrderDtos {
     }
 
     public record CheckoutItemRequest(
-        @NotNull(message = "상품 ID가 필요합니다.") Long productId,
-        @NotNull(message = "수량이 필요합니다.")
+        @NotNull(message = "상품 ID는 필수입니다.") Long productId,
+        @NotNull(message = "수량은 필수입니다.")
         @Min(value = 1, message = "수량은 1개 이상이어야 합니다.") Integer quantity
     ) {
     }
 
     public record CheckoutPreviewRequest(
-        @NotEmpty(message = "상품을 한 개 이상 담아주세요.") List<@Valid CheckoutItemRequest> items
+        @NotEmpty(message = "상품을 1개 이상 담아 주세요.") List<@Valid CheckoutItemRequest> items
     ) {
     }
 
@@ -45,35 +45,36 @@ public final class OrderDtos {
     }
 
     public record CreateOrderRequest(
-        @NotBlank(message = "중복 제출 방지 키가 필요합니다.") String idempotencyKey,
-        @NotBlank(message = "받는 분 이름을 입력해주세요.") String customerName,
-        @NotBlank(message = "연락처를 입력해주세요.") String phone,
-        @NotBlank(message = "우편번호를 입력해주세요.") String postalCode,
-        @NotBlank(message = "기본 주소를 입력해주세요.") String address1,
+        @NotBlank(message = "중복 제출 방지 키는 필수입니다.") String idempotencyKey,
+        @NotBlank(message = "받는 분 이름을 입력해 주세요.") String customerName,
+        @NotBlank(message = "연락처를 입력해 주세요.") String phone,
+        @NotBlank(message = "우편번호를 입력해 주세요.") String postalCode,
+        @NotBlank(message = "기본 주소를 입력해 주세요.") String address1,
         String address2,
         String note,
-        @NotEmpty(message = "주문 상품이 필요합니다.") List<@Valid CheckoutItemRequest> items
+        @NotNull(message = "결제 수단을 선택해 주세요.") PaymentMethod paymentMethod,
+        @NotEmpty(message = "주문 상품은 필수입니다.") List<@Valid CheckoutItemRequest> items
     ) {
     }
 
-    public record CreateOrderResponse(String orderNumber, String status) {
+    public record CreateOrderResponse(
+        String orderNumber,
+        String status,
+        String paymentStatus,
+        String paymentMethod
+    ) {
     }
 
     public record GuestOrderLookupRequest(
-        @NotBlank(message = "주문번호를 입력해주세요.") String orderNumber,
-        @NotBlank(message = "연락처를 입력해주세요.") String phone
+        @NotBlank(message = "주문번호를 입력해 주세요.") String orderNumber,
+        @NotBlank(message = "연락처를 입력해 주세요.") String phone
     ) {
     }
 
-    public record GuestOrderLookupResponse(
-        String orderNumber
-    ) {
+    public record GuestOrderLookupResponse(String orderNumber) {
     }
 
-    public record CancelOrderResponse(
-        String orderNumber,
-        String status
-    ) {
+    public record CancelOrderResponse(String orderNumber, String status) {
     }
 
     public record OrderSummaryResponse(
@@ -91,6 +92,9 @@ public final class OrderDtos {
         String orderNumber,
         String status,
         String customerType,
+        String paymentStatus,
+        String paymentMethod,
+        String paymentMessage,
         String customerName,
         String phone,
         String postalCode,
@@ -105,4 +109,3 @@ public final class OrderDtos {
     ) {
     }
 }
-

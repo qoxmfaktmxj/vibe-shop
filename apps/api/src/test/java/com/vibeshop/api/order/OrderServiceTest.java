@@ -12,12 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
-import com.vibeshop.api.order.OrderDtos.CheckoutItemRequest;
 import com.vibeshop.api.order.OrderDtos.CancelOrderResponse;
+import com.vibeshop.api.order.OrderDtos.CheckoutItemRequest;
 import com.vibeshop.api.order.OrderDtos.CreateOrderRequest;
 import com.vibeshop.api.order.OrderDtos.CreateOrderResponse;
 import com.vibeshop.api.order.OrderDtos.GuestOrderLookupRequest;
 import com.vibeshop.api.order.OrderDtos.GuestOrderLookupResponse;
+import com.vibeshop.api.order.OrderDtos.OrderResponse;
 import com.vibeshop.api.order.OrderDtos.OrderSummaryResponse;
 
 @SpringBootTest
@@ -35,6 +36,7 @@ class OrderServiceTest {
     void setUp() {
         jdbcClient.sql("DELETE FROM shopping_cart_items").update();
         jdbcClient.sql("DELETE FROM customer_order_lines").update();
+        jdbcClient.sql("DELETE FROM order_payments").update();
         jdbcClient.sql("DELETE FROM customer_orders").update();
         jdbcClient.sql("DELETE FROM user_sessions").update();
         jdbcClient.sql("DELETE FROM users").update();
@@ -43,7 +45,7 @@ class OrderServiceTest {
 
         jdbcClient.sql("""
             INSERT INTO categories (id, slug, name, description, accent_color)
-            VALUES (1, 'living', '리빙', '리빙 카테고리', '#29339b')
+            VALUES (1, 'living', 'Living', 'Living category', '#29339b')
             """).update();
 
         jdbcClient.sql("""
@@ -65,14 +67,14 @@ class OrderServiceTest {
                 10,
                 1,
                 'linen-bed-set',
-                '린넨 베드 세트',
-                '대표 상품',
-                '대표 상품 설명',
+                'Linen Bed Set',
+                'Soft linen bedding set',
+                'Product description',
                 89000,
                 'BEST',
                 '#29339b',
                 '/images/products/living-01.jpg',
-                '린넨 베드 세트 상품 이미지',
+                'Linen Bed Set image',
                 TRUE,
                 10
             )
@@ -80,7 +82,7 @@ class OrderServiceTest {
     }
 
     @Test
-    void createReturnsExistingOrderForSameIdempotencyKey() {
+    void createReturnsExistingPaidOrderForSameIdempotencyKey() {
         CreateOrderRequest request = new CreateOrderRequest(
             "idem-order-1",
             "Kim Minsu",
@@ -89,6 +91,7 @@ class OrderServiceTest {
             "Teheran-ro 123",
             "8F",
             "Leave at the door.",
+            PaymentMethod.CARD,
             List.of(new CheckoutItemRequest(10L, 1))
         );
 
@@ -98,15 +101,20 @@ class OrderServiceTest {
         Integer orderCount = jdbcClient.sql("SELECT COUNT(*) FROM customer_orders")
             .query(Integer.class)
             .single();
+        Integer paymentCount = jdbcClient.sql("SELECT COUNT(*) FROM order_payments")
+            .query(Integer.class)
+            .single();
 
         assertThat(first.orderNumber()).isEqualTo(second.orderNumber());
-        assertThat(first.status()).isEqualTo("RECEIVED");
-        assertThat(second.status()).isEqualTo("RECEIVED");
+        assertThat(first.status()).isEqualTo("PAID");
+        assertThat(first.paymentStatus()).isEqualTo("SUCCEEDED");
+        assertThat(second.status()).isEqualTo("PAID");
         assertThat(orderCount).isEqualTo(1);
+        assertThat(paymentCount).isEqualTo(1);
     }
 
     @Test
-    void lookupReturnsOrderWhenPhoneMatches() {
+    void bankTransferOrderStaysPendingAndCanBeLookedUp() {
         CreateOrderResponse created = orderService.create(new CreateOrderRequest(
             "idem-order-lookup",
             "Kim Minsu",
@@ -115,6 +123,7 @@ class OrderServiceTest {
             "Teheran-ro 123",
             "8F",
             "Leave at the door.",
+            PaymentMethod.BANK_TRANSFER,
             List.of(new CheckoutItemRequest(10L, 1))
         ));
 
@@ -122,12 +131,16 @@ class OrderServiceTest {
             created.orderNumber(),
             "01012345678"
         ));
+        OrderResponse order = orderService.getGuest(found.orderNumber(), "01012345678");
 
         assertThat(found.orderNumber()).isEqualTo(created.orderNumber());
+        assertThat(order.status()).isEqualTo("PENDING_PAYMENT");
+        assertThat(order.paymentStatus()).isEqualTo("PENDING");
+        assertThat(order.paymentMethod()).isEqualTo("BANK_TRANSFER");
     }
 
     @Test
-    void cancelChangesStatusToCancelled() {
+    void cancelPaidOrderMarksRefundedAndRestoresStock() {
         CreateOrderResponse created = orderService.create(new CreateOrderRequest(
             "idem-order-cancel",
             "Kim Minsu",
@@ -136,26 +149,7 @@ class OrderServiceTest {
             "Teheran-ro 123",
             "8F",
             "Leave at the door.",
-            List.of(new CheckoutItemRequest(10L, 1))
-        ));
-
-        CancelOrderResponse cancelled = orderService.cancel(created.orderNumber());
-
-        assertThat(cancelled.orderNumber()).isEqualTo(created.orderNumber());
-        assertThat(cancelled.status()).isEqualTo("CANCELLED");
-        assertThat(orderService.get(created.orderNumber()).status()).isEqualTo("CANCELLED");
-    }
-
-    @Test
-    void createAndCancelAdjustProductStock() {
-        orderService.create(new CreateOrderRequest(
-            "idem-order-stock",
-            "Kim Minsu",
-            "01012345678",
-            "06236",
-            "Teheran-ro 123",
-            "8F",
-            "Leave at the door.",
+            PaymentMethod.CARD,
             List.of(new CheckoutItemRequest(10L, 2))
         ));
 
@@ -163,23 +157,49 @@ class OrderServiceTest {
             .query(Integer.class)
             .single();
 
-        CancelOrderResponse cancelled = orderService.cancel(
-            jdbcClient.sql("SELECT order_number FROM customer_orders WHERE idempotency_key = 'idem-order-stock'")
-                .query(String.class)
-                .single()
-        );
+        CancelOrderResponse cancelled = orderService.cancel(created.orderNumber());
+        OrderResponse order = orderService.get(created.orderNumber());
 
         Integer stockAfterCancel = jdbcClient.sql("SELECT stock FROM products WHERE id = 10")
             .query(Integer.class)
             .single();
 
-        assertThat(cancelled.status()).isEqualTo("CANCELLED");
+        assertThat(cancelled.orderNumber()).isEqualTo(created.orderNumber());
+        assertThat(cancelled.status()).isEqualTo("REFUNDED");
+        assertThat(order.status()).isEqualTo("REFUNDED");
+        assertThat(order.paymentStatus()).isEqualTo("REFUNDED");
         assertThat(stockAfterCreate).isEqualTo(8);
         assertThat(stockAfterCancel).isEqualTo(10);
     }
 
     @Test
-    void listByPhoneReturnsLatestOrdersFirst() {
+    void failedMobilePaymentCancelsOrderAndRestoresStockImmediately() {
+        CreateOrderResponse created = orderService.create(new CreateOrderRequest(
+            "idem-order-fail",
+            "Kim Minsu",
+            "01012345678",
+            "06236",
+            "Teheran-ro 123",
+            "8F",
+            "Leave at the door.",
+            PaymentMethod.MOBILE,
+            List.of(new CheckoutItemRequest(10L, 2))
+        ));
+
+        OrderResponse order = orderService.getGuest(created.orderNumber(), "01012345678");
+        Integer stockAfterFailure = jdbcClient.sql("SELECT stock FROM products WHERE id = 10")
+            .query(Integer.class)
+            .single();
+
+        assertThat(created.status()).isEqualTo("CANCELLED");
+        assertThat(created.paymentStatus()).isEqualTo("FAILED");
+        assertThat(order.status()).isEqualTo("CANCELLED");
+        assertThat(order.paymentStatus()).isEqualTo("FAILED");
+        assertThat(stockAfterFailure).isEqualTo(10);
+    }
+
+    @Test
+    void listByPhoneReturnsLatestGuestOrdersFirst() {
         orderService.create(new CreateOrderRequest(
             "idem-order-list-1",
             "Kim Minsu",
@@ -188,6 +208,7 @@ class OrderServiceTest {
             "Teheran-ro 123",
             "8F",
             "Leave at the door.",
+            PaymentMethod.CARD,
             List.of(new CheckoutItemRequest(10L, 1))
         ));
 
@@ -199,6 +220,7 @@ class OrderServiceTest {
             "Teheran-ro 123",
             "8F",
             "Leave at the door.",
+            PaymentMethod.BANK_TRANSFER,
             List.of(new CheckoutItemRequest(10L, 1))
         ));
 
@@ -228,6 +250,7 @@ class OrderServiceTest {
             "Teheran-ro 123",
             "8F",
             "Leave at the door.",
+            PaymentMethod.CARD,
             List.of(new CheckoutItemRequest(10L, 1))
         ), 301L);
 
@@ -239,6 +262,7 @@ class OrderServiceTest {
             "Teheran-ro 123",
             "8F",
             "Leave at the door.",
+            PaymentMethod.BANK_TRANSFER,
             List.of(new CheckoutItemRequest(10L, 1))
         ));
 

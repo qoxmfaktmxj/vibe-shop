@@ -29,6 +29,7 @@ class OrderControllerTest {
     void setUp() {
         jdbcClient.sql("DELETE FROM shopping_cart_items").update();
         jdbcClient.sql("DELETE FROM customer_order_lines").update();
+        jdbcClient.sql("DELETE FROM order_payments").update();
         jdbcClient.sql("DELETE FROM customer_orders").update();
         jdbcClient.sql("DELETE FROM user_sessions").update();
         jdbcClient.sql("DELETE FROM users").update();
@@ -90,13 +91,15 @@ class OrderControllerTest {
                       "address1": "Teheran-ro 123",
                       "address2": "8F",
                       "note": "Leave at concierge",
+                      "paymentMethod": "CARD",
                       "items": [
                         { "productId": 10, "quantity": 1 }
                       ]
                     }
                     """))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.status").value("RECEIVED"));
+            .andExpect(jsonPath("$.status").value("PAID"))
+            .andExpect(jsonPath("$.paymentStatus").value("SUCCEEDED"));
 
         String orderNumber = jdbcClient.sql("SELECT order_number FROM customer_orders WHERE idempotency_key = 'member-order-1'")
             .query(String.class)
@@ -110,7 +113,8 @@ class OrderControllerTest {
         mockMvc.perform(get("/api/v1/orders/{orderNumber}", orderNumber).cookie(memberACookie))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.orderNumber").value(orderNumber))
-            .andExpect(jsonPath("$.customerType").value("MEMBER"));
+            .andExpect(jsonPath("$.customerType").value("MEMBER"))
+            .andExpect(jsonPath("$.paymentStatus").value("SUCCEEDED"));
 
         mockMvc.perform(get("/api/v1/orders/{orderNumber}", orderNumber).cookie(memberBCookie))
             .andExpect(status().isNotFound());
@@ -132,13 +136,15 @@ class OrderControllerTest {
                       "address1": "Teheran-ro 123",
                       "address2": "8F",
                       "note": "Leave at the door",
+                      "paymentMethod": "BANK_TRANSFER",
                       "items": [
                         { "productId": 10, "quantity": 1 }
                       ]
                     }
                     """))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.status").value("RECEIVED"));
+            .andExpect(jsonPath("$.status").value("PENDING_PAYMENT"))
+            .andExpect(jsonPath("$.paymentStatus").value("PENDING"));
 
         String orderNumber = jdbcClient.sql("SELECT order_number FROM customer_orders WHERE idempotency_key = 'guest-order-1'")
             .query(String.class)
@@ -153,7 +159,8 @@ class OrderControllerTest {
         mockMvc.perform(get("/api/v1/orders/{orderNumber}", orderNumber).param("phone", "01099998888"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.orderNumber").value(orderNumber))
-            .andExpect(jsonPath("$.customerType").value("GUEST"));
+            .andExpect(jsonPath("$.customerType").value("GUEST"))
+            .andExpect(jsonPath("$.paymentStatus").value("PENDING"));
 
         mockMvc.perform(post("/api/v1/orders/{orderNumber}/cancel", orderNumber))
             .andExpect(status().isBadRequest());

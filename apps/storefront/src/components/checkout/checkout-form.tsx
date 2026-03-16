@@ -5,9 +5,42 @@ import { useEffect, useEffectEvent, useState, useTransition } from "react";
 
 import { useAuth } from "@/lib/auth-store";
 import { createOrder, previewOrder } from "@/lib/client-api";
-import type { CheckoutPreview } from "@/lib/contracts";
+import type { CheckoutPreview, PaymentMethod } from "@/lib/contracts";
 import { useCart } from "@/lib/cart-store";
 import { formatPrice } from "@/lib/currency";
+import { formatPaymentMethod } from "@/lib/payment";
+
+const PAYMENT_OPTIONS: Array<{
+  value: PaymentMethod;
+  label: string;
+  description: string;
+}> = [
+  {
+    value: "CARD",
+    label: "신용카드",
+    description: "즉시 승인되는 모의 결제입니다.",
+  },
+  {
+    value: "BANK_TRANSFER",
+    label: "계좌이체",
+    description: "입금 확인 전까지 결제 대기 상태로 유지됩니다.",
+  },
+  {
+    value: "VIRTUAL_ACCOUNT",
+    label: "가상계좌",
+    description: "가상계좌 발급 후 결제 대기 상태를 재현합니다.",
+  },
+  {
+    value: "MOBILE",
+    label: "휴대폰 결제",
+    description: "실패 시나리오를 검증하기 위한 모의 결제 수단입니다.",
+  },
+  {
+    value: "EASY_PAY",
+    label: "간편결제",
+    description: "즉시 승인되는 간편결제 흐름입니다.",
+  },
+];
 
 function makeIdempotencyKey() {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
@@ -32,6 +65,7 @@ export function CheckoutForm() {
     address1: "",
     address2: "",
     note: "",
+    paymentMethod: "CARD" as PaymentMethod,
   });
 
   const requestPreview = useEffectEvent(async () => {
@@ -57,6 +91,7 @@ export function CheckoutForm() {
     if (!hydrated) {
       return;
     }
+
     void requestPreview();
   }, [hydrated, items]);
 
@@ -77,11 +112,11 @@ export function CheckoutForm() {
         <p className="display-eyebrow">Checkout</p>
         <h1 className="display-heading mt-3 text-3xl font-semibold">주문서 작성</h1>
         <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--ink-soft)]">
-          받는 분 정보와 배송지를 입력하고 주문 내용을 확인해 주세요.
+          받는 분 정보와 배송지를 입력하고 결제 수단을 선택해 주세요.
         </p>
         <p className="mt-3 text-sm text-[var(--ink-soft)]">
           {session.authenticated
-            ? "현재 주문은 로그인한 회원 계정에 연결됩니다."
+            ? "현재 주문은 로그인한 회원 계정과 연결됩니다."
             : "비회원 주문은 주문번호와 연락처로 다시 조회할 수 있습니다."}
         </p>
 
@@ -99,11 +134,17 @@ export function CheckoutForm() {
                     quantity: item.quantity,
                   })),
                 });
-                clearCart();
+
+                if (result.paymentStatus !== "FAILED") {
+                  clearCart();
+                }
+
                 setIdempotencyKey(makeIdempotencyKey());
+
                 const nextUrl = session.authenticated
                   ? `/orders/${result.orderNumber}`
                   : `/orders/${result.orderNumber}?phone=${encodeURIComponent(form.phone.trim())}`;
+
                 router.push(nextUrl);
               } catch (submitError) {
                 setError(
@@ -187,6 +228,41 @@ export function CheckoutForm() {
             />
           </label>
 
+          <fieldset className="grid gap-3">
+            <legend className="text-sm font-medium text-[var(--ink)]">결제 수단</legend>
+            <div className="grid gap-3 md:grid-cols-2">
+              {PAYMENT_OPTIONS.map((option) => {
+                const selected = form.paymentMethod === option.value;
+
+                return (
+                  <label
+                    key={option.value}
+                    className={`rounded-[24px] border px-4 py-4 transition ${
+                      selected
+                        ? "border-[var(--ink)] bg-[rgba(255,255,255,0.92)]"
+                        : "border-[var(--line)] bg-[rgba(255,255,255,0.72)]"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value={option.value}
+                      checked={selected}
+                      onChange={() =>
+                        setForm((current) => ({ ...current, paymentMethod: option.value }))
+                      }
+                      className="sr-only"
+                    />
+                    <p className="text-sm font-semibold text-[var(--ink)]">{option.label}</p>
+                    <p className="mt-2 text-xs leading-6 text-[var(--ink-soft)]">
+                      {option.description}
+                    </p>
+                  </label>
+                );
+              })}
+            </div>
+          </fieldset>
+
           {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
           <button
@@ -213,6 +289,10 @@ export function CheckoutForm() {
           ))}
         </div>
         <div className="stat-divider mt-6 space-y-3 pt-5 text-sm">
+          <div className="flex justify-between">
+            <span>선택한 결제 수단</span>
+            <span>{formatPaymentMethod(form.paymentMethod)}</span>
+          </div>
           <div className="flex justify-between">
             <span>상품 합계</span>
             <span>{formatPrice(preview?.subtotal ?? 0)}원</span>

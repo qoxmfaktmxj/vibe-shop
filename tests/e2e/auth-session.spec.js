@@ -48,9 +48,13 @@ test("member auth flow keeps session and scopes orders to the account", async ({
   await checkoutInputs.nth(3).fill("Teheran-ro 456, Gangnam-gu");
   await checkoutInputs.nth(4).fill("12F");
   await page.locator("form textarea").fill("Member delivery note.");
+  await page.locator('input[name="paymentMethod"][value="CARD"]').check({
+    force: true,
+  });
   await page.locator('button[type="submit"]').click();
 
   await expect(page).toHaveURL(/\/orders\/[A-Z0-9]+$/);
+  await expect(page.getByRole("heading", { name: "결제가 완료되었습니다." })).toBeVisible();
   const memberOrderNumber = new URL(page.url()).pathname.split("/").at(-1);
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "08-member-order.png"),
@@ -65,5 +69,5 @@ test("member auth flow keeps session and scopes orders to the account", async ({
   await expect(page).toHaveURL(
     new RegExp(`/lookup-order\\?orderNumber=${memberOrderNumber}$`),
   );
-  await expect(page.locator('input').first()).toHaveValue(memberOrderNumber);
+  await expect(page.locator("input").first()).toHaveValue(memberOrderNumber);
 });
