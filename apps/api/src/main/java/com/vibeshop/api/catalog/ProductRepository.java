@@ -15,13 +15,22 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findAllByOrderByFeaturedDescIdAsc();
 
     @EntityGraph(attributePaths = "category")
+    List<Product> findAllByCategory_VisibleTrueOrderByFeaturedDescIdAsc();
+
+    @EntityGraph(attributePaths = "category")
     List<Product> findByCategory_SlugOrderByFeaturedDescIdAsc(String categorySlug);
+
+    @EntityGraph(attributePaths = "category")
+    List<Product> findByCategory_SlugAndCategory_VisibleTrueOrderByFeaturedDescIdAsc(String categorySlug);
 
     @EntityGraph(attributePaths = "category")
     List<Product> findAllByOrderByCreatedAtDescIdDesc();
 
     @EntityGraph(attributePaths = "category")
     Optional<Product> findBySlug(String slug);
+
+    @EntityGraph(attributePaths = "category")
+    Optional<Product> findBySlugAndCategory_VisibleTrue(String slug);
 
     @EntityGraph(attributePaths = "category")
     List<Product> findAllByIdIn(Collection<Long> ids);
@@ -48,7 +57,29 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
         @Param("keyword") String keyword
     );
 
+    @EntityGraph(attributePaths = "category")
+    @Query("""
+        SELECT p
+        FROM Product p
+        JOIN p.category c
+        WHERE c.visible = true
+          AND (:categorySlug IS NULL OR c.slug = :categorySlug)
+          AND (
+            :keyword IS NULL
+            OR LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(p.summary) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+          )
+        ORDER BY p.featured DESC, p.id ASC
+        """)
+    List<Product> searchVisible(
+        @Param("categorySlug") String categorySlug,
+        @Param("keyword") String keyword
+    );
+
     long countByFeaturedTrue();
 
     long countByStockLessThanEqual(int stock);
+
+    long countByCategory_Id(Long categoryId);
 }

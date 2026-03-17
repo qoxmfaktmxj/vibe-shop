@@ -1,7 +1,14 @@
 import { cache } from "react";
 import { cookies } from "next/headers";
 
-import type { AdminDashboard, AdminOrder, AdminProduct, AdminSession } from "@/lib/contracts";
+import type {
+  AdminCategory,
+  AdminDashboard,
+  AdminDisplay,
+  AdminOrder,
+  AdminProduct,
+  AdminSession,
+} from "@/lib/contracts";
 
 const API_BASE_URL =
   process.env.API_BASE_URL ??
@@ -43,6 +50,18 @@ export const getAdminDashboard = cache(async () =>
     headers: await getCookieHeaders(),
   }),
 );
+
+export async function getAdminDisplay(): Promise<AdminDisplay> {
+  return fetchFromApi<AdminDisplay>("/api/v1/admin/display", {
+    headers: await getCookieHeaders(),
+  });
+}
+
+export async function getAdminCategories(): Promise<AdminCategory[]> {
+  return fetchFromApi<AdminCategory[]>("/api/v1/admin/categories", {
+    headers: await getCookieHeaders(),
+  });
+}
 
 export async function getAdminProducts(): Promise<AdminProduct[]> {
   return fetchFromApi<AdminProduct[]>("/api/v1/admin/products", {

@@ -32,18 +32,174 @@ public final class AdminDtos {
         }
     }
 
+    public record AdminDisplayItemResponse(
+        Long id,
+        String title,
+        String subtitle,
+        String imageUrl,
+        String imageAlt,
+        String href,
+        String ctaLabel,
+        String accentColor,
+        int displayOrder,
+        boolean visible,
+        OffsetDateTime startsAt,
+        OffsetDateTime endsAt
+    ) {
+    }
+
+    public record AdminDisplaySectionResponse(
+        Long id,
+        String code,
+        String title,
+        String subtitle,
+        int displayOrder,
+        boolean visible,
+        List<AdminDisplayItemResponse> items
+    ) {
+    }
+
     public record AdminDisplayResponse(
         String heroTitle,
-        String heroSubtitle
+        String heroSubtitle,
+        String heroCtaLabel,
+        String heroCtaHref,
+        List<AdminDisplaySectionResponse> sections
     ) {
     }
 
     public record UpdateAdminDisplayRequest(
         @NotBlank(message = "메인 제목을 입력해 주세요.")
-        @Size(max = 255, message = "메인 제목은 255자 이하여야 합니다.") String heroTitle,
+        @Size(max = 255, message = "메인 제목은 255자 이하로 입력해 주세요.") String heroTitle,
         @NotBlank(message = "메인 설명을 입력해 주세요.")
-        @Size(max = 1000, message = "메인 설명은 1000자 이하여야 합니다.") String heroSubtitle
+        @Size(max = 1000, message = "메인 설명은 1000자 이하로 입력해 주세요.") String heroSubtitle,
+        @NotBlank(message = "메인 버튼 문구를 입력해 주세요.")
+        @Size(max = 80, message = "메인 버튼 문구는 80자 이하로 입력해 주세요.") String heroCtaLabel,
+        @NotBlank(message = "메인 버튼 링크를 입력해 주세요.")
+        @Size(max = 255, message = "메인 버튼 링크는 255자 이하로 입력해 주세요.") String heroCtaHref
     ) {
+    }
+
+    public record UpdateAdminDisplaySectionRequest(
+        @NotBlank(message = "섹션 제목을 입력해 주세요.")
+        @Size(max = 255, message = "섹션 제목은 255자 이하로 입력해 주세요.") String title,
+        @NotBlank(message = "섹션 설명을 입력해 주세요.")
+        @Size(max = 1000, message = "섹션 설명은 1000자 이하로 입력해 주세요.") String subtitle,
+        @Min(value = 0, message = "정렬 순서는 0 이상이어야 합니다.") int displayOrder,
+        boolean visible
+    ) {
+    }
+
+    public record CreateAdminDisplayItemRequest(
+        @NotBlank(message = "섹션 코드를 선택해 주세요.") String sectionCode,
+        @NotBlank(message = "배너 제목을 입력해 주세요.")
+        @Size(max = 255, message = "배너 제목은 255자 이하로 입력해 주세요.") String title,
+        @NotBlank(message = "배너 설명을 입력해 주세요.")
+        @Size(max = 1000, message = "배너 설명은 1000자 이하로 입력해 주세요.") String subtitle,
+        @NotBlank(message = "이미지 경로를 입력해 주세요.")
+        @Size(max = 255, message = "이미지 경로는 255자 이하로 입력해 주세요.") String imageUrl,
+        @NotBlank(message = "이미지 대체 텍스트를 입력해 주세요.")
+        @Size(max = 255, message = "이미지 대체 텍스트는 255자 이하로 입력해 주세요.") String imageAlt,
+        @NotBlank(message = "이동 링크를 입력해 주세요.")
+        @Size(max = 255, message = "이동 링크는 255자 이하로 입력해 주세요.") String href,
+        @NotBlank(message = "버튼 문구를 입력해 주세요.")
+        @Size(max = 80, message = "버튼 문구는 80자 이하로 입력해 주세요.") String ctaLabel,
+        @NotBlank(message = "강조 색상을 입력해 주세요.")
+        @Size(max = 20, message = "강조 색상은 20자 이하로 입력해 주세요.") String accentColor,
+        @Min(value = 0, message = "정렬 순서는 0 이상이어야 합니다.") int displayOrder,
+        boolean visible,
+        OffsetDateTime startsAt,
+        OffsetDateTime endsAt
+    ) {
+    }
+
+    public record UpdateAdminDisplayItemRequest(
+        @NotBlank(message = "섹션 코드를 선택해 주세요.") String sectionCode,
+        @NotBlank(message = "배너 제목을 입력해 주세요.")
+        @Size(max = 255, message = "배너 제목은 255자 이하로 입력해 주세요.") String title,
+        @NotBlank(message = "배너 설명을 입력해 주세요.")
+        @Size(max = 1000, message = "배너 설명은 1000자 이하로 입력해 주세요.") String subtitle,
+        @NotBlank(message = "이미지 경로를 입력해 주세요.")
+        @Size(max = 255, message = "이미지 경로는 255자 이하로 입력해 주세요.") String imageUrl,
+        @NotBlank(message = "이미지 대체 텍스트를 입력해 주세요.")
+        @Size(max = 255, message = "이미지 대체 텍스트는 255자 이하로 입력해 주세요.") String imageAlt,
+        @NotBlank(message = "이동 링크를 입력해 주세요.")
+        @Size(max = 255, message = "이동 링크는 255자 이하로 입력해 주세요.") String href,
+        @NotBlank(message = "버튼 문구를 입력해 주세요.")
+        @Size(max = 80, message = "버튼 문구는 80자 이하로 입력해 주세요.") String ctaLabel,
+        @NotBlank(message = "강조 색상을 입력해 주세요.")
+        @Size(max = 20, message = "강조 색상은 20자 이하로 입력해 주세요.") String accentColor,
+        @Min(value = 0, message = "정렬 순서는 0 이상이어야 합니다.") int displayOrder,
+        boolean visible,
+        OffsetDateTime startsAt,
+        OffsetDateTime endsAt
+    ) {
+    }
+
+    public record DeleteAdminDisplayItemResponse(Long itemId) {
+    }
+
+    public record AdminCategoryResponse(
+        Long id,
+        String slug,
+        String name,
+        String description,
+        String accentColor,
+        int displayOrder,
+        boolean visible,
+        String coverImageUrl,
+        String coverImageAlt,
+        String heroTitle,
+        String heroSubtitle,
+        long productCount
+    ) {
+    }
+
+    public record CreateAdminCategoryRequest(
+        @NotBlank(message = "카테고리 slug를 입력해 주세요.")
+        @Size(max = 80, message = "카테고리 slug는 80자 이하로 입력해 주세요.") String slug,
+        @NotBlank(message = "카테고리명을 입력해 주세요.")
+        @Size(max = 80, message = "카테고리명은 80자 이하로 입력해 주세요.") String name,
+        @NotBlank(message = "카테고리 설명을 입력해 주세요.")
+        @Size(max = 255, message = "카테고리 설명은 255자 이하로 입력해 주세요.") String description,
+        @NotBlank(message = "강조 색상을 입력해 주세요.")
+        @Size(max = 20, message = "강조 색상은 20자 이하로 입력해 주세요.") String accentColor,
+        @Min(value = 0, message = "정렬 순서는 0 이상이어야 합니다.") int displayOrder,
+        boolean visible,
+        @NotBlank(message = "커버 이미지 경로를 입력해 주세요.")
+        @Size(max = 255, message = "커버 이미지 경로는 255자 이하로 입력해 주세요.") String coverImageUrl,
+        @NotBlank(message = "커버 이미지 대체 텍스트를 입력해 주세요.")
+        @Size(max = 255, message = "커버 이미지 대체 텍스트는 255자 이하로 입력해 주세요.") String coverImageAlt,
+        @NotBlank(message = "카테고리 히어로 제목을 입력해 주세요.")
+        @Size(max = 255, message = "카테고리 히어로 제목은 255자 이하로 입력해 주세요.") String heroTitle,
+        @NotBlank(message = "카테고리 히어로 설명을 입력해 주세요.")
+        @Size(max = 1000, message = "카테고리 히어로 설명은 1000자 이하로 입력해 주세요.") String heroSubtitle
+    ) {
+    }
+
+    public record UpdateAdminCategoryRequest(
+        @NotBlank(message = "카테고리 slug를 입력해 주세요.")
+        @Size(max = 80, message = "카테고리 slug는 80자 이하로 입력해 주세요.") String slug,
+        @NotBlank(message = "카테고리명을 입력해 주세요.")
+        @Size(max = 80, message = "카테고리명은 80자 이하로 입력해 주세요.") String name,
+        @NotBlank(message = "카테고리 설명을 입력해 주세요.")
+        @Size(max = 255, message = "카테고리 설명은 255자 이하로 입력해 주세요.") String description,
+        @NotBlank(message = "강조 색상을 입력해 주세요.")
+        @Size(max = 20, message = "강조 색상은 20자 이하로 입력해 주세요.") String accentColor,
+        @Min(value = 0, message = "정렬 순서는 0 이상이어야 합니다.") int displayOrder,
+        boolean visible,
+        @NotBlank(message = "커버 이미지 경로를 입력해 주세요.")
+        @Size(max = 255, message = "커버 이미지 경로는 255자 이하로 입력해 주세요.") String coverImageUrl,
+        @NotBlank(message = "커버 이미지 대체 텍스트를 입력해 주세요.")
+        @Size(max = 255, message = "커버 이미지 대체 텍스트는 255자 이하로 입력해 주세요.") String coverImageAlt,
+        @NotBlank(message = "카테고리 히어로 제목을 입력해 주세요.")
+        @Size(max = 255, message = "카테고리 히어로 제목은 255자 이하로 입력해 주세요.") String heroTitle,
+        @NotBlank(message = "카테고리 히어로 설명을 입력해 주세요.")
+        @Size(max = 1000, message = "카테고리 히어로 설명은 1000자 이하로 입력해 주세요.") String heroSubtitle
+    ) {
+    }
+
+    public record DeleteAdminCategoryResponse(Long categoryId) {
     }
 
     public record AdminProductResponse(
@@ -65,12 +221,12 @@ public final class AdminDtos {
 
     public record UpdateAdminProductRequest(
         @NotBlank(message = "상품명을 입력해 주세요.")
-        @Size(max = 120, message = "상품명은 120자 이하여야 합니다.") String name,
+        @Size(max = 120, message = "상품명은 120자 이하로 입력해 주세요.") String name,
         @NotBlank(message = "상품 요약을 입력해 주세요.")
-        @Size(max = 255, message = "상품 요약은 255자 이하여야 합니다.") String summary,
+        @Size(max = 255, message = "상품 요약은 255자 이하로 입력해 주세요.") String summary,
         @NotBlank(message = "배지 문구를 입력해 주세요.")
-        @Size(max = 50, message = "배지 문구는 50자 이하여야 합니다.") String badge,
-        @DecimalMin(value = "0", message = "가격은 0원 이상이어야 합니다.") BigDecimal price,
+        @Size(max = 50, message = "배지 문구는 50자 이하로 입력해 주세요.") String badge,
+        @DecimalMin(value = "0", message = "가격은 0 이상이어야 합니다.") BigDecimal price,
         @Min(value = 0, message = "재고는 0 이상이어야 합니다.") int stock,
         @Min(value = 0, message = "인기 점수는 0 이상이어야 합니다.") int popularityScore,
         boolean featured

@@ -11,14 +11,102 @@ export type AdminSession = {
   sessionToken?: string | null;
 };
 
+export type AdminDisplayItem = {
+  id: number;
+  title: string;
+  subtitle: string;
+  imageUrl: string;
+  imageAlt: string;
+  href: string;
+  ctaLabel: string;
+  accentColor: string;
+  displayOrder: number;
+  visible: boolean;
+  startsAt: string | null;
+  endsAt: string | null;
+};
+
+export type AdminDisplaySection = {
+  id: number;
+  code: string;
+  title: string;
+  subtitle: string;
+  displayOrder: number;
+  visible: boolean;
+  items: AdminDisplayItem[];
+};
+
 export type AdminDisplay = {
   heroTitle: string;
   heroSubtitle: string;
+  heroCtaLabel: string;
+  heroCtaHref: string;
+  sections: AdminDisplaySection[];
 };
 
 export type UpdateAdminDisplayPayload = {
   heroTitle: string;
   heroSubtitle: string;
+  heroCtaLabel: string;
+  heroCtaHref: string;
+};
+
+export type UpdateAdminDisplaySectionPayload = {
+  title: string;
+  subtitle: string;
+  displayOrder: number;
+  visible: boolean;
+};
+
+export type DisplayItemPayload = {
+  sectionCode: string;
+  title: string;
+  subtitle: string;
+  imageUrl: string;
+  imageAlt: string;
+  href: string;
+  ctaLabel: string;
+  accentColor: string;
+  displayOrder: number;
+  visible: boolean;
+  startsAt?: string | null;
+  endsAt?: string | null;
+};
+
+export type DeleteAdminDisplayItemResponse = {
+  itemId: number;
+};
+
+export type AdminCategory = {
+  id: number;
+  slug: string;
+  name: string;
+  description: string;
+  accentColor: string;
+  displayOrder: number;
+  visible: boolean;
+  coverImageUrl: string;
+  coverImageAlt: string;
+  heroTitle: string;
+  heroSubtitle: string;
+  productCount: number;
+};
+
+export type AdminCategoryPayload = {
+  slug: string;
+  name: string;
+  description: string;
+  accentColor: string;
+  displayOrder: number;
+  visible: boolean;
+  coverImageUrl: string;
+  coverImageAlt: string;
+  heroTitle: string;
+  heroSubtitle: string;
+};
+
+export type DeleteAdminCategoryResponse = {
+  categoryId: number;
 };
 
 export type AdminProduct = {

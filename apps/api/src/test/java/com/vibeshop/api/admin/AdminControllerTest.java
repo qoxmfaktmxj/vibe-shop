@@ -42,8 +42,32 @@ class AdminControllerTest {
         jdbcClient.sql("DELETE FROM admin_display_settings").update();
 
         jdbcClient.sql("""
-            INSERT INTO categories (id, slug, name, description, accent_color)
-            VALUES (1, 'living', 'Living', 'Living category', '#29339b')
+            INSERT INTO categories (
+                id,
+                slug,
+                name,
+                description,
+                accent_color,
+                display_order,
+                is_visible,
+                cover_image_url,
+                cover_image_alt,
+                hero_title,
+                hero_subtitle
+            )
+            VALUES (
+                1,
+                'living',
+                'Living',
+                'Living category',
+                '#29339b',
+                10,
+                TRUE,
+                '/images/products/living-01.jpg',
+                'Living category cover',
+                'Living category hero',
+                'Living category subtitle'
+            )
             """).update();
 
         jdbcClient.sql("""
@@ -134,11 +158,14 @@ class AdminControllerTest {
                 .content("""
                     {
                       "heroTitle": "Admin Hero Title",
-                      "heroSubtitle": "Admin subtitle updated from dashboard."
+                      "heroSubtitle": "Admin subtitle updated from dashboard.",
+                      "heroCtaLabel": "Admin CTA",
+                      "heroCtaHref": "/search?sort=popular"
                     }
                     """))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.heroTitle").value("Admin Hero Title"));
+            .andExpect(jsonPath("$.heroTitle").value("Admin Hero Title"))
+            .andExpect(jsonPath("$.heroCtaLabel").value("Admin CTA"));
 
         mockMvc.perform(get("/api/v1/home"))
             .andExpect(status().isOk())

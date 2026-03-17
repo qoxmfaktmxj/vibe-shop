@@ -32,8 +32,32 @@ class CartServiceTest {
         jdbcClient.sql("DELETE FROM categories").update();
 
         jdbcClient.sql("""
-            INSERT INTO categories (id, slug, name, description, accent_color)
-            VALUES (1, 'living', '리빙', '리빙 카테고리', '#29339b')
+            INSERT INTO categories (
+                id,
+                slug,
+                name,
+                description,
+                accent_color,
+                display_order,
+                is_visible,
+                cover_image_url,
+                cover_image_alt,
+                hero_title,
+                hero_subtitle
+            )
+            VALUES (
+                1,
+                'living',
+                '리빙',
+                '리빙 카테고리',
+                '#29339b',
+                10,
+                TRUE,
+                '/images/products/living-01.jpg',
+                '리빙 카테고리 커버',
+                '리빙 카테고리 히어로',
+                '리빙 카테고리 설명'
+            )
             """).update();
 
         jdbcClient.sql("""

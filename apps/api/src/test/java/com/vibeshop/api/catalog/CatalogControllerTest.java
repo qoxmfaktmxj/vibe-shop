@@ -38,11 +38,22 @@ class CatalogControllerTest {
         jdbcClient.sql("DELETE FROM categories").update();
 
         jdbcClient.sql("""
-            INSERT INTO categories (id, slug, name, description, accent_color)
-            VALUES
-              (1, 'living', '리빙', '공간의 결을 다듬는 리빙 컬렉션', '#ff8d6b'),
-              (2, 'kitchen', '키친', '테이블과 조리를 위한 키친 셀렉션', '#ffbf5f'),
-              (3, 'wellness', '웰니스', '휴식과 루틴을 위한 웰니스 아이템', '#68b78e')
+            INSERT INTO categories (
+                id,
+                slug,
+                name,
+                description,
+                accent_color,
+                display_order,
+                is_visible,
+                cover_image_url,
+                cover_image_alt,
+                hero_title,
+                hero_subtitle
+            ) VALUES
+              (1, 'living', '리빙', '공간의 결을 다듬는 리빙 컬렉션', '#ff8d6b', 10, TRUE, '/images/products/living-01.jpg', '리빙 커버', '리빙 히어로', '리빙 히어로 설명'),
+              (2, 'kitchen', '키친', '테이블과 조리를 위한 키친 셀렉션', '#ffbf5f', 20, TRUE, '/images/products/kitchen-01.jpg', '키친 커버', '키친 히어로', '키친 히어로 설명'),
+              (3, 'wellness', '웰니스', '휴식과 루틴을 위한 웰니스 아이템', '#68b78e', 30, TRUE, '/images/products/wellness-01.jpg', '웰니스 커버', '웰니스 히어로', '웰니스 히어로 설명')
             """).update();
 
         insertProduct(
@@ -64,10 +75,15 @@ class CatalogControllerTest {
     }
 
     @Test
-    void homeIncludesExpandedDisplaySections() throws Exception {
+    void homeIncludesDisplaySectionsAndCategoryMetadata() throws Exception {
         mockMvc.perform(get("/api/v1/home"))
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.heroCtaLabel").value("컬렉션 보기"))
+            .andExpect(jsonPath("$.displaySections.length()").value(6))
+            .andExpect(jsonPath("$.displaySections[0].code").value("HERO"))
             .andExpect(jsonPath("$.featuredCategories.length()").value(3))
+            .andExpect(jsonPath("$.featuredCategories[0].slug").value("living"))
+            .andExpect(jsonPath("$.featuredCategories[0].coverImageUrl").value("/images/products/living-01.jpg"))
             .andExpect(jsonPath("$.curatedPicks.length()").value(2))
             .andExpect(jsonPath("$.newArrivals[0].slug").value("balance-yoga-mat"))
             .andExpect(jsonPath("$.bestSellers[0].slug").value("linen-bed-set"));

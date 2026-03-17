@@ -4,6 +4,30 @@ export type Category = {
   name: string;
   description: string;
   accentColor: string;
+  displayOrder: number;
+  coverImageUrl: string;
+  coverImageAlt: string;
+  heroTitle: string;
+  heroSubtitle: string;
+};
+
+export type HomeDisplayItem = {
+  id: number;
+  title: string;
+  subtitle: string;
+  imageUrl: string;
+  imageAlt: string;
+  href: string;
+  ctaLabel: string;
+  accentColor: string;
+};
+
+export type HomeDisplaySection = {
+  code: string;
+  title: string;
+  subtitle: string;
+  visible: boolean;
+  items: HomeDisplayItem[];
 };
 
 export type ProductSummary = {
@@ -28,6 +52,9 @@ export type ProductDetail = ProductSummary & {
 export type HomeResponse = {
   heroTitle: string;
   heroSubtitle: string;
+  heroCtaLabel: string;
+  heroCtaHref: string;
+  displaySections: HomeDisplaySection[];
   featuredCategories: Category[];
   curatedPicks: ProductSummary[];
   newArrivals: ProductSummary[];

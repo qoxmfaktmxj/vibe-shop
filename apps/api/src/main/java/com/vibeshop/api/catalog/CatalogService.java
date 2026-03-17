@@ -1,9 +1,9 @@
 package com.vibeshop.api.catalog;
 
-import java.util.Comparator;
-import java.util.List;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.Comparator;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vibeshop.api.admin.AdminDisplaySettings;
 import com.vibeshop.api.admin.AdminDisplaySettingsRepository;
 import com.vibeshop.api.common.ResourceNotFoundException;
+import com.vibeshop.api.display.DisplayItem;
+import com.vibeshop.api.display.DisplaySection;
+import com.vibeshop.api.display.DisplaySectionCode;
+import com.vibeshop.api.display.DisplaySectionRepository;
 
 @Service
 @Transactional(readOnly = true)
@@ -41,42 +45,46 @@ public class CatalogService {
         .comparing(Product::getPrice, Comparator.reverseOrder())
         .thenComparing(Product::getId);
 
+    private static final Comparator<DisplayItem> DISPLAY_ITEM_ORDER = Comparator
+        .comparing(DisplayItem::getDisplayOrder)
+        .thenComparing(DisplayItem::getId);
+
     private static final long DISPLAY_SETTINGS_ID = 1L;
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
-    private static final String DEFAULT_HERO_TITLE = "리빙의 결을 따라 고른 이번 시즌 셀렉션";
-    private static final String DEFAULT_HERO_SUBTITLE =
-        "리빙, 키친, 웰니스 카테고리에서 지금 바로 보기 좋은 신상품과 인기 상품만 따로 제안합니다.";
 
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
     private final AdminDisplaySettingsRepository adminDisplaySettingsRepository;
+    private final DisplaySectionRepository displaySectionRepository;
 
     public CatalogService(
         CategoryRepository categoryRepository,
         ProductRepository productRepository,
-        AdminDisplaySettingsRepository adminDisplaySettingsRepository
+        AdminDisplaySettingsRepository adminDisplaySettingsRepository,
+        DisplaySectionRepository displaySectionRepository
     ) {
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
         this.adminDisplaySettingsRepository = adminDisplaySettingsRepository;
+        this.displaySectionRepository = displaySectionRepository;
     }
 
     public HomeResponse getHome() {
-        List<CategorySummary> categories = categoryRepository.findAllByOrderByIdAsc().stream()
+        List<CategorySummary> categories = categoryRepository.findAllByVisibleTrueOrderByDisplayOrderAscIdAsc().stream()
             .map(this::toCategorySummary)
             .toList();
-        List<Product> allProducts = productRepository.findAllByOrderByFeaturedDescIdAsc();
-        AdminDisplaySettings displaySettings = adminDisplaySettingsRepository.findById(DISPLAY_SETTINGS_ID)
-            .orElseGet(() -> adminDisplaySettingsRepository.save(new AdminDisplaySettings(
-                DISPLAY_SETTINGS_ID,
-                DEFAULT_HERO_TITLE,
-                DEFAULT_HERO_SUBTITLE,
-                OffsetDateTime.now(SEOUL)
-            )));
+        List<Product> allProducts = productRepository.findAllByCategory_VisibleTrueOrderByFeaturedDescIdAsc();
+        AdminDisplaySettings displaySettings = getDisplaySettings();
+        OffsetDateTime current = now();
 
         return new HomeResponse(
             displaySettings.getHeroTitle(),
             displaySettings.getHeroSubtitle(),
+            displaySettings.getHeroCtaLabel(),
+            displaySettings.getHeroCtaHref(),
+            ensureDisplaySections().stream()
+                .map(section -> toHomeDisplaySectionResponse(section, current))
+                .toList(),
             categories,
             allProducts.stream()
                 .filter(Product::isFeatured)
@@ -98,7 +106,9 @@ public class CatalogService {
     }
 
     public List<CategorySummary> getCategories() {
-        return categoryRepository.findAllByOrderByIdAsc().stream().map(this::toCategorySummary).toList();
+        return categoryRepository.findAllByVisibleTrueOrderByDisplayOrderAscIdAsc().stream()
+            .map(this::toCategorySummary)
+            .toList();
     }
 
     public List<ProductSummary> getProducts(String categorySlug) {
@@ -117,17 +127,17 @@ public class CatalogService {
         List<Product> products = normalizedKeyword == null
             ? (
                 normalizedCategorySlug == null
-                    ? productRepository.findAllByOrderByFeaturedDescIdAsc()
-                    : productRepository.findByCategory_SlugOrderByFeaturedDescIdAsc(normalizedCategorySlug)
+                    ? productRepository.findAllByCategory_VisibleTrueOrderByFeaturedDescIdAsc()
+                    : productRepository.findByCategory_SlugAndCategory_VisibleTrueOrderByFeaturedDescIdAsc(normalizedCategorySlug)
             )
-            : productRepository.search(normalizedCategorySlug, normalizedKeyword);
+            : productRepository.searchVisible(normalizedCategorySlug, normalizedKeyword);
 
         applySort(products, normalizedSort);
         return products.stream().map(this::toProductSummary).toList();
     }
 
     public ProductDetailResponse getProduct(String slug) {
-        Product product = productRepository.findBySlug(slug)
+        Product product = productRepository.findBySlugAndCategory_VisibleTrue(slug)
             .orElseThrow(() -> new ResourceNotFoundException("상품을 찾을 수 없습니다."));
 
         return new ProductDetailResponse(
@@ -147,13 +157,47 @@ public class CatalogService {
         );
     }
 
+    private AdminDisplaySettings getDisplaySettings() {
+        return adminDisplaySettingsRepository.findById(DISPLAY_SETTINGS_ID)
+            .orElseGet(() -> adminDisplaySettingsRepository.save(new AdminDisplaySettings(
+                DISPLAY_SETTINGS_ID,
+                "리듬과 계절을 따라 고른 이번 시즌 셀렉션",
+                "리빙, 키친, 웰니스 카테고리에서 지금 바로 보기 좋은 신상품과 인기 상품을 묶어 제안합니다.",
+                "컬렉션 보기",
+                "/search",
+                now()
+            )));
+    }
+
+    private List<DisplaySection> ensureDisplaySections() {
+        List<DisplaySection> sections = displaySectionRepository.findAllByOrderByDisplayOrderAscIdAsc();
+        if (!sections.isEmpty()) {
+            return sections;
+        }
+
+        OffsetDateTime current = now();
+        return displaySectionRepository.saveAll(List.of(
+            new DisplaySection(DisplaySectionCode.HERO, "시즌 대표 배너", "메인 비주얼과 CTA를 함께 노출합니다.", 10, true, current),
+            new DisplaySection(DisplaySectionCode.FEATURED_CATEGORY, "카테고리 셀렉션", "운영 중인 주요 카테고리를 전면에서 소개합니다.", 20, true, current),
+            new DisplaySection(DisplaySectionCode.CURATED_PICK, "큐레이션 픽", "지금 보여주고 싶은 추천 상품을 강조합니다.", 30, true, current),
+            new DisplaySection(DisplaySectionCode.NEW_ARRIVALS, "신상품 드롭", "최근 등록된 상품을 우선 노출합니다.", 40, true, current),
+            new DisplaySection(DisplaySectionCode.BEST_SELLERS, "베스트셀러", "인기 점수가 높은 상품을 중심으로 구성합니다.", 50, true, current),
+            new DisplaySection(DisplaySectionCode.PROMOTION, "프로모션 배너", "기획전과 프로모션 링크를 하단 섹션에 노출합니다.", 60, true, current)
+        ));
+    }
+
     private CategorySummary toCategorySummary(Category category) {
         return new CategorySummary(
             category.getId(),
             category.getSlug(),
             category.getName(),
             category.getDescription(),
-            category.getAccentColor()
+            category.getAccentColor(),
+            category.getDisplayOrder(),
+            category.getCoverImageUrl(),
+            category.getCoverImageAlt(),
+            category.getHeroTitle(),
+            category.getHeroSubtitle()
         );
     }
 
@@ -173,6 +217,29 @@ public class CatalogService {
         );
     }
 
+    private HomeDisplaySectionResponse toHomeDisplaySectionResponse(DisplaySection section, OffsetDateTime current) {
+        return new HomeDisplaySectionResponse(
+            section.getCode().name(),
+            section.getTitle(),
+            section.getSubtitle(),
+            section.isVisible(),
+            section.getItems().stream()
+                .filter(item -> item.isActiveAt(current))
+                .sorted(DISPLAY_ITEM_ORDER)
+                .map(item -> new HomeDisplayItemResponse(
+                    item.getId(),
+                    item.getTitle(),
+                    item.getSubtitle(),
+                    item.getImageUrl(),
+                    item.getImageAlt(),
+                    item.getHref(),
+                    item.getCtaLabel(),
+                    item.getAccentColor()
+                ))
+                .toList()
+        );
+    }
+
     private void applySort(List<Product> products, String sort) {
         Comparator<Product> comparator = switch (sort) {
             case "newest" -> NEWEST_ORDER;
@@ -183,5 +250,9 @@ public class CatalogService {
         };
 
         products.sort(comparator);
+    }
+
+    private OffsetDateTime now() {
+        return OffsetDateTime.now(SEOUL);
     }
 }

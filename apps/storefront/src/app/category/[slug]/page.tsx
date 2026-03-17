@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -31,18 +32,27 @@ export default async function CategoryPage({
 
   return (
     <div className="grid-shell space-y-8">
-      <section
-        className="surface-card rounded-[36px] p-8 sm:p-10"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(241,239,233,0.72) 100%)",
-        }}
-      >
-        <p className="display-eyebrow">{category.name}</p>
-        <h1 className="display-heading mt-3 text-4xl font-semibold">{category.description}</h1>
-        <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--ink-soft)]">
-          취향에 맞는 상품을 차분하게 둘러보고, 이번 주 신상품과 가장 인기 있는 아이템을 함께 비교해 보세요.
-        </p>
+      <section className="surface-card relative overflow-hidden rounded-[36px] p-8 sm:p-10">
+        <div className="absolute inset-0">
+          <Image
+            src={category.coverImageUrl}
+            alt={category.coverImageAlt}
+            fill
+            sizes="100vw"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[rgba(11,14,22,0.82)] via-[rgba(11,14,22,0.48)] to-[rgba(11,14,22,0.12)]" />
+        </div>
+
+        <div className="relative max-w-2xl text-white">
+          <p className="display-eyebrow text-white/70">{category.name}</p>
+          <h1 className="display-heading mt-3 text-4xl font-semibold">
+            {category.heroTitle || category.description}
+          </h1>
+          <p className="mt-4 text-sm leading-7 text-white/78">
+            {category.heroSubtitle || category.description}
+          </p>
+        </div>
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">

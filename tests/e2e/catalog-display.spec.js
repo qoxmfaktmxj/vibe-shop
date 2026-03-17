@@ -3,7 +3,8 @@ const { expect, test } = require("playwright/test");
 test("catalog display sections and search filters work", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
   await expect(page.getByRole("heading", { name: "신상품 드롭" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "지금 인기 있는 셀렉션" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "베스트셀러" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "카테고리 셀렉션" })).toBeVisible();
 
   await page.goto("/search", { waitUntil: "networkidle" });
   await page.locator("form select").selectOption("kitchen");

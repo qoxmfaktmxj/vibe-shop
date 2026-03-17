@@ -38,8 +38,32 @@ class OrderControllerTest {
         jdbcClient.sql("DELETE FROM categories").update();
 
         jdbcClient.sql("""
-            INSERT INTO categories (id, slug, name, description, accent_color)
-            VALUES (1, 'living', 'Living', 'Living category', '#29339b')
+            INSERT INTO categories (
+                id,
+                slug,
+                name,
+                description,
+                accent_color,
+                display_order,
+                is_visible,
+                cover_image_url,
+                cover_image_alt,
+                hero_title,
+                hero_subtitle
+            )
+            VALUES (
+                1,
+                'living',
+                'Living',
+                'Living category',
+                '#29339b',
+                10,
+                TRUE,
+                '/images/products/living-01.jpg',
+                'Living category cover',
+                'Living category hero',
+                'Living category subtitle'
+            )
             """).update();
 
         jdbcClient.sql("""

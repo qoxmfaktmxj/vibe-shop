@@ -14,14 +14,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vibeshop.api.admin.AdminDtos.AdminDashboardResponse;
-import com.vibeshop.api.admin.AdminDtos.AdminDisplayResponse;
 import com.vibeshop.api.admin.AdminDtos.AdminOrderResponse;
 import com.vibeshop.api.admin.AdminDtos.AdminProductResponse;
-import com.vibeshop.api.admin.AdminDtos.UpdateAdminDisplayRequest;
 import com.vibeshop.api.admin.AdminDtos.UpdateAdminOrderStatusRequest;
 import com.vibeshop.api.admin.AdminDtos.UpdateAdminProductRequest;
-import com.vibeshop.api.auth.AuthService;
-import com.vibeshop.api.common.UnauthorizedException;
 
 @RestController
 @RequestMapping("/api/v1/admin")
@@ -30,18 +26,18 @@ public class AdminController {
     private static final String ADMIN_SESSION_COOKIE = "vibe_shop_admin_session";
 
     private final AdminService adminService;
-    private final AuthService authService;
+    private final AdminAccessGuard adminAccessGuard;
 
-    public AdminController(AdminService adminService, AuthService authService) {
+    public AdminController(AdminService adminService, AdminAccessGuard adminAccessGuard) {
         this.adminService = adminService;
-        this.authService = authService;
+        this.adminAccessGuard = adminAccessGuard;
     }
 
     @GetMapping("/dashboard")
     AdminDashboardResponse dashboard(
         @CookieValue(value = ADMIN_SESSION_COOKIE, required = false) String adminSessionToken
     ) {
-        requireAdmin(adminSessionToken);
+        adminAccessGuard.requireAdmin(adminSessionToken);
         return adminService.getDashboard();
     }
 
@@ -51,7 +47,7 @@ public class AdminController {
         @RequestParam(required = false) String category,
         @RequestParam(required = false, name = "q") String keyword
     ) {
-        requireAdmin(adminSessionToken);
+        adminAccessGuard.requireAdmin(adminSessionToken);
         return adminService.getProducts(category, keyword);
     }
 
@@ -61,7 +57,7 @@ public class AdminController {
         @PathVariable Long productId,
         @Valid @RequestBody UpdateAdminProductRequest request
     ) {
-        requireAdmin(adminSessionToken);
+        adminAccessGuard.requireAdmin(adminSessionToken);
         return adminService.updateProduct(productId, request);
     }
 
@@ -70,7 +66,7 @@ public class AdminController {
         @CookieValue(value = ADMIN_SESSION_COOKIE, required = false) String adminSessionToken,
         @RequestParam(required = false) String status
     ) {
-        requireAdmin(adminSessionToken);
+        adminAccessGuard.requireAdmin(adminSessionToken);
         return adminService.getOrders(status);
     }
 
@@ -80,30 +76,7 @@ public class AdminController {
         @PathVariable String orderNumber,
         @Valid @RequestBody UpdateAdminOrderStatusRequest request
     ) {
-        requireAdmin(adminSessionToken);
-        return adminService.updateOrderStatus(orderNumber, request.status());
-    }
-
-    @GetMapping("/display")
-    AdminDisplayResponse display(
-        @CookieValue(value = ADMIN_SESSION_COOKIE, required = false) String adminSessionToken
-    ) {
-        requireAdmin(adminSessionToken);
-        return adminService.getDisplay();
-    }
-
-    @PutMapping("/display")
-    AdminDisplayResponse updateDisplay(
-        @CookieValue(value = ADMIN_SESSION_COOKIE, required = false) String adminSessionToken,
-        @Valid @RequestBody UpdateAdminDisplayRequest request
-    ) {
-        requireAdmin(adminSessionToken);
-        return adminService.updateDisplay(request);
-    }
-
-    private void requireAdmin(String adminSessionToken) {
-        if (authService.resolveAdminUser(adminSessionToken).isEmpty()) {
-            throw new UnauthorizedException("관리자 로그인이 필요합니다.");
-        }
+        adminAccessGuard.requireAdmin(adminSessionToken);
+        return adminService.updateOrderStatus(orderNumber, request);
     }
 }

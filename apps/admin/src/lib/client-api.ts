@@ -1,10 +1,17 @@
 import type {
+  AdminCategory,
+  AdminCategoryPayload,
   AdminDisplay,
+  AdminDisplayItem,
   AdminOrder,
   AdminProduct,
   AdminSession,
+  DeleteAdminCategoryResponse,
+  DeleteAdminDisplayItemResponse,
+  DisplayItemPayload,
   LoginPayload,
   UpdateAdminDisplayPayload,
+  UpdateAdminDisplaySectionPayload,
   UpdateAdminOrderStatusPayload,
   UpdateAdminProductPayload,
 } from "@/lib/contracts";
@@ -66,6 +73,70 @@ export async function updateDisplay(
   return fetchJson<AdminDisplay>("/api/v1/admin/display", {
     method: "PUT",
     body: JSON.stringify(payload),
+  });
+}
+
+export async function updateDisplaySection(
+  sectionCode: string,
+  payload: UpdateAdminDisplaySectionPayload,
+): Promise<AdminDisplay["sections"][number]> {
+  return fetchJson<AdminDisplay["sections"][number]>(`/api/v1/admin/display/sections/${sectionCode}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function createDisplayItem(
+  payload: DisplayItemPayload,
+): Promise<AdminDisplayItem> {
+  return fetchJson<AdminDisplayItem>("/api/v1/admin/display/items", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateDisplayItem(
+  itemId: number,
+  payload: DisplayItemPayload,
+): Promise<AdminDisplayItem> {
+  return fetchJson<AdminDisplayItem>(`/api/v1/admin/display/items/${itemId}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteDisplayItem(
+  itemId: number,
+): Promise<DeleteAdminDisplayItemResponse> {
+  return fetchJson<DeleteAdminDisplayItemResponse>(`/api/v1/admin/display/items/${itemId}`, {
+    method: "DELETE",
+  });
+}
+
+export async function createCategory(
+  payload: AdminCategoryPayload,
+): Promise<AdminCategory> {
+  return fetchJson<AdminCategory>("/api/v1/admin/categories", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateCategory(
+  categoryId: number,
+  payload: AdminCategoryPayload,
+): Promise<AdminCategory> {
+  return fetchJson<AdminCategory>(`/api/v1/admin/categories/${categoryId}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteCategory(
+  categoryId: number,
+): Promise<DeleteAdminCategoryResponse> {
+  return fetchJson<DeleteAdminCategoryResponse>(`/api/v1/admin/categories/${categoryId}`, {
+    method: "DELETE",
   });
 }
 
