@@ -42,6 +42,19 @@ public class User {
     @Column(nullable = false, length = 20)
     private UserRole role;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private UserStatus status;
+
+    @Column(length = 30)
+    private String phone;
+
+    @Column(name = "last_login_at")
+    private OffsetDateTime lastLoginAt;
+
+    @Column(name = "marketing_opt_in", nullable = false)
+    private boolean marketingOptIn;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
@@ -52,7 +65,18 @@ public class User {
         AuthProviderType provider,
         OffsetDateTime createdAt
     ) {
-        this(name, email, passwordHash, provider, UserRole.CUSTOMER, createdAt);
+        this(
+            name,
+            email,
+            passwordHash,
+            provider,
+            UserRole.CUSTOMER,
+            UserStatus.ACTIVE,
+            null,
+            false,
+            null,
+            createdAt
+        );
     }
 
     public User(
@@ -63,11 +87,41 @@ public class User {
         UserRole role,
         OffsetDateTime createdAt
     ) {
+        this(
+            name,
+            email,
+            passwordHash,
+            provider,
+            role,
+            UserStatus.ACTIVE,
+            null,
+            false,
+            null,
+            createdAt
+        );
+    }
+
+    public User(
+        String name,
+        String email,
+        String passwordHash,
+        AuthProviderType provider,
+        UserRole role,
+        UserStatus status,
+        String phone,
+        boolean marketingOptIn,
+        OffsetDateTime lastLoginAt,
+        OffsetDateTime createdAt
+    ) {
         this.name = name;
         this.email = email;
         this.passwordHash = passwordHash;
         this.provider = provider;
         this.role = role;
+        this.status = status;
+        this.phone = phone;
+        this.lastLoginAt = lastLoginAt;
+        this.marketingOptIn = marketingOptIn;
         this.createdAt = createdAt;
     }
 
@@ -80,7 +134,19 @@ public class User {
         this.provider = provider;
     }
 
+    public void changeStatus(UserStatus status) {
+        this.status = status;
+    }
+
+    public void markLoggedIn(OffsetDateTime lastLoginAt) {
+        this.lastLoginAt = lastLoginAt;
+    }
+
     public boolean isAdmin() {
         return role != UserRole.CUSTOMER;
+    }
+
+    public boolean isBlocked() {
+        return status == UserStatus.BLOCKED;
     }
 }

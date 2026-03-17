@@ -31,6 +31,7 @@ import com.vibeshop.api.admin.AdminDtos.UpdateAdminOrderStatusRequest;
 import com.vibeshop.api.admin.AdminDtos.UpdateAdminProductRequest;
 import com.vibeshop.api.auth.UserRepository;
 import com.vibeshop.api.auth.UserRole;
+import com.vibeshop.api.auth.UserStatus;
 import com.vibeshop.api.catalog.Category;
 import com.vibeshop.api.catalog.CategoryRepository;
 import com.vibeshop.api.catalog.Product;
@@ -111,6 +112,9 @@ public class AdminService {
             productRepository.countByFeaturedTrue(),
             productRepository.countByStockLessThanEqual(5),
             userRepository.countByRole(UserRole.CUSTOMER),
+            userRepository.countByRoleAndStatus(UserRole.CUSTOMER, UserStatus.ACTIVE),
+            userRepository.countByRoleAndStatus(UserRole.CUSTOMER, UserStatus.DORMANT),
+            userRepository.countByRoleAndStatus(UserRole.CUSTOMER, UserStatus.BLOCKED),
             customerOrderRepository.count(),
             customerOrderRepository.countByStatus(OrderStatus.PAID),
             customerOrderRepository.countByStatus(OrderStatus.PENDING_PAYMENT),

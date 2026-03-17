@@ -111,7 +111,13 @@ public class AuthService {
             return Optional.empty();
         }
 
-        return Optional.of(session.get().getUser());
+        User user = session.get().getUser();
+        if (user.isBlocked()) {
+            userSessionRepository.delete(session.get());
+            return Optional.empty();
+        }
+
+        return Optional.of(user);
     }
 
     @Transactional(readOnly = true)
@@ -146,6 +152,7 @@ public class AuthService {
             throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
         }
 
+        ensureAccountCanAuthenticate(user);
         return user;
     }
 
@@ -162,6 +169,7 @@ public class AuthService {
             throw new IllegalArgumentException("관리자 권한이 없습니다.");
         }
 
+        ensureAccountCanAuthenticate(user);
         return user;
     }
 
@@ -198,6 +206,7 @@ public class AuthService {
 
     private AuthenticatedSession createSession(User user, OffsetDateTime now) {
         clearExpiredSessions();
+        user.markLoggedIn(now);
 
         String rawToken = UUID.randomUUID().toString().replace("-", "");
         userSessionRepository.save(new UserSession(
@@ -208,6 +217,12 @@ public class AuthService {
         ));
 
         return new AuthenticatedSession(user, rawToken);
+    }
+
+    private void ensureAccountCanAuthenticate(User user) {
+        if (user.isBlocked()) {
+            throw new IllegalArgumentException("차단된 계정입니다. 관리자에게 문의해 주세요.");
+        }
     }
 
     private String normalizeEmail(String email) {

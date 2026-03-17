@@ -7,6 +7,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+
 import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -22,11 +26,16 @@ import org.springframework.test.web.servlet.MvcResult;
 @AutoConfigureMockMvc
 class AdminControllerTest {
 
+    private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
+
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private JdbcClient jdbcClient;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setUp() {
@@ -35,6 +44,8 @@ class AdminControllerTest {
         jdbcClient.sql("DELETE FROM order_payments").update();
         jdbcClient.sql("DELETE FROM customer_orders").update();
         jdbcClient.sql("DELETE FROM shipping_addresses").update();
+        jdbcClient.sql("DELETE FROM display_items").update();
+        jdbcClient.sql("DELETE FROM display_sections").update();
         jdbcClient.sql("DELETE FROM user_sessions").update();
         jdbcClient.sql("DELETE FROM users").update();
         jdbcClient.sql("DELETE FROM products").update();
@@ -201,6 +212,293 @@ class AdminControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.orderNumber").value(orderNumber))
             .andExpect(jsonPath("$.status").value("PREPARING"));
+    }
+
+    @Test
+    void adminCanManageMembersAndReadStatistics() throws Exception {
+        OffsetDateTime now = OffsetDateTime.now(SEOUL);
+
+        jdbcClient.sql("""
+            INSERT INTO users (
+                id,
+                name,
+                email,
+                password_hash,
+                provider,
+                role,
+                status,
+                phone,
+                marketing_opt_in,
+                created_at,
+                last_login_at
+            )
+            VALUES (
+                101,
+                'Member Active',
+                'member-active@example.com',
+                ?,
+                'LOCAL',
+                'CUSTOMER',
+                'ACTIVE',
+                '01011112222',
+                TRUE,
+                ?,
+                ?
+            )
+            """)
+            .param(passwordEncoder.encode("password123"))
+            .param(now.minusDays(2))
+            .param(now.minusHours(1))
+            .update();
+
+        jdbcClient.sql("""
+            INSERT INTO users (
+                id,
+                name,
+                email,
+                password_hash,
+                provider,
+                role,
+                status,
+                phone,
+                marketing_opt_in,
+                created_at,
+                last_login_at
+            )
+            VALUES (
+                102,
+                'Member Dormant',
+                'member-dormant@example.com',
+                ?,
+                'GOOGLE',
+                'CUSTOMER',
+                'DORMANT',
+                NULL,
+                FALSE,
+                ?,
+                ?
+            )
+            """)
+            .param(passwordEncoder.encode("password123"))
+            .param(now.minusDays(14))
+            .param(now.minusDays(8))
+            .update();
+
+        jdbcClient.sql("""
+            INSERT INTO shipping_addresses (
+                id,
+                user_id,
+                label,
+                recipient_name,
+                phone,
+                postal_code,
+                address1,
+                address2,
+                is_default,
+                created_at,
+                updated_at
+            )
+            VALUES (
+                501,
+                101,
+                '집',
+                'Member Active',
+                '01011112222',
+                '06236',
+                'Teheran-ro 123',
+                '8F',
+                TRUE,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+            """).update();
+
+        jdbcClient.sql("""
+            INSERT INTO customer_orders (
+                id,
+                order_number,
+                idempotency_key,
+                customer_type,
+                user_id,
+                customer_name,
+                phone,
+                postal_code,
+                address1,
+                address2,
+                note,
+                subtotal,
+                shipping_fee,
+                total,
+                status,
+                created_at
+            )
+            VALUES (
+                701,
+                'VSSTAT701',
+                'stats-order-701',
+                'MEMBER',
+                101,
+                'Member Active',
+                '01011112222',
+                '06236',
+                'Teheran-ro 123',
+                '8F',
+                '',
+                89000,
+                0,
+                89000,
+                'PAID',
+                ?
+            )
+            """)
+            .param(now.minusDays(1))
+            .update();
+
+        jdbcClient.sql("""
+            INSERT INTO customer_orders (
+                id,
+                order_number,
+                idempotency_key,
+                customer_type,
+                user_id,
+                customer_name,
+                phone,
+                postal_code,
+                address1,
+                address2,
+                note,
+                subtotal,
+                shipping_fee,
+                total,
+                status,
+                created_at
+            )
+            VALUES (
+                702,
+                'VSSTAT702',
+                'stats-order-702',
+                'GUEST',
+                NULL,
+                'Guest Cancel',
+                '01099998888',
+                '06236',
+                'Teheran-ro 222',
+                '5F',
+                '',
+                89000,
+                0,
+                89000,
+                'CANCELLED',
+                ?
+            )
+            """)
+            .param(now.minusDays(2))
+            .update();
+
+        jdbcClient.sql("""
+            INSERT INTO customer_order_lines (
+                id,
+                order_id,
+                product_id,
+                product_name,
+                quantity,
+                unit_price,
+                line_total
+            )
+            VALUES
+            (801, 701, 10, 'Linen Bed Set', 1, 89000, 89000),
+            (802, 702, 10, 'Linen Bed Set', 1, 89000, 89000)
+            """).update();
+
+        jdbcClient.sql("""
+            INSERT INTO order_payments (
+                id,
+                order_id,
+                payment_method,
+                payment_status,
+                provider_code,
+                reference_code,
+                message,
+                approved_at,
+                created_at,
+                updated_at
+            )
+            VALUES (
+                901,
+                701,
+                'CARD',
+                'SUCCEEDED',
+                'mock',
+                'stats-payment-701',
+                'ok',
+                ?,
+                ?,
+                ?
+            )
+            """)
+            .param(now.minusDays(1))
+            .param(now.minusDays(1))
+            .param(now.minusDays(1))
+            .update();
+
+        jdbcClient.sql("""
+            INSERT INTO order_payments (
+                id,
+                order_id,
+                payment_method,
+                payment_status,
+                provider_code,
+                reference_code,
+                message,
+                approved_at,
+                created_at,
+                updated_at
+            )
+            VALUES (
+                902,
+                702,
+                'CARD',
+                'CANCELLED',
+                'mock',
+                'stats-payment-702',
+                'cancelled',
+                NULL,
+                ?,
+                ?
+            )
+            """)
+            .param(now.minusDays(2))
+            .param(now.minusDays(2))
+            .update();
+
+        Cookie adminCookie = loginAsAdmin();
+
+        mockMvc.perform(get("/api/v1/admin/members").cookie(adminCookie))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].email").value("member-active@example.com"))
+            .andExpect(jsonPath("$[0].orderCount").value(1))
+            .andExpect(jsonPath("$[0].shippingAddressCount").value(1))
+            .andExpect(jsonPath("$[0].totalSpent").value(89000));
+
+        mockMvc.perform(put("/api/v1/admin/members/{memberId}/status", 101)
+                .cookie(adminCookie)
+                .contentType("application/json")
+                .content("""
+                    {
+                      "status": "BLOCKED"
+                    }
+                    """))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value("BLOCKED"));
+
+        mockMvc.perform(get("/api/v1/admin/statistics").cookie(adminCookie))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.sevenDay.orderCount").value(2))
+            .andExpect(jsonPath("$.sevenDay.paidRevenue").value(89000))
+            .andExpect(jsonPath("$.sevenDay.newMemberCount").value(1))
+            .andExpect(jsonPath("$.sevenDay.cancelledOrderCount").value(1))
+            .andExpect(jsonPath("$.categorySales[0].categorySlug").value("living"))
+            .andExpect(jsonPath("$.topProducts[0].productId").value(10));
     }
 
     private Cookie loginAsAdmin() throws Exception {

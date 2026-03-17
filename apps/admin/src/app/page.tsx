@@ -5,9 +5,11 @@ import {
   getAdminCategories,
   getAdminDashboard,
   getAdminDisplay,
+  getAdminMembers,
   getAdminOrders,
   getAdminProducts,
   getAdminSession,
+  getAdminStatistics,
 } from "@/lib/server-api";
 
 export default async function AdminPage() {
@@ -17,12 +19,14 @@ export default async function AdminPage() {
     redirect("/login");
   }
 
-  const [dashboard, display, products, orders, categories] = await Promise.all([
+  const [dashboard, display, products, orders, categories, members, statistics] = await Promise.all([
     getAdminDashboard(),
     getAdminDisplay(),
     getAdminProducts(),
     getAdminOrders(),
     getAdminCategories(),
+    getAdminMembers(),
+    getAdminStatistics(),
   ]);
 
   return (
@@ -32,6 +36,8 @@ export default async function AdminPage() {
       initialProducts={products}
       initialOrders={orders}
       initialCategories={categories}
+      initialMembers={members}
+      initialStatistics={statistics}
     />
   );
 }

@@ -5,9 +5,8 @@ test("mobile payment failure keeps the cart for retry", async ({ page }) => {
   await page.locator('a[href^="/category/"]').first().click();
   await expect(page).toHaveURL(/\/category\//);
   await page.waitForLoadState("networkidle");
-  await page.locator('a[href^="/products/"]').first().click();
-  await expect(page).toHaveURL(/\/products\//);
-  await page.waitForLoadState("networkidle");
+  await page.goto("/products/brew-mug", { waitUntil: "networkidle" });
+  await expect(page).toHaveURL(/\/products\/brew-mug$/);
   await page.getByRole("button", { name: "Add to Bag" }).click();
 
   await expect

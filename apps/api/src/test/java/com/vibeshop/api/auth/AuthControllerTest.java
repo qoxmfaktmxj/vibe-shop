@@ -43,6 +43,9 @@ class AuthControllerTest {
         jdbcClient.sql("DELETE FROM order_payments").update();
         jdbcClient.sql("DELETE FROM customer_orders").update();
         jdbcClient.sql("DELETE FROM shipping_addresses").update();
+        jdbcClient.sql("DELETE FROM display_items").update();
+        jdbcClient.sql("DELETE FROM display_sections").update();
+        jdbcClient.sql("DELETE FROM admin_display_settings").update();
         jdbcClient.sql("DELETE FROM user_sessions").update();
         jdbcClient.sql("DELETE FROM users").update();
         jdbcClient.sql("DELETE FROM products").update();
@@ -143,8 +146,18 @@ class AuthControllerTest {
     void loginMergesGuestCartIntoMemberCart() throws Exception {
         OffsetDateTime now = OffsetDateTime.now(SEOUL);
         jdbcClient.sql("""
-            INSERT INTO users (id, name, email, password_hash, provider, role, created_at)
-            VALUES (100, 'Kim Minsu', 'minsu@example.com', ?, 'LOCAL', 'CUSTOMER', ?)
+            INSERT INTO users (
+                id,
+                name,
+                email,
+                password_hash,
+                provider,
+                role,
+                status,
+                marketing_opt_in,
+                created_at
+            )
+            VALUES (100, 'Kim Minsu', 'minsu@example.com', ?, 'LOCAL', 'CUSTOMER', 'ACTIVE', FALSE, ?)
             """)
             .param(passwordEncoder.encode("password123"))
             .param(now)
@@ -218,6 +231,44 @@ class AuthControllerTest {
         mockMvc.perform(post("/api/v1/auth/logout").cookie(authCookie))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.authenticated").value(false));
+
+        mockMvc.perform(get("/api/v1/auth/session").cookie(authCookie))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.authenticated").value(false));
+    }
+
+    @Test
+    void blockedUserCannotLoginAndExistingSessionExpires() throws Exception {
+        MvcResult signUpResult = mockMvc.perform(post("/api/v1/auth/signup")
+                .contentType("application/json")
+                .content("""
+                    {
+                      "name": "Blocked User",
+                      "email": "blocked@example.com",
+                      "password": "password123"
+                    }
+                    """))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        Cookie authCookie = signUpResult.getResponse().getCookie("vibe_shop_session");
+
+        jdbcClient.sql("""
+            UPDATE users
+            SET status = 'BLOCKED'
+            WHERE email = 'blocked@example.com'
+            """).update();
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                .contentType("application/json")
+                .content("""
+                    {
+                      "email": "blocked@example.com",
+                      "password": "password123"
+                    }
+                    """))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("차단된 계정입니다. 관리자에게 문의해 주세요."));
 
         mockMvc.perform(get("/api/v1/auth/session").cookie(authCookie))
             .andExpect(status().isOk())

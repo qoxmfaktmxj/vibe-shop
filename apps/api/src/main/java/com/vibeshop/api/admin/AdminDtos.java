@@ -252,12 +252,81 @@ public final class AdminDtos {
     ) {
     }
 
+    public record AdminMemberResponse(
+        Long id,
+        String name,
+        String email,
+        String phone,
+        String provider,
+        String role,
+        String status,
+        boolean marketingOptIn,
+        OffsetDateTime createdAt,
+        OffsetDateTime lastLoginAt,
+        long orderCount,
+        long shippingAddressCount,
+        BigDecimal totalSpent
+    ) {
+    }
+
+    public record UpdateAdminMemberStatusRequest(
+        @NotBlank(message = "회원 상태를 입력해 주세요.") String status
+    ) {
+    }
+
+    public record AdminStatisticsSummaryResponse(
+        int windowDays,
+        long orderCount,
+        BigDecimal paidRevenue,
+        long newMemberCount,
+        long cancelledOrderCount,
+        long refundedOrderCount
+    ) {
+    }
+
+    public record AdminDailyMetricResponse(
+        String date,
+        long orderCount,
+        BigDecimal paidRevenue,
+        long newMemberCount
+    ) {
+    }
+
+    public record AdminCategorySalesResponse(
+        String categorySlug,
+        String categoryName,
+        long quantity,
+        BigDecimal revenue
+    ) {
+    }
+
+    public record AdminTopProductResponse(
+        Long productId,
+        String productName,
+        String categoryName,
+        long quantity,
+        BigDecimal revenue
+    ) {
+    }
+
+    public record AdminStatisticsResponse(
+        AdminStatisticsSummaryResponse sevenDay,
+        AdminStatisticsSummaryResponse thirtyDay,
+        List<AdminDailyMetricResponse> dailyMetrics,
+        List<AdminCategorySalesResponse> categorySales,
+        List<AdminTopProductResponse> topProducts
+    ) {
+    }
+
     public record AdminDashboardResponse(
         AdminDisplayResponse display,
         long productCount,
         long featuredProductCount,
         long lowStockCount,
         long memberCount,
+        long activeMemberCount,
+        long dormantMemberCount,
+        long blockedMemberCount,
         long totalOrderCount,
         long paidOrderCount,
         long pendingOrderCount,

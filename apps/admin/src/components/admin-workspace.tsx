@@ -6,14 +6,18 @@ import { useRouter } from "next/navigation";
 
 import { AdminCategoryManager } from "@/components/admin-category-manager";
 import { AdminDisplayManager } from "@/components/admin-display-manager";
+import { AdminMemberManager } from "@/components/admin-member-manager";
+import { AdminStatisticsPanel } from "@/components/admin-statistics-panel";
 import { updateDisplay, updateOrderStatus, updateProduct } from "@/lib/client-api";
 import { useAdminAuth } from "@/lib/auth-store";
 import type {
   AdminCategory,
   AdminDashboard,
   AdminDisplay,
+  AdminMember,
   AdminOrder,
   AdminProduct,
+  AdminStatistics,
   UpdateAdminDisplayPayload,
   UpdateAdminProductPayload,
 } from "@/lib/contracts";
@@ -63,12 +67,16 @@ export function AdminWorkspace({
   initialProducts,
   initialOrders,
   initialCategories,
+  initialMembers,
+  initialStatistics,
 }: {
   initialDashboard: AdminDashboard;
   initialDisplay: AdminDisplay;
   initialProducts: AdminProduct[];
   initialOrders: AdminOrder[];
   initialCategories: AdminCategory[];
+  initialMembers: AdminMember[];
+  initialStatistics: AdminStatistics;
 }) {
   const router = useRouter();
   const { session, signOut } = useAdminAuth();
@@ -76,6 +84,7 @@ export function AdminWorkspace({
   const [display, setDisplay] = useState(initialDisplay);
   const [products, setProducts] = useState(initialProducts);
   const [orders, setOrders] = useState(initialOrders);
+  const [members, setMembers] = useState(initialMembers);
   const [productQuery, setProductQuery] = useState("");
   const [selectedProductId, setSelectedProductId] = useState(initialProducts[0]?.id ?? 0);
   const [displayForm, setDisplayForm] = useState<UpdateAdminDisplayPayload>({
@@ -132,6 +141,23 @@ export function AdminWorkspace({
 
     setSelectedProductId(product.id);
     setProductForm(createProductForm(product));
+  }
+
+  function handleMemberUpdated(nextMember: AdminMember) {
+    setMembers((current) => {
+      const nextMembers = current.map((member) =>
+        member.id === nextMember.id ? nextMember : member,
+      );
+
+      setDashboard((currentDashboard) => ({
+        ...currentDashboard,
+        activeMemberCount: nextMembers.filter((member) => member.status === "ACTIVE").length,
+        dormantMemberCount: nextMembers.filter((member) => member.status === "DORMANT").length,
+        blockedMemberCount: nextMembers.filter((member) => member.status === "BLOCKED").length,
+      }));
+
+      return nextMembers;
+    });
   }
 
   return (
@@ -299,6 +325,8 @@ export function AdminWorkspace({
 
             <AdminDisplayManager initialDisplay={display} />
             <AdminCategoryManager initialCategories={initialCategories} />
+            <AdminStatisticsPanel statistics={initialStatistics} />
+            <AdminMemberManager members={members} onMemberUpdated={handleMemberUpdated} />
           </section>
 
           <section className="grid gap-6">

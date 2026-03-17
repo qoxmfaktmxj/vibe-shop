@@ -3,15 +3,18 @@ import type {
   AdminCategoryPayload,
   AdminDisplay,
   AdminDisplayItem,
+  AdminMember,
   AdminOrder,
   AdminProduct,
   AdminSession,
+  AdminStatistics,
   DeleteAdminCategoryResponse,
   DeleteAdminDisplayItemResponse,
   DisplayItemPayload,
   LoginPayload,
   UpdateAdminDisplayPayload,
   UpdateAdminDisplaySectionPayload,
+  UpdateAdminMemberStatusPayload,
   UpdateAdminOrderStatusPayload,
   UpdateAdminProductPayload,
 } from "@/lib/contracts";
@@ -157,5 +160,43 @@ export async function updateOrderStatus(
   return fetchJson<AdminOrder>(`/api/v1/admin/orders/${orderNumber}/status`, {
     method: "PUT",
     body: JSON.stringify(payload),
+  });
+}
+
+export async function getMembers(query?: {
+  status?: string;
+  provider?: string;
+  q?: string;
+}): Promise<AdminMember[]> {
+  const params = new URLSearchParams();
+  if (query?.status) {
+    params.set("status", query.status);
+  }
+  if (query?.provider) {
+    params.set("provider", query.provider);
+  }
+  if (query?.q) {
+    params.set("q", query.q);
+  }
+
+  const search = params.toString();
+  return fetchJson<AdminMember[]>(`/api/v1/admin/members${search ? `?${search}` : ""}`, {
+    method: "GET",
+  });
+}
+
+export async function updateMemberStatus(
+  memberId: number,
+  payload: UpdateAdminMemberStatusPayload,
+): Promise<AdminMember> {
+  return fetchJson<AdminMember>(`/api/v1/admin/members/${memberId}/status`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function getStatistics(): Promise<AdminStatistics> {
+  return fetchJson<AdminStatistics>("/api/v1/admin/statistics", {
+    method: "GET",
   });
 }

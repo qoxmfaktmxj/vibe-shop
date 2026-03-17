@@ -5,9 +5,11 @@ import type {
   AdminCategory,
   AdminDashboard,
   AdminDisplay,
+  AdminMember,
   AdminOrder,
   AdminProduct,
   AdminSession,
+  AdminStatistics,
 } from "@/lib/contracts";
 
 const API_BASE_URL =
@@ -71,6 +73,18 @@ export async function getAdminProducts(): Promise<AdminProduct[]> {
 
 export async function getAdminOrders(): Promise<AdminOrder[]> {
   return fetchFromApi<AdminOrder[]>("/api/v1/admin/orders", {
+    headers: await getCookieHeaders(),
+  });
+}
+
+export async function getAdminMembers(): Promise<AdminMember[]> {
+  return fetchFromApi<AdminMember[]>("/api/v1/admin/members", {
+    headers: await getCookieHeaders(),
+  });
+}
+
+export async function getAdminStatistics(): Promise<AdminStatistics> {
+  return fetchFromApi<AdminStatistics>("/api/v1/admin/statistics", {
     headers: await getCookieHeaders(),
   });
 }

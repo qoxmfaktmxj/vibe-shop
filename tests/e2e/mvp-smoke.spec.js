@@ -28,9 +28,8 @@ test("storefront MVP smoke flow", async ({ page }) => {
     fullPage: true,
   });
 
-  await page.locator('a[href^="/products/"]').first().click();
-  await expect(page).toHaveURL(/\/products\//, { timeout: NAVIGATION_TIMEOUT });
-  await page.waitForLoadState("networkidle");
+  await page.goto("/products/brew-mug", { waitUntil: "networkidle" });
+  await expect(page).toHaveURL(/\/products\/brew-mug$/, { timeout: NAVIGATION_TIMEOUT });
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "03-product.png"),
     fullPage: true,

@@ -152,12 +152,74 @@ export type UpdateAdminOrderStatusPayload = {
   status: string;
 };
 
+export type AdminMember = {
+  id: number;
+  name: string;
+  email: string;
+  phone: string | null;
+  provider: string;
+  role: string;
+  status: string;
+  marketingOptIn: boolean;
+  createdAt: string;
+  lastLoginAt: string | null;
+  orderCount: number;
+  shippingAddressCount: number;
+  totalSpent: number;
+};
+
+export type UpdateAdminMemberStatusPayload = {
+  status: string;
+};
+
+export type AdminStatisticsSummary = {
+  windowDays: number;
+  orderCount: number;
+  paidRevenue: number;
+  newMemberCount: number;
+  cancelledOrderCount: number;
+  refundedOrderCount: number;
+};
+
+export type AdminDailyMetric = {
+  date: string;
+  orderCount: number;
+  paidRevenue: number;
+  newMemberCount: number;
+};
+
+export type AdminCategorySales = {
+  categorySlug: string;
+  categoryName: string;
+  quantity: number;
+  revenue: number;
+};
+
+export type AdminTopProduct = {
+  productId: number;
+  productName: string;
+  categoryName: string;
+  quantity: number;
+  revenue: number;
+};
+
+export type AdminStatistics = {
+  sevenDay: AdminStatisticsSummary;
+  thirtyDay: AdminStatisticsSummary;
+  dailyMetrics: AdminDailyMetric[];
+  categorySales: AdminCategorySales[];
+  topProducts: AdminTopProduct[];
+};
+
 export type AdminDashboard = {
   display: AdminDisplay;
   productCount: number;
   featuredProductCount: number;
   lowStockCount: number;
   memberCount: number;
+  activeMemberCount: number;
+  dormantMemberCount: number;
+  blockedMemberCount: number;
   totalOrderCount: number;
   paidOrderCount: number;
   pendingOrderCount: number;
