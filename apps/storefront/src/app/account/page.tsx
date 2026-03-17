@@ -1,7 +1,14 @@
 import { redirect } from "next/navigation";
 
 import { AccountDashboard } from "@/components/account/account-dashboard";
-import { getAccountProfile, getAuthSession, getShippingAddresses, listOrders } from "@/lib/server-api";
+import {
+  getAccountProfile,
+  getAccountReviews,
+  getAccountWishlist,
+  getAuthSession,
+  getShippingAddresses,
+  listOrders,
+} from "@/lib/server-api";
 
 export default async function AccountPage() {
   const session = await getAuthSession().catch(() => ({ authenticated: false, user: null }));
@@ -10,10 +17,12 @@ export default async function AccountPage() {
     redirect("/login?next=/account");
   }
 
-  const [profile, addresses, orders] = await Promise.all([
+  const [profile, addresses, orders, wishlist, reviews] = await Promise.all([
     getAccountProfile(),
     getShippingAddresses(),
     listOrders(),
+    getAccountWishlist(),
+    getAccountReviews(),
   ]);
 
   return (
@@ -21,6 +30,8 @@ export default async function AccountPage() {
       initialProfile={profile}
       initialAddresses={addresses}
       recentOrders={orders.slice(0, 3)}
+      initialWishlist={wishlist}
+      initialReviews={reviews}
     />
   );
 }

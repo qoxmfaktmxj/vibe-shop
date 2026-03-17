@@ -4,6 +4,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,9 @@ import com.vibeshop.api.display.DisplayItem;
 import com.vibeshop.api.display.DisplaySection;
 import com.vibeshop.api.display.DisplaySectionCode;
 import com.vibeshop.api.display.DisplaySectionRepository;
+import com.vibeshop.api.review.ReviewService;
+import com.vibeshop.api.review.ReviewService.ProductReviewSnapshot;
+import com.vibeshop.api.wishlist.WishlistService;
 
 @Service
 @Transactional(readOnly = true)
@@ -56,24 +60,34 @@ public class CatalogService {
     private final ProductRepository productRepository;
     private final AdminDisplaySettingsRepository adminDisplaySettingsRepository;
     private final DisplaySectionRepository displaySectionRepository;
+    private final WishlistService wishlistService;
+    private final ReviewService reviewService;
 
     public CatalogService(
         CategoryRepository categoryRepository,
         ProductRepository productRepository,
         AdminDisplaySettingsRepository adminDisplaySettingsRepository,
-        DisplaySectionRepository displaySectionRepository
+        DisplaySectionRepository displaySectionRepository,
+        WishlistService wishlistService,
+        ReviewService reviewService
     ) {
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
         this.adminDisplaySettingsRepository = adminDisplaySettingsRepository;
         this.displaySectionRepository = displaySectionRepository;
+        this.wishlistService = wishlistService;
+        this.reviewService = reviewService;
     }
 
-    public HomeResponse getHome() {
+    public HomeResponse getHome(Long userId) {
         List<CategorySummary> categories = categoryRepository.findAllByVisibleTrueOrderByDisplayOrderAscIdAsc().stream()
             .map(this::toCategorySummary)
             .toList();
         List<Product> allProducts = productRepository.findAllByCategory_VisibleTrueOrderByFeaturedDescIdAsc();
+        Set<Long> wishlistedProductIds = wishlistService.getWishlistedProductIds(
+            userId,
+            allProducts.stream().map(Product::getId).toList()
+        );
         AdminDisplaySettings displaySettings = getDisplaySettings();
         OffsetDateTime current = now();
 
@@ -90,17 +104,17 @@ public class CatalogService {
                 .filter(Product::isFeatured)
                 .sorted(POPULAR_ORDER)
                 .limit(6)
-                .map(this::toProductSummary)
+                .map(product -> toProductSummary(product, wishlistedProductIds.contains(product.getId())))
                 .toList(),
             allProducts.stream()
                 .sorted(NEWEST_ORDER)
                 .limit(8)
-                .map(this::toProductSummary)
+                .map(product -> toProductSummary(product, wishlistedProductIds.contains(product.getId())))
                 .toList(),
             allProducts.stream()
                 .sorted(POPULAR_ORDER)
                 .limit(8)
-                .map(this::toProductSummary)
+                .map(product -> toProductSummary(product, wishlistedProductIds.contains(product.getId())))
                 .toList()
         );
     }
@@ -111,15 +125,7 @@ public class CatalogService {
             .toList();
     }
 
-    public List<ProductSummary> getProducts(String categorySlug) {
-        return getProducts(categorySlug, null, null);
-    }
-
-    public List<ProductSummary> getProducts(String categorySlug, String keyword) {
-        return getProducts(categorySlug, keyword, null);
-    }
-
-    public List<ProductSummary> getProducts(String categorySlug, String keyword, String sort) {
+    public List<ProductSummary> getProducts(String categorySlug, String keyword, String sort, Long userId) {
         String normalizedCategorySlug = categorySlug == null || categorySlug.isBlank() ? null : categorySlug.trim();
         String normalizedKeyword = keyword == null || keyword.isBlank() ? null : keyword.trim();
         String normalizedSort = sort == null || sort.isBlank() ? "recommended" : sort.trim();
@@ -133,12 +139,19 @@ public class CatalogService {
             : productRepository.searchVisible(normalizedCategorySlug, normalizedKeyword);
 
         applySort(products, normalizedSort);
-        return products.stream().map(this::toProductSummary).toList();
+        Set<Long> wishlistedProductIds = wishlistService.getWishlistedProductIds(
+            userId,
+            products.stream().map(Product::getId).toList()
+        );
+        return products.stream()
+            .map(product -> toProductSummary(product, wishlistedProductIds.contains(product.getId())))
+            .toList();
     }
 
-    public ProductDetailResponse getProduct(String slug) {
+    public ProductDetailResponse getProduct(String slug, Long userId) {
         Product product = productRepository.findBySlugAndCategory_VisibleTrue(slug)
             .orElseThrow(() -> new ResourceNotFoundException("상품을 찾을 수 없습니다."));
+        ProductReviewSnapshot reviewSnapshot = reviewService.getProductReviewSnapshot(product.getId(), userId);
 
         return new ProductDetailResponse(
             product.getId(),
@@ -153,7 +166,12 @@ public class CatalogService {
             product.getAccentColor(),
             product.getImageUrl(),
             product.getImageAlt(),
-            product.getStock()
+            product.getStock(),
+            wishlistService.isWishlisted(userId, product.getId()),
+            reviewSnapshot.canWriteReview(),
+            reviewSnapshot.hasReviewed(),
+            reviewSnapshot.summary(),
+            reviewSnapshot.reviews()
         );
     }
 
@@ -161,9 +179,9 @@ public class CatalogService {
         return adminDisplaySettingsRepository.findById(DISPLAY_SETTINGS_ID)
             .orElseGet(() -> adminDisplaySettingsRepository.save(new AdminDisplaySettings(
                 DISPLAY_SETTINGS_ID,
-                "리듬과 계절을 따라 고른 이번 시즌 셀렉션",
-                "리빙, 키친, 웰니스 카테고리에서 지금 바로 보기 좋은 신상품과 인기 상품을 묶어 제안합니다.",
-                "컬렉션 보기",
+                "由щ벉怨?怨꾩젅???곕씪 怨좊Ⅸ ?대쾲 ?쒖쫵 ??됱뀡",
+                "由щ튃, ?ㅼ튇, ?곕땲??移댄뀒怨좊━?먯꽌 吏湲?諛붾줈 蹂닿린 醫뗭? ?좎긽?덇낵 ?멸린 ?곹뭹??臾띠뼱 ?쒖븞?⑸땲??",
+                "而щ젆??蹂닿린",
                 "/search",
                 now()
             )));
@@ -177,12 +195,12 @@ public class CatalogService {
 
         OffsetDateTime current = now();
         return displaySectionRepository.saveAll(List.of(
-            new DisplaySection(DisplaySectionCode.HERO, "시즌 대표 배너", "메인 비주얼과 CTA를 함께 노출합니다.", 10, true, current),
-            new DisplaySection(DisplaySectionCode.FEATURED_CATEGORY, "카테고리 셀렉션", "운영 중인 주요 카테고리를 전면에서 소개합니다.", 20, true, current),
-            new DisplaySection(DisplaySectionCode.CURATED_PICK, "큐레이션 픽", "지금 보여주고 싶은 추천 상품을 강조합니다.", 30, true, current),
-            new DisplaySection(DisplaySectionCode.NEW_ARRIVALS, "신상품 드롭", "최근 등록된 상품을 우선 노출합니다.", 40, true, current),
-            new DisplaySection(DisplaySectionCode.BEST_SELLERS, "베스트셀러", "인기 점수가 높은 상품을 중심으로 구성합니다.", 50, true, current),
-            new DisplaySection(DisplaySectionCode.PROMOTION, "프로모션 배너", "기획전과 프로모션 링크를 하단 섹션에 노출합니다.", 60, true, current)
+            new DisplaySection(DisplaySectionCode.HERO, "Hero Banner", "Primary campaign area on the home page.", 10, true, current),
+            new DisplaySection(DisplaySectionCode.FEATURED_CATEGORY, "Featured Categories", "Highlights for major browsing categories.", 20, true, current),
+            new DisplaySection(DisplaySectionCode.CURATED_PICK, "Curated Picks", "Editor-selected products that deserve extra attention.", 30, true, current),
+            new DisplaySection(DisplaySectionCode.NEW_ARRIVALS, "New Arrivals", "Recently added products shown first.", 40, true, current),
+            new DisplaySection(DisplaySectionCode.BEST_SELLERS, "Best Sellers", "Products ranked by popularity and demand.", 50, true, current),
+            new DisplaySection(DisplaySectionCode.PROMOTION, "Promotion", "Campaign banners and promotional links.", 60, true, current)
         ));
     }
 
@@ -201,7 +219,7 @@ public class CatalogService {
         );
     }
 
-    private ProductSummary toProductSummary(Product product) {
+    private ProductSummary toProductSummary(Product product, boolean wishlisted) {
         return new ProductSummary(
             product.getId(),
             product.getSlug(),
@@ -213,7 +231,8 @@ public class CatalogService {
             product.getBadge(),
             product.getAccentColor(),
             product.getImageUrl(),
-            product.getImageAlt()
+            product.getImageAlt(),
+            wishlisted
         );
     }
 

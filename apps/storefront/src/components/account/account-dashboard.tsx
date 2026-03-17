@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 
@@ -7,14 +8,17 @@ import {
   createShippingAddress,
   deleteShippingAddress,
   listShippingAddresses,
+  removeWishlistItem,
   updateAccountProfile,
   updateShippingAddress,
 } from "@/lib/client-api";
 import type {
   AccountProfile,
+  MyReview,
   OrderSummaryResponse,
   ShippingAddress,
   ShippingAddressPayload,
+  WishlistItem,
 } from "@/lib/contracts";
 import { formatPrice } from "@/lib/currency";
 import { useAuth } from "@/lib/auth-store";
@@ -34,6 +38,12 @@ const PROVIDER_LABELS: Record<string, string> = {
   LOCAL: "일반 회원",
   KAKAO: "카카오 로그인",
   NAVER: "네이버 로그인",
+  GOOGLE: "Google Login",
+};
+
+const REVIEW_STATUS_LABELS: Record<string, string> = {
+  PUBLISHED: "공개",
+  HIDDEN: "숨김",
 };
 
 function sortAddresses(addresses: ShippingAddress[]) {
@@ -53,10 +63,14 @@ export function AccountDashboard({
   initialProfile,
   initialAddresses,
   recentOrders,
+  initialWishlist,
+  initialReviews,
 }: {
   initialProfile: AccountProfile;
   initialAddresses: ShippingAddress[];
   recentOrders: OrderSummaryResponse[];
+  initialWishlist: WishlistItem[];
+  initialReviews: MyReview[];
 }) {
   const { refreshSession } = useAuth();
   const [profile, setProfile] = useState(initialProfile);
@@ -64,12 +78,17 @@ export function AccountDashboard({
   const [profileMessage, setProfileMessage] = useState("");
   const [profileError, setProfileError] = useState("");
   const [addresses, setAddresses] = useState(sortAddresses(initialAddresses));
+  const [wishlist, setWishlist] = useState(initialWishlist);
+  const [reviews] = useState(initialReviews);
+  const [wishlistMessage, setWishlistMessage] = useState("");
+  const [wishlistError, setWishlistError] = useState("");
   const [addressForm, setAddressForm] = useState<ShippingAddressPayload>(EMPTY_ADDRESS_FORM);
   const [editingAddressId, setEditingAddressId] = useState<number | null>(null);
   const [addressMessage, setAddressMessage] = useState("");
   const [addressError, setAddressError] = useState("");
   const [isSavingProfile, startSavingProfile] = useTransition();
   const [isSavingAddress, startSavingAddress] = useTransition();
+  const [isUpdatingWishlist, startUpdatingWishlist] = useTransition();
 
   const joinedDate = new Date(profile.createdAt).toLocaleDateString("ko-KR", {
     year: "numeric",
@@ -108,16 +127,16 @@ export function AccountDashboard({
   }
 
   return (
-    <div className="grid-shell">
+    <div className="grid-shell space-y-6">
       <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <article className="surface-card rounded-[36px] p-8 sm:p-10">
           <p className="display-eyebrow">My Page</p>
           <h1 className="display-heading mt-4 text-4xl font-semibold">내 계정</h1>
           <p className="mt-4 max-w-2xl text-base leading-8 text-[var(--ink-soft)]">
-            주문 현황과 배송지, 계정 정보를 한 곳에서 관리합니다. 회원 주문은 이 계정에만 연결됩니다.
+            주문, 배송지, 찜, 리뷰를 한 곳에서 관리합니다.
           </p>
 
-          <dl className="mt-8 grid gap-4 sm:grid-cols-3">
+          <dl className="mt-8 grid gap-4 sm:grid-cols-4">
             <div className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
               <dt className="display-eyebrow">Joined</dt>
               <dd className="mt-3 text-lg font-semibold">{joinedDate}</dd>
@@ -127,8 +146,12 @@ export function AccountDashboard({
               <dd className="mt-3 text-3xl font-semibold">{profile.orderCount}</dd>
             </div>
             <div className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
-              <dt className="display-eyebrow">Addresses</dt>
-              <dd className="mt-3 text-3xl font-semibold">{profile.addressCount}</dd>
+              <dt className="display-eyebrow">Wishlist</dt>
+              <dd className="mt-3 text-3xl font-semibold">{profile.wishlistCount}</dd>
+            </div>
+            <div className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
+              <dt className="display-eyebrow">Reviews</dt>
+              <dd className="mt-3 text-3xl font-semibold">{profile.reviewCount}</dd>
             </div>
           </dl>
         </article>
@@ -199,7 +222,7 @@ export function AccountDashboard({
               disabled={isSavingProfile}
               className="button-primary w-full px-5 py-3 disabled:opacity-60"
             >
-              {isSavingProfile ? "저장 중입니다." : "계정 저장"}
+              {isSavingProfile ? "저장 중..." : "계정 저장"}
             </button>
           </form>
         </article>
@@ -258,7 +281,7 @@ export function AccountDashboard({
                         type="button"
                         disabled={isSavingAddress}
                         onClick={() => {
-                          if (!window.confirm("이 배송지를 삭제하시겠습니까?")) {
+                          if (!window.confirm("이 배송지를 삭제할까요?")) {
                             return;
                           }
                           setAddressMessage("");
@@ -288,7 +311,7 @@ export function AccountDashboard({
               ))
             ) : (
               <div className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
-                등록된 배송지가 없습니다. 첫 배송지를 등록하면 기본 배송지로 자동 지정됩니다.
+                등록된 배송지가 없습니다. 첫 배송지는 기본 배송지로 설정됩니다.
               </div>
             )}
           </div>
@@ -340,7 +363,7 @@ export function AccountDashboard({
             }}
           >
             <label className="grid gap-2">
-              <span className="text-sm font-medium">배송지 별칭</span>
+              <span className="text-sm font-medium">배송지 이름</span>
               <input
                 name="label"
                 required
@@ -469,7 +492,7 @@ export function AccountDashboard({
                 disabled={isSavingAddress}
                 className="button-primary flex-1 px-5 py-3 disabled:opacity-60"
               >
-                {isSavingAddress ? "저장 중입니다." : editingAddressId ? "배송지 수정" : "배송지 저장"}
+                {isSavingAddress ? "저장 중..." : editingAddressId ? "배송지 수정" : "배송지 저장"}
               </button>
               <button
                 type="button"
@@ -480,6 +503,138 @@ export function AccountDashboard({
               </button>
             </div>
           </form>
+        </article>
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-[1fr_1fr]">
+        <article className="surface-card rounded-[36px] p-8 sm:p-10">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="display-eyebrow">Wishlist</p>
+              <h2 className="display-heading mt-4 text-3xl font-semibold">찜한 상품</h2>
+            </div>
+            <Link href="/search" className="button-secondary px-4 py-3">
+              상품 더 보기
+            </Link>
+          </div>
+
+          <div className="mt-8 space-y-4">
+            {wishlist.length > 0 ? (
+              wishlist.map((item) => (
+                <article
+                  key={item.productId}
+                  className="grid gap-4 rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5 sm:grid-cols-[120px_minmax(0,1fr)]"
+                >
+                  <Link href={`/products/${item.slug}`} className="relative min-h-[140px] overflow-hidden rounded-[24px]">
+                    <Image
+                      src={item.imageUrl}
+                      alt={item.imageAlt}
+                      fill
+                      sizes="120px"
+                      className="object-cover"
+                    />
+                  </Link>
+                  <div className="flex flex-col gap-4">
+                    <div>
+                      <p className="display-eyebrow">{item.categoryName}</p>
+                      <Link href={`/products/${item.slug}`} className="mt-2 block text-xl font-semibold">
+                        {item.name}
+                      </Link>
+                      <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">{item.summary}</p>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.16em] text-[var(--ink-soft)]">Saved</p>
+                        <p className="mt-1 text-sm text-[var(--ink-soft)]">
+                          {new Date(item.createdAt).toLocaleDateString("ko-KR")}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <p className="text-lg font-semibold text-[var(--primary)]">{formatPrice(item.price)}</p>
+                        <button
+                          type="button"
+                          disabled={isUpdatingWishlist}
+                          onClick={() => {
+                            setWishlistMessage("");
+                            setWishlistError("");
+                            startUpdatingWishlist(() => {
+                              void (async () => {
+                                try {
+                                  await removeWishlistItem(item.productId);
+                                  setWishlist((current) =>
+                                    current.filter((currentItem) => currentItem.productId !== item.productId),
+                                  );
+                                  setProfile((current) => ({
+                                    ...current,
+                                    wishlistCount: Math.max(0, current.wishlistCount - 1),
+                                  }));
+                                  setWishlistMessage("찜 목록을 업데이트했습니다.");
+                                } catch (error) {
+                                  setWishlistError(getErrorMessage(error, "찜 해제 중 문제가 발생했습니다."));
+                                }
+                              })();
+                            });
+                          }}
+                          className="button-secondary px-4 py-3 disabled:opacity-60"
+                        >
+                          찜 해제
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              ))
+            ) : (
+              <div className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
+                아직 찜한 상품이 없습니다. 마음에 드는 상품을 저장해 보세요.
+              </div>
+            )}
+          </div>
+          {wishlistMessage ? <p className="mt-4 text-sm text-[var(--secondary)]">{wishlistMessage}</p> : null}
+          {wishlistError ? <p className="mt-4 text-sm text-red-600">{wishlistError}</p> : null}
+        </article>
+
+        <article className="surface-card rounded-[36px] p-8 sm:p-10">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="display-eyebrow">Reviews</p>
+              <h2 className="display-heading mt-4 text-3xl font-semibold">내 리뷰</h2>
+            </div>
+            <Link href="/search" className="button-secondary px-4 py-3">
+              리뷰 쓸 상품 찾기
+            </Link>
+          </div>
+
+          <div className="mt-8 space-y-4">
+            {reviews.length > 0 ? (
+              reviews.map((review) => (
+                <article
+                  key={review.id}
+                  className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6"
+                >
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <Link href={`/products/${review.productSlug}`} className="text-lg font-semibold">
+                        {review.productName}
+                      </Link>
+                      <p className="mt-2 text-sm text-[var(--ink-soft)]">
+                        {review.rating} / 5 · {REVIEW_STATUS_LABELS[review.status] ?? review.status}
+                      </p>
+                    </div>
+                    <p className="text-sm text-[var(--ink-soft)]">
+                      {new Date(review.createdAt).toLocaleDateString("ko-KR")}
+                    </p>
+                  </div>
+                  <p className="mt-4 text-base font-semibold">{review.title}</p>
+                  <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">{review.content}</p>
+                </article>
+              ))
+            ) : (
+              <div className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
+                아직 작성한 리뷰가 없습니다. 구매 후 상품 상세에서 바로 작성할 수 있습니다.
+              </div>
+            )}
+          </div>
         </article>
       </section>
 
@@ -507,15 +662,11 @@ export function AccountDashboard({
                     <div className="space-y-2">
                       <p className="text-xl font-semibold">{order.orderNumber}</p>
                       <p className="text-sm text-[var(--ink-soft)]">{order.customerName}</p>
-                      <p className="text-sm text-[var(--ink-soft)]">
-                        상품 수량 {order.itemCount}개
-                      </p>
+                      <p className="text-sm text-[var(--ink-soft)]">상품 수량 {order.itemCount}개</p>
                     </div>
                     <div className="space-y-2 text-sm sm:text-right">
-                      <p className="font-semibold text-[var(--ink)]">
-                        {formatOrderStatus(order.status)}
-                      </p>
-                      <p>{formatPrice(order.total)}원</p>
+                      <p className="font-semibold text-[var(--ink)]">{formatOrderStatus(order.status)}</p>
+                      <p>{formatPrice(order.total)}</p>
                       <p className="text-[var(--ink-soft)]">
                         {new Date(order.createdAt).toLocaleString("ko-KR")}
                       </p>
@@ -525,7 +676,7 @@ export function AccountDashboard({
               ))
             ) : (
               <div className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
-                아직 완료된 주문이 없습니다. 첫 주문을 만들면 이 영역에 최근 주문이 표시됩니다.
+                아직 주문 내역이 없습니다.
               </div>
             )}
           </div>
@@ -539,9 +690,9 @@ export function AccountDashboard({
               href="/search"
               className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 transition hover:translate-y-[-2px]"
             >
-              <p className="text-lg font-semibold">상품 더 보기</p>
+              <p className="text-lg font-semibold">상품 둘러보기</p>
               <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">
-                카테고리와 검색 화면으로 이동해 다음 주문을 준비합니다.
+                카테고리와 검색 화면으로 이동합니다.
               </p>
             </Link>
             <Link
@@ -550,7 +701,7 @@ export function AccountDashboard({
             >
               <p className="text-lg font-semibold">장바구니 확인</p>
               <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">
-                저장된 상품을 점검하고 바로 주문으로 이어갈 수 있습니다.
+                담아둔 상품을 확인하고 주문으로 이어갈 수 있습니다.
               </p>
             </Link>
             <Link
@@ -559,7 +710,7 @@ export function AccountDashboard({
             >
               <p className="text-lg font-semibold">비회원 주문 조회</p>
               <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">
-                별도 비회원 주문은 주문번호와 연락처로 다시 확인할 수 있습니다.
+                별도의 비회원 주문도 주문번호와 연락처로 다시 확인할 수 있습니다.
               </p>
             </Link>
           </div>

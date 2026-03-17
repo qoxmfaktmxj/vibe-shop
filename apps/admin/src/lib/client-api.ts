@@ -6,6 +6,7 @@ import type {
   AdminMember,
   AdminOrder,
   AdminProduct,
+  AdminReview,
   AdminSession,
   AdminStatistics,
   DeleteAdminCategoryResponse,
@@ -17,6 +18,7 @@ import type {
   UpdateAdminMemberStatusPayload,
   UpdateAdminOrderStatusPayload,
   UpdateAdminProductPayload,
+  UpdateAdminReviewStatusPayload,
 } from "@/lib/contracts";
 
 function getApiBaseUrl() {
@@ -198,5 +200,33 @@ export async function updateMemberStatus(
 export async function getStatistics(): Promise<AdminStatistics> {
   return fetchJson<AdminStatistics>("/api/v1/admin/statistics", {
     method: "GET",
+  });
+}
+
+export async function getReviews(query?: {
+  status?: string;
+  q?: string;
+}): Promise<AdminReview[]> {
+  const params = new URLSearchParams();
+  if (query?.status) {
+    params.set("status", query.status);
+  }
+  if (query?.q) {
+    params.set("q", query.q);
+  }
+
+  const search = params.toString();
+  return fetchJson<AdminReview[]>(`/api/v1/admin/reviews${search ? `?${search}` : ""}`, {
+    method: "GET",
+  });
+}
+
+export async function updateReviewStatus(
+  reviewId: number,
+  payload: UpdateAdminReviewStatusPayload,
+): Promise<AdminReview> {
+  return fetchJson<AdminReview>(`/api/v1/admin/reviews/${reviewId}/status`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
   });
 }

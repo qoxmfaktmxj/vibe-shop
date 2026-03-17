@@ -2,25 +2,34 @@ package com.vibeshop.api.catalog;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.vibeshop.api.auth.AuthService;
+
 @RestController
 @RequestMapping("/api/v1")
 public class CatalogController {
 
-    private final CatalogService catalogService;
+    private static final String AUTH_SESSION_COOKIE = "vibe_shop_session";
 
-    public CatalogController(CatalogService catalogService) {
+    private final CatalogService catalogService;
+    private final AuthService authService;
+
+    public CatalogController(CatalogService catalogService, AuthService authService) {
         this.catalogService = catalogService;
+        this.authService = authService;
     }
 
     @GetMapping("/home")
-    HomeResponse home() {
-        return catalogService.getHome();
+    HomeResponse home(
+        @CookieValue(value = AUTH_SESSION_COOKIE, required = false) String authSessionToken
+    ) {
+        return catalogService.getHome(authService.resolveAuthenticatedUserId(authSessionToken));
     }
 
     @GetMapping("/categories")
@@ -30,15 +39,24 @@ public class CatalogController {
 
     @GetMapping("/products")
     List<ProductSummary> products(
+        @CookieValue(value = AUTH_SESSION_COOKIE, required = false) String authSessionToken,
         @RequestParam(required = false) String category,
         @RequestParam(required = false, name = "q") String keyword,
         @RequestParam(required = false) String sort
     ) {
-        return catalogService.getProducts(category, keyword, sort);
+        return catalogService.getProducts(
+            category,
+            keyword,
+            sort,
+            authService.resolveAuthenticatedUserId(authSessionToken)
+        );
     }
 
     @GetMapping("/products/{slug}")
-    ProductDetailResponse product(@PathVariable String slug) {
-        return catalogService.getProduct(slug);
+    ProductDetailResponse product(
+        @CookieValue(value = AUTH_SESSION_COOKIE, required = false) String authSessionToken,
+        @PathVariable String slug
+    ) {
+        return catalogService.getProduct(slug, authService.resolveAuthenticatedUserId(authSessionToken));
     }
 }

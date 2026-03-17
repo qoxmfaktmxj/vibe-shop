@@ -15,6 +15,8 @@ import com.vibeshop.api.auth.User;
 import com.vibeshop.api.auth.UserRepository;
 import com.vibeshop.api.common.ResourceNotFoundException;
 import com.vibeshop.api.order.CustomerOrderRepository;
+import com.vibeshop.api.review.ReviewService;
+import com.vibeshop.api.wishlist.WishlistService;
 
 @Service
 @Transactional
@@ -25,15 +27,21 @@ public class AccountService {
     private final UserRepository userRepository;
     private final ShippingAddressRepository shippingAddressRepository;
     private final CustomerOrderRepository customerOrderRepository;
+    private final WishlistService wishlistService;
+    private final ReviewService reviewService;
 
     public AccountService(
         UserRepository userRepository,
         ShippingAddressRepository shippingAddressRepository,
-        CustomerOrderRepository customerOrderRepository
+        CustomerOrderRepository customerOrderRepository,
+        WishlistService wishlistService,
+        ReviewService reviewService
     ) {
         this.userRepository = userRepository;
         this.shippingAddressRepository = shippingAddressRepository;
         this.customerOrderRepository = customerOrderRepository;
+        this.wishlistService = wishlistService;
+        this.reviewService = reviewService;
     }
 
     @Transactional(readOnly = true)
@@ -137,7 +145,9 @@ public class AccountService {
             user.getProvider().name(),
             user.getCreatedAt(),
             customerOrderRepository.countByUserId(user.getId()),
-            shippingAddressRepository.countByUser_Id(user.getId())
+            shippingAddressRepository.countByUser_Id(user.getId()),
+            wishlistService.countByUserId(user.getId()),
+            reviewService.countByUserId(user.getId())
         );
     }
 

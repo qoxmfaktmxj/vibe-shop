@@ -8,6 +8,7 @@ import type {
   AdminMember,
   AdminOrder,
   AdminProduct,
+  AdminReview,
   AdminSession,
   AdminStatistics,
 } from "@/lib/contracts";
@@ -85,6 +86,12 @@ export async function getAdminMembers(): Promise<AdminMember[]> {
 
 export async function getAdminStatistics(): Promise<AdminStatistics> {
   return fetchFromApi<AdminStatistics>("/api/v1/admin/statistics", {
+    headers: await getCookieHeaders(),
+  });
+}
+
+export async function getAdminReviews(): Promise<AdminReview[]> {
+  return fetchFromApi<AdminReview[]>("/api/v1/admin/reviews", {
     headers: await getCookieHeaders(),
   });
 }

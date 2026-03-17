@@ -21,6 +21,11 @@ import com.vibeshop.api.account.AccountDtos.ShippingAddressResponse;
 import com.vibeshop.api.account.AccountDtos.UpdateProfileRequest;
 import com.vibeshop.api.auth.AuthService;
 import com.vibeshop.api.common.UnauthorizedException;
+import com.vibeshop.api.review.MyReviewResponse;
+import com.vibeshop.api.review.ReviewService;
+import com.vibeshop.api.wishlist.WishlistDtos.WishlistProductResponse;
+import com.vibeshop.api.wishlist.WishlistDtos.WishlistStateResponse;
+import com.vibeshop.api.wishlist.WishlistService;
 
 @RestController
 @RequestMapping("/api/v1/account")
@@ -30,10 +35,19 @@ public class AccountController {
 
     private final AccountService accountService;
     private final AuthService authService;
+    private final WishlistService wishlistService;
+    private final ReviewService reviewService;
 
-    public AccountController(AccountService accountService, AuthService authService) {
+    public AccountController(
+        AccountService accountService,
+        AuthService authService,
+        WishlistService wishlistService,
+        ReviewService reviewService
+    ) {
         this.accountService = accountService;
         this.authService = authService;
+        this.wishlistService = wishlistService;
+        this.reviewService = reviewService;
     }
 
     @GetMapping
@@ -82,6 +96,36 @@ public class AccountController {
     ) {
         accountService.deleteAddress(requireAuthenticatedUserId(authSessionToken), addressId);
         return new DeleteShippingAddressResponse(addressId);
+    }
+
+    @GetMapping("/wishlist")
+    List<WishlistProductResponse> wishlist(
+        @CookieValue(value = AUTH_SESSION_COOKIE, required = false) String authSessionToken
+    ) {
+        return wishlistService.getWishlist(requireAuthenticatedUserId(authSessionToken));
+    }
+
+    @PostMapping("/wishlist/items/{productId}")
+    WishlistStateResponse addWishlistItem(
+        @CookieValue(value = AUTH_SESSION_COOKIE, required = false) String authSessionToken,
+        @PathVariable Long productId
+    ) {
+        return wishlistService.addWishlistItem(requireAuthenticatedUserId(authSessionToken), productId);
+    }
+
+    @DeleteMapping("/wishlist/items/{productId}")
+    WishlistStateResponse removeWishlistItem(
+        @CookieValue(value = AUTH_SESSION_COOKIE, required = false) String authSessionToken,
+        @PathVariable Long productId
+    ) {
+        return wishlistService.removeWishlistItem(requireAuthenticatedUserId(authSessionToken), productId);
+    }
+
+    @GetMapping("/reviews")
+    List<MyReviewResponse> reviews(
+        @CookieValue(value = AUTH_SESSION_COOKIE, required = false) String authSessionToken
+    ) {
+        return reviewService.getMyReviews(requireAuthenticatedUserId(authSessionToken));
     }
 
     private Long requireAuthenticatedUserId(String authSessionToken) {

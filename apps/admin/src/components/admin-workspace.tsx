@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { AdminCategoryManager } from "@/components/admin-category-manager";
 import { AdminDisplayManager } from "@/components/admin-display-manager";
 import { AdminMemberManager } from "@/components/admin-member-manager";
+import { AdminReviewManager } from "@/components/admin-review-manager";
 import { AdminStatisticsPanel } from "@/components/admin-statistics-panel";
 import { updateDisplay, updateOrderStatus, updateProduct } from "@/lib/client-api";
 import { useAdminAuth } from "@/lib/auth-store";
@@ -17,6 +18,7 @@ import type {
   AdminMember,
   AdminOrder,
   AdminProduct,
+  AdminReview,
   AdminStatistics,
   UpdateAdminDisplayPayload,
   UpdateAdminProductPayload,
@@ -69,6 +71,7 @@ export function AdminWorkspace({
   initialCategories,
   initialMembers,
   initialStatistics,
+  initialReviews,
 }: {
   initialDashboard: AdminDashboard;
   initialDisplay: AdminDisplay;
@@ -77,6 +80,7 @@ export function AdminWorkspace({
   initialCategories: AdminCategory[];
   initialMembers: AdminMember[];
   initialStatistics: AdminStatistics;
+  initialReviews: AdminReview[];
 }) {
   const router = useRouter();
   const { session, signOut } = useAdminAuth();
@@ -85,6 +89,7 @@ export function AdminWorkspace({
   const [products, setProducts] = useState(initialProducts);
   const [orders, setOrders] = useState(initialOrders);
   const [members, setMembers] = useState(initialMembers);
+  const [reviews] = useState(initialReviews);
   const [productQuery, setProductQuery] = useState("");
   const [selectedProductId, setSelectedProductId] = useState(initialProducts[0]?.id ?? 0);
   const [displayForm, setDisplayForm] = useState<UpdateAdminDisplayPayload>({
@@ -327,6 +332,7 @@ export function AdminWorkspace({
             <AdminCategoryManager initialCategories={initialCategories} />
             <AdminStatisticsPanel statistics={initialStatistics} />
             <AdminMemberManager members={members} onMemberUpdated={handleMemberUpdated} />
+            <AdminReviewManager reviews={reviews} />
           </section>
 
           <section className="grid gap-6">

@@ -211,6 +211,24 @@ export type AdminStatistics = {
   topProducts: AdminTopProduct[];
 };
 
+export type AdminReview = {
+  id: number;
+  productId: number;
+  productSlug: string;
+  productName: string;
+  reviewerName: string;
+  reviewerEmail: string;
+  rating: number;
+  title: string;
+  content: string;
+  status: string;
+  createdAt: string;
+};
+
+export type UpdateAdminReviewStatusPayload = {
+  status: string;
+};
+
 export type AdminDashboard = {
   display: AdminDisplay;
   productCount: number;

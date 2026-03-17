@@ -17,7 +17,9 @@ public final class AccountDtos {
         String provider,
         OffsetDateTime createdAt,
         long orderCount,
-        long addressCount
+        long addressCount,
+        long wishlistCount,
+        long reviewCount
     ) {
     }
 

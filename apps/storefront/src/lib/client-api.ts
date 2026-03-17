@@ -5,16 +5,20 @@ import type {
   CartItem,
   CartResponse,
   CheckoutPreview,
+  CreateReviewPayload,
   CreateOrderPayload,
   CreateOrderResponse,
   DeleteShippingAddressResponse,
   GuestOrderLookupPayload,
   GuestOrderLookupResponse,
   LoginPayload,
+  MyReview,
   ShippingAddress,
   ShippingAddressPayload,
   SignUpPayload,
   UpdateAccountProfilePayload,
+  WishlistItem,
+  WishlistStateResponse,
 } from "@/lib/contracts";
 
 function getApiBaseUrl() {
@@ -142,6 +146,44 @@ export async function deleteShippingAddress(
 ): Promise<DeleteShippingAddressResponse> {
   return fetchJson<DeleteShippingAddressResponse>(`/api/v1/account/addresses/${addressId}`, {
     method: "DELETE",
+  });
+}
+
+export async function listAccountWishlist(): Promise<WishlistItem[]> {
+  return fetchJson<WishlistItem[]>("/api/v1/account/wishlist", {
+    method: "GET",
+  });
+}
+
+export async function addWishlistItem(
+  productId: number,
+): Promise<WishlistStateResponse> {
+  return fetchJson<WishlistStateResponse>(`/api/v1/account/wishlist/items/${productId}`, {
+    method: "POST",
+  });
+}
+
+export async function removeWishlistItem(
+  productId: number,
+): Promise<WishlistStateResponse> {
+  return fetchJson<WishlistStateResponse>(`/api/v1/account/wishlist/items/${productId}`, {
+    method: "DELETE",
+  });
+}
+
+export async function listAccountReviews(): Promise<MyReview[]> {
+  return fetchJson<MyReview[]>("/api/v1/account/reviews", {
+    method: "GET",
+  });
+}
+
+export async function createProductReview(
+  productId: number,
+  payload: CreateReviewPayload,
+): Promise<MyReview> {
+  return fetchJson<MyReview>(`/api/v1/products/${productId}/reviews`, {
+    method: "POST",
+    body: JSON.stringify(payload),
   });
 }
 

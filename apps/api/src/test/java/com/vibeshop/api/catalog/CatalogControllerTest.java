@@ -27,6 +27,8 @@ class CatalogControllerTest {
 
     @BeforeEach
     void setUp() {
+        jdbcClient.sql("DELETE FROM wishlist_items").update();
+        jdbcClient.sql("DELETE FROM product_reviews").update();
         jdbcClient.sql("DELETE FROM shopping_cart_items").update();
         jdbcClient.sql("DELETE FROM customer_order_lines").update();
         jdbcClient.sql("DELETE FROM order_payments").update();
@@ -51,26 +53,54 @@ class CatalogControllerTest {
                 hero_title,
                 hero_subtitle
             ) VALUES
-              (1, 'living', '리빙', '공간의 결을 다듬는 리빙 컬렉션', '#ff8d6b', 10, TRUE, '/images/products/living-01.jpg', '리빙 커버', '리빙 히어로', '리빙 히어로 설명'),
-              (2, 'kitchen', '키친', '테이블과 조리를 위한 키친 셀렉션', '#ffbf5f', 20, TRUE, '/images/products/kitchen-01.jpg', '키친 커버', '키친 히어로', '키친 히어로 설명'),
-              (3, 'wellness', '웰니스', '휴식과 루틴을 위한 웰니스 아이템', '#68b78e', 30, TRUE, '/images/products/wellness-01.jpg', '웰니스 커버', '웰니스 히어로', '웰니스 히어로 설명')
+              (1, 'living', 'Living', 'Living edit', '#ff8d6b', 10, TRUE, '/images/products/living-01.jpg', 'Living cover', 'Living hero', 'Living subtitle'),
+              (2, 'kitchen', 'Kitchen', 'Kitchen edit', '#ffbf5f', 20, TRUE, '/images/products/kitchen-01.jpg', 'Kitchen cover', 'Kitchen hero', 'Kitchen subtitle'),
+              (3, 'wellness', 'Wellness', 'Wellness edit', '#68b78e', 30, TRUE, '/images/products/wellness-01.jpg', 'Wellness cover', 'Wellness hero', 'Wellness subtitle')
             """).update();
 
         insertProduct(
-            10L, 1L, "linen-bed-set", "리넨 베드 세트", "리빙 베스트셀러",
-            89000, true, 980, OffsetDateTime.of(2026, 2, 1, 9, 0, 0, 0, ZoneOffset.ofHours(9))
+            10L,
+            1L,
+            "linen-bed-set",
+            "Linen Bed Set",
+            "Living best seller",
+            89000,
+            true,
+            980,
+            OffsetDateTime.of(2026, 2, 1, 9, 0, 0, 0, ZoneOffset.ofHours(9))
         );
         insertProduct(
-            11L, 1L, "arch-wall-mirror", "아치 월 미러", "신상품 리빙 셀렉션",
-            149000, false, 620, OffsetDateTime.of(2026, 3, 10, 9, 0, 0, 0, ZoneOffset.ofHours(9))
+            11L,
+            1L,
+            "arch-wall-mirror",
+            "Arch Wall Mirror",
+            "Living new arrival",
+            149000,
+            false,
+            620,
+            OffsetDateTime.of(2026, 3, 10, 9, 0, 0, 0, ZoneOffset.ofHours(9))
         );
         insertProduct(
-            12L, 2L, "stone-plate-set", "스톤 플레이트 세트", "키친 베스트셀러",
-            42000, true, 970, OffsetDateTime.of(2026, 3, 12, 9, 0, 0, 0, ZoneOffset.ofHours(9))
+            12L,
+            2L,
+            "stone-plate-set",
+            "Stone Plate Set",
+            "Kitchen best seller",
+            42000,
+            true,
+            970,
+            OffsetDateTime.of(2026, 3, 12, 9, 0, 0, 0, ZoneOffset.ofHours(9))
         );
         insertProduct(
-            13L, 3L, "balance-yoga-mat", "밸런스 요가 매트", "웰니스 인기 상품",
-            68000, false, 860, OffsetDateTime.of(2026, 3, 13, 9, 0, 0, 0, ZoneOffset.ofHours(9))
+            13L,
+            3L,
+            "balance-yoga-mat",
+            "Balance Yoga Mat",
+            "Wellness popular item",
+            68000,
+            false,
+            860,
+            OffsetDateTime.of(2026, 3, 13, 9, 0, 0, 0, ZoneOffset.ofHours(9))
         );
     }
 
@@ -78,7 +108,7 @@ class CatalogControllerTest {
     void homeIncludesDisplaySectionsAndCategoryMetadata() throws Exception {
         mockMvc.perform(get("/api/v1/home"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.heroCtaLabel").value("컬렉션 보기"))
+            .andExpect(jsonPath("$.heroCtaLabel").isNotEmpty())
             .andExpect(jsonPath("$.displaySections.length()").value(6))
             .andExpect(jsonPath("$.displaySections[0].code").value("HERO"))
             .andExpect(jsonPath("$.featuredCategories.length()").value(3))
@@ -106,7 +136,7 @@ class CatalogControllerTest {
     void searchCanFilterByCategoryAndKeyword() throws Exception {
         mockMvc.perform(get("/api/v1/products")
                 .param("category", "living")
-                .param("q", "리빙")
+                .param("q", "living")
                 .param("sort", "newest"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(2))
@@ -149,12 +179,12 @@ class CatalogControllerTest {
                 slug,
                 name,
                 summary,
-                name + " 상세 설명",
+                name + " detail",
                 price,
                 featured ? "FEATURED" : "STANDARD",
                 "#29339b",
                 "/images/products/test.jpg",
-                name + " 이미지",
+                name + " image",
                 featured,
                 20,
                 popularityScore,

@@ -1,4 +1,3 @@
-import { cache } from "react";
 import { cookies } from "next/headers";
 
 import type {
@@ -6,11 +5,13 @@ import type {
   AuthSession,
   Category,
   HomeResponse,
+  MyReview,
   OrderResponse,
   OrderSummaryResponse,
   ProductDetail,
   ProductSummary,
   ShippingAddress,
+  WishlistItem,
 } from "@/lib/contracts";
 
 const API_BASE_URL =
@@ -48,11 +49,17 @@ async function fetchFromApi<T>(path: string, init?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-export const getHomeData = cache(async () => fetchFromApi<HomeResponse>("/api/v1/home"));
+export async function getHomeData() {
+  return fetchFromApi<HomeResponse>("/api/v1/home", {
+    headers: await getCookieHeaders(),
+  });
+}
 
-export const getCategories = cache(async () => fetchFromApi<Category[]>("/api/v1/categories"));
+export async function getCategories() {
+  return fetchFromApi<Category[]>("/api/v1/categories");
+}
 
-export const getProducts = cache(async (category?: string, sort?: string) => {
+export async function getProducts(category?: string, sort?: string) {
   const params = new URLSearchParams();
   if (category) {
     params.set("category", category);
@@ -61,10 +68,12 @@ export const getProducts = cache(async (category?: string, sort?: string) => {
     params.set("sort", sort);
   }
   const query = params.toString() ? `?${params.toString()}` : "";
-  return fetchFromApi<ProductSummary[]>(`/api/v1/products${query}`);
-});
+  return fetchFromApi<ProductSummary[]>(`/api/v1/products${query}`, {
+    headers: await getCookieHeaders(),
+  });
+}
 
-export const searchProducts = cache(async (keyword: string, sort?: string, category?: string) => {
+export async function searchProducts(keyword: string, sort?: string, category?: string) {
   const params = new URLSearchParams();
   params.set("q", keyword);
   if (category) {
@@ -74,12 +83,16 @@ export const searchProducts = cache(async (keyword: string, sort?: string, categ
     params.set("sort", sort);
   }
   const query = `?${params.toString()}`;
-  return fetchFromApi<ProductSummary[]>(`/api/v1/products${query}`);
-});
+  return fetchFromApi<ProductSummary[]>(`/api/v1/products${query}`, {
+    headers: await getCookieHeaders(),
+  });
+}
 
-export const getProduct = cache(async (slug: string) =>
-  fetchFromApi<ProductDetail>(`/api/v1/products/${slug}`),
-);
+export async function getProduct(slug: string) {
+  return fetchFromApi<ProductDetail>(`/api/v1/products/${slug}`, {
+    headers: await getCookieHeaders(),
+  });
+}
 
 export async function getOrder(orderNumber: string, phone?: string) {
   const query = phone ? `?phone=${encodeURIComponent(phone)}` : "";
@@ -109,6 +122,18 @@ export async function getAccountProfile(): Promise<AccountProfile> {
 
 export async function getShippingAddresses(): Promise<ShippingAddress[]> {
   return fetchFromApi<ShippingAddress[]>("/api/v1/account/addresses", {
+    headers: await getCookieHeaders(),
+  });
+}
+
+export async function getAccountWishlist(): Promise<WishlistItem[]> {
+  return fetchFromApi<WishlistItem[]>("/api/v1/account/wishlist", {
+    headers: await getCookieHeaders(),
+  });
+}
+
+export async function getAccountReviews(): Promise<MyReview[]> {
+  return fetchFromApi<MyReview[]>("/api/v1/account/reviews", {
     headers: await getCookieHeaders(),
   });
 }

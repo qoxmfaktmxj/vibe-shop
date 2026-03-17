@@ -42,11 +42,30 @@ export type ProductSummary = {
   accentColor: string;
   imageUrl: string;
   imageAlt: string;
+  wishlisted: boolean;
+};
+
+export type ReviewSummary = {
+  averageRating: number;
+  reviewCount: number;
+};
+
+export type ProductReview = {
+  id: number;
+  rating: number;
+  title: string;
+  content: string;
+  reviewerName: string;
+  createdAt: string;
 };
 
 export type ProductDetail = ProductSummary & {
   description: string;
   stock: number;
+  canWriteReview: boolean;
+  hasReviewed: boolean;
+  reviewSummary: ReviewSummary;
+  reviews: ProductReview[];
 };
 
 export type HomeResponse = {
@@ -82,6 +101,8 @@ export type AccountProfile = {
   createdAt: string;
   orderCount: number;
   addressCount: number;
+  wishlistCount: number;
+  reviewCount: number;
 };
 
 export type UpdateAccountProfilePayload = {
@@ -111,6 +132,46 @@ export type ShippingAddressPayload = {
 
 export type DeleteShippingAddressResponse = {
   addressId: number;
+};
+
+export type WishlistItem = {
+  productId: number;
+  slug: string;
+  name: string;
+  categorySlug: string;
+  categoryName: string;
+  summary: string;
+  price: number;
+  badge: string;
+  accentColor: string;
+  imageUrl: string;
+  imageAlt: string;
+  createdAt: string;
+};
+
+export type WishlistStateResponse = {
+  productId: number;
+  wishlisted: boolean;
+};
+
+export type CreateReviewPayload = {
+  rating: number;
+  title: string;
+  content: string;
+};
+
+export type MyReview = {
+  id: number;
+  productId: number;
+  productSlug: string;
+  productName: string;
+  productImageUrl: string;
+  productImageAlt: string;
+  rating: number;
+  title: string;
+  content: string;
+  status: string;
+  createdAt: string;
 };
 
 export type SignUpPayload = {

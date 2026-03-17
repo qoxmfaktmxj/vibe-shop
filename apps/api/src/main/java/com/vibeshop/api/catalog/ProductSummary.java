@@ -13,6 +13,7 @@ public record ProductSummary(
     String badge,
     String accentColor,
     String imageUrl,
-    String imageAlt
+    String imageAlt,
+    boolean wishlisted
 ) {
 }

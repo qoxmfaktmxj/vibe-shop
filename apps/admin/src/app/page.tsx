@@ -8,6 +8,7 @@ import {
   getAdminMembers,
   getAdminOrders,
   getAdminProducts,
+  getAdminReviews,
   getAdminSession,
   getAdminStatistics,
 } from "@/lib/server-api";
@@ -19,7 +20,7 @@ export default async function AdminPage() {
     redirect("/login");
   }
 
-  const [dashboard, display, products, orders, categories, members, statistics] = await Promise.all([
+  const [dashboard, display, products, orders, categories, members, statistics, reviews] = await Promise.all([
     getAdminDashboard(),
     getAdminDisplay(),
     getAdminProducts(),
@@ -27,6 +28,7 @@ export default async function AdminPage() {
     getAdminCategories(),
     getAdminMembers(),
     getAdminStatistics(),
+    getAdminReviews(),
   ]);
 
   return (
@@ -38,6 +40,7 @@ export default async function AdminPage() {
       initialCategories={categories}
       initialMembers={members}
       initialStatistics={statistics}
+      initialReviews={reviews}
     />
   );
 }
