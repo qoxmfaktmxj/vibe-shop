@@ -24,11 +24,10 @@ public final class AdminDtos {
 
     public record AdminSessionResponse(
         boolean authenticated,
-        AdminSessionUserResponse user,
-        String sessionToken
+        AdminSessionUserResponse user
     ) {
         public static AdminSessionResponse unauthenticated() {
-            return new AdminSessionResponse(false, null, null);
+            return new AdminSessionResponse(false, null);
         }
     }
 

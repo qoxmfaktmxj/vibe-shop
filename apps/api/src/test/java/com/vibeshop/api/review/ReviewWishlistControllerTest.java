@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -22,11 +23,17 @@ import org.springframework.test.web.servlet.MvcResult;
 @AutoConfigureMockMvc
 class ReviewWishlistControllerTest {
 
+    private static final String ADMIN_EMAIL = "owner@vibeshop.local";
+    private static final String ADMIN_PASSWORD = "owner1234!";
+
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private JdbcClient jdbcClient;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setUp() {
@@ -109,6 +116,36 @@ class ReviewWishlistControllerTest {
                 CURRENT_TIMESTAMP
             )
             """).update();
+
+        jdbcClient.sql("""
+            INSERT INTO users (
+                id,
+                name,
+                email,
+                password_hash,
+                provider,
+                role,
+                status,
+                marketing_opt_in,
+                created_at,
+                last_login_at
+            )
+            VALUES (
+                900,
+                'Owner',
+                ?,
+                ?,
+                'LOCAL',
+                'OWNER',
+                'ACTIVE',
+                FALSE,
+                CURRENT_TIMESTAMP,
+                NULL
+            )
+            """)
+            .param(ADMIN_EMAIL)
+            .param(passwordEncoder.encode(ADMIN_PASSWORD))
+            .update();
     }
 
     @Test
@@ -266,10 +303,10 @@ class ReviewWishlistControllerTest {
                 .contentType("application/json")
                 .content("""
                     {
-                      "email": "admin@vibeshop.local",
-                      "password": "admin1234!"
+                      "email": "%s",
+                      "password": "%s"
                     }
-                    """))
+                    """.formatted(ADMIN_EMAIL, ADMIN_PASSWORD)))
             .andExpect(status().isOk())
             .andExpect(cookie().exists("vibe_shop_admin_session"))
             .andReturn();

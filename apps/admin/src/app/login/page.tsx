@@ -48,16 +48,8 @@ export default async function LoginPage() {
           <p className="eyebrow text-[var(--ink-soft)]">Admin Login</p>
           <h2 className="display mt-5 text-4xl font-semibold leading-[0.94]">운영 계정으로 로그인</h2>
           <p className="mt-5 text-base leading-8 text-[var(--ink-soft)]">
-            개발용 부트스트랩 계정은 첫 로그인 시 자동 생성됩니다.
+            관리자 권한이 부여된 기존 계정으로 로그인해 주세요.
           </p>
-          <div className="mt-6 rounded-[28px] border border-[var(--line)] bg-white/55 p-5 text-sm leading-7 text-[var(--ink-soft)]">
-            <p>
-              이메일: <span className="font-semibold text-[var(--ink)]">admin@vibeshop.local</span>
-            </p>
-            <p>
-              비밀번호: <span className="font-semibold text-[var(--ink)]">admin1234!</span>
-            </p>
-          </div>
           <div className="mt-8">
             <LoginForm />
           </div>

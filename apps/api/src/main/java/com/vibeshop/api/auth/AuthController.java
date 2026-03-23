@@ -28,6 +28,8 @@ public class AuthController {
     private static final String AUTH_SESSION_COOKIE = "vibe_shop_session";
     private static final String CART_SESSION_COOKIE = "vibe_shop_cart";
     private static final Duration AUTH_SESSION_MAX_AGE = Duration.ofDays(30);
+    private static final boolean AUTH_COOKIE_SECURE = false;
+    private static final String AUTH_COOKIE_SAME_SITE = "Lax";
 
     private final AuthService authService;
     private final CartService cartService;
@@ -46,7 +48,7 @@ public class AuthController {
         AuthService.AuthenticatedSession session = authService.signUp(request);
         applyAuthenticatedSession(response, session);
         mergeGuestCartIfPresent(cartSessionToken, session.user().getId());
-        return toResponse(session.user(), session.rawSessionToken());
+        return toResponse(session.user());
     }
 
     @PostMapping("/login")
@@ -58,7 +60,7 @@ public class AuthController {
         AuthService.AuthenticatedSession session = authService.login(request);
         applyAuthenticatedSession(response, session);
         mergeGuestCartIfPresent(cartSessionToken, session.user().getId());
-        return toResponse(session.user(), session.rawSessionToken());
+        return toResponse(session.user());
     }
 
     @PostMapping("/social/exchange")
@@ -70,7 +72,7 @@ public class AuthController {
         AuthService.AuthenticatedSession session = authService.socialExchange(request);
         applyAuthenticatedSession(response, session);
         mergeGuestCartIfPresent(cartSessionToken, session.user().getId());
-        return toResponse(session.user(), session.rawSessionToken());
+        return toResponse(session.user());
     }
 
     @PostMapping("/logout")
@@ -89,7 +91,7 @@ public class AuthController {
         HttpServletResponse response
     ) {
         return authService.resolveUser(sessionToken)
-            .map(user -> toResponse(user, null))
+            .map(this::toResponse)
             .orElseGet(() -> {
                 clearSessionCookie(response);
                 return AuthSessionResponse.unauthenticated();
@@ -97,10 +99,10 @@ public class AuthController {
     }
 
     private void applyAuthenticatedSession(HttpServletResponse response, AuthService.AuthenticatedSession session) {
-        response.addHeader("X-Session-Token", session.rawSessionToken());
         response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from(AUTH_SESSION_COOKIE, session.rawSessionToken())
             .httpOnly(true)
-            .sameSite("Lax")
+            .secure(AUTH_COOKIE_SECURE)
+            .sameSite(AUTH_COOKIE_SAME_SITE)
             .path("/")
             .maxAge(AUTH_SESSION_MAX_AGE)
             .build()
@@ -110,7 +112,8 @@ public class AuthController {
     private void clearSessionCookie(HttpServletResponse response) {
         response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from(AUTH_SESSION_COOKIE, "")
             .httpOnly(true)
-            .sameSite("Lax")
+            .secure(AUTH_COOKIE_SECURE)
+            .sameSite(AUTH_COOKIE_SAME_SITE)
             .path("/")
             .maxAge(Duration.ZERO)
             .build()
@@ -125,7 +128,7 @@ public class AuthController {
         cartService.mergeGuestCartIntoMemberCart(guestCartToken, userId);
     }
 
-    private AuthSessionResponse toResponse(User user, String sessionToken) {
+    private AuthSessionResponse toResponse(User user) {
         return new AuthSessionResponse(
             true,
             new AuthenticatedUserResponse(
@@ -133,8 +136,7 @@ public class AuthController {
                 user.getName(),
                 user.getEmail(),
                 user.getProvider().name()
-            ),
-            sessionToken
+            )
         );
     }
 }

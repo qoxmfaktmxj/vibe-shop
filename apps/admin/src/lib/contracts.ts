@@ -8,7 +8,6 @@ export type AdminUser = {
 export type AdminSession = {
   authenticated: boolean;
   user: AdminUser | null;
-  sessionToken?: string | null;
 };
 
 export type AdminDisplayItem = {

@@ -26,6 +26,8 @@ public class AdminAuthController {
 
     private static final String ADMIN_SESSION_COOKIE = "vibe_shop_admin_session";
     private static final Duration ADMIN_SESSION_MAX_AGE = Duration.ofDays(30);
+    private static final boolean ADMIN_COOKIE_SECURE = false;
+    private static final String ADMIN_COOKIE_SAME_SITE = "Lax";
 
     private final AuthService authService;
 
@@ -40,7 +42,7 @@ public class AdminAuthController {
     ) {
         AuthService.AuthenticatedSession session = authService.loginAdmin(request);
         applyAuthenticatedSession(response, session);
-        return toResponse(session.user(), session.rawSessionToken());
+        return toResponse(session.user());
     }
 
     @PostMapping("/logout")
@@ -59,7 +61,7 @@ public class AdminAuthController {
         HttpServletResponse response
     ) {
         return authService.resolveAdminUser(sessionToken)
-            .map(user -> toResponse(user, null))
+            .map(this::toResponse)
             .orElseGet(() -> {
                 clearSessionCookie(response);
                 return AdminSessionResponse.unauthenticated();
@@ -67,10 +69,10 @@ public class AdminAuthController {
     }
 
     private void applyAuthenticatedSession(HttpServletResponse response, AuthService.AuthenticatedSession session) {
-        response.addHeader("X-Admin-Session-Token", session.rawSessionToken());
         response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from(ADMIN_SESSION_COOKIE, session.rawSessionToken())
             .httpOnly(true)
-            .sameSite("Lax")
+            .secure(ADMIN_COOKIE_SECURE)
+            .sameSite(ADMIN_COOKIE_SAME_SITE)
             .path("/")
             .maxAge(ADMIN_SESSION_MAX_AGE)
             .build()
@@ -80,14 +82,15 @@ public class AdminAuthController {
     private void clearSessionCookie(HttpServletResponse response) {
         response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from(ADMIN_SESSION_COOKIE, "")
             .httpOnly(true)
-            .sameSite("Lax")
+            .secure(ADMIN_COOKIE_SECURE)
+            .sameSite(ADMIN_COOKIE_SAME_SITE)
             .path("/")
             .maxAge(Duration.ZERO)
             .build()
             .toString());
     }
 
-    private AdminSessionResponse toResponse(User user, String sessionToken) {
+    private AdminSessionResponse toResponse(User user) {
         return new AdminSessionResponse(
             true,
             new AdminSessionUserResponse(
@@ -95,8 +98,7 @@ public class AdminAuthController {
                 user.getName(),
                 user.getEmail(),
                 user.getRole().name()
-            ),
-            sessionToken
+            )
         );
     }
 }
