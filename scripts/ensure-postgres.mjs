@@ -3,7 +3,7 @@ import { spawn } from "node:child_process";
 import process from "node:process";
 
 const DB_HOST = process.env.DB_HOST ?? "127.0.0.1";
-const DB_PORT = Number(process.env.DB_PORT ?? "5433");
+const DB_PORT = Number(process.env.DB_PORT ?? "55432");
 const STARTUP_TIMEOUT_MS = 90_000;
 const POLL_INTERVAL_MS = 2_000;
 
