@@ -17,8 +17,11 @@ export default async function SearchPage({
   const categories = await getCategories();
   const selectedCategory = categories.find((item) => item.slug === currentCategory);
   const shouldRenderResults = Boolean(keyword || currentCategory);
-  const products = keyword
+  const searchResult = keyword
     ? await searchProducts(keyword, currentSort, currentCategory || undefined)
+    : null;
+  const products = keyword
+    ? searchResult?.items ?? []
     : currentCategory
       ? await getProducts(currentCategory, currentSort)
       : [];
@@ -50,6 +53,26 @@ export default async function SearchPage({
             </div>
             <p className="text-sm text-[var(--ink-soft)]">{products.length}개 상품</p>
           </div>
+
+          {searchResult?.appliedFilters?.length ? (
+            <div className="mt-6 flex flex-wrap gap-2">
+              {searchResult.appliedFilters.map((filter) => (
+                <span
+                  key={`${filter.type}-${filter.value}`}
+                  className="rounded-full border border-[var(--line)] bg-[rgba(255,255,255,0.82)] px-3 py-2 text-xs font-medium text-[var(--ink-soft)]"
+                >
+                  {filter.label}
+                </span>
+              ))}
+            </div>
+          ) : null}
+
+          {searchResult?.fallback?.applied ? (
+            <div className="mt-5 rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.76)] p-4 text-sm leading-7 text-[var(--ink-soft)]">
+              <p className="font-semibold text-[var(--ink)]">해석된 검색 조건을 조금 넓혀 보여드렸습니다.</p>
+              <p className="mt-2">{searchResult.fallback.reason}</p>
+            </div>
+          ) : null}
 
           <div className="mt-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <ProductSortTabs

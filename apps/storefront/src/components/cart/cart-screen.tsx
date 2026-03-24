@@ -4,28 +4,35 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useEffectEvent, useState } from "react";
 
-import { previewOrder } from "@/lib/client-api";
-import type { CheckoutPreview } from "@/lib/contracts";
+import { RecommendationShelf } from "@/components/recommendation/recommendation-shelf";
+import { getCartRecommendations, previewOrder } from "@/lib/client-api";
+import type { CheckoutPreview, RecommendationCollection } from "@/lib/contracts";
 import { useCart } from "@/lib/cart-store";
 import { formatPrice } from "@/lib/currency";
 
 export function CartScreen() {
   const { items, hydrated, removeItem, updateQuantity } = useCart();
   const [preview, setPreview] = useState<CheckoutPreview | null>(null);
+  const [recommendations, setRecommendations] = useState<RecommendationCollection | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const requestPreview = useEffectEvent(async () => {
     if (items.length === 0) {
       setPreview(null);
+      setRecommendations(null);
       setError("");
       return;
     }
 
     setLoading(true);
     try {
-      const nextPreview = await previewOrder(items);
+      const [nextPreview, nextRecommendations] = await Promise.all([
+        previewOrder(items),
+        getCartRecommendations(),
+      ]);
       setPreview(nextPreview);
+      setRecommendations(nextRecommendations);
       setError("");
     } catch (previewError) {
       setError(
@@ -67,8 +74,9 @@ export function CartScreen() {
   }
 
   return (
-    <div className="grid gap-14 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start">
-      <section className="min-w-0">
+    <div className="space-y-12">
+      <div className="grid gap-14 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start">
+        <section className="min-w-0">
         <header className="mb-10">
           <p className="display-eyebrow">Shopping Bag</p>
           <h1 className="display-heading mt-4 text-4xl font-light tracking-tight text-[var(--ink)]">
@@ -153,9 +161,9 @@ export function CartScreen() {
             Continue Curating
           </Link>
         </div>
-      </section>
+        </section>
 
-      <aside className="surface-card editorial-shadow rounded-xl p-8 lg:sticky lg:top-32">
+        <aside className="surface-card editorial-shadow rounded-xl p-8 lg:sticky lg:top-32">
         <p className="display-eyebrow">Summary</p>
         <h2 className="display-heading mt-4 text-3xl font-light text-[var(--ink)]">주문 요약</h2>
         <div className="mt-8 space-y-4 text-sm">
@@ -194,7 +202,10 @@ export function CartScreen() {
         <div className="mt-4 rounded-lg bg-[var(--surface-low)] p-4 text-[11px] leading-6 text-[var(--ink-soft)]">
           Secure checkout flow. 배송비와 주문 금액은 장바구니 기준으로 즉시 다시 계산됩니다.
         </div>
-      </aside>
+        </aside>
+      </div>
+
+      {recommendations ? <RecommendationShelf collection={recommendations} eyebrow="Cart Match" /> : null}
     </div>
   );
 }

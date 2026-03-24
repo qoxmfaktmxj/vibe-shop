@@ -236,6 +236,75 @@ export type UpdateAdminReviewStatusPayload = {
   status: string;
 };
 
+export type AdminOperationsSummary = {
+  lowStockThreshold: number;
+  suspiciousScoreThreshold: number;
+  lowRatingThreshold: number;
+  lowStockCount: number;
+  suspiciousOrderCount: number;
+  trendingProductCount: number;
+  lowRatingReviewCount: number;
+  fulfillmentAttentionCount: number;
+};
+
+export type AdminLowStockProduct = {
+  productId: number;
+  productName: string;
+  categoryName: string;
+  stock: number;
+  popularityScore: number;
+  featured: boolean;
+};
+
+export type AdminSuspiciousOrder = {
+  orderNumber: string;
+  customerName: string;
+  customerType: string;
+  phone: string;
+  status: string;
+  paymentStatus: string;
+  paymentMethod: string;
+  total: number;
+  itemCount: number;
+  riskLevel: string;
+  riskScore: number;
+  reasons: string[];
+  createdAt: string;
+};
+
+export type AdminTrendingProductDetail = {
+  productId: number;
+  productName: string;
+  categoryName: string;
+  stock: number;
+  recentViewCount: number;
+  paidOrderQuantity: number;
+  wishlistCount: number;
+  trendScore: number;
+};
+
+export type AdminLowRatingReview = {
+  reviewId: number;
+  productId: number;
+  productName: string;
+  reviewerName: string;
+  reviewerEmail: string;
+  rating: number;
+  title: string;
+  status: string;
+  helpfulCount: number;
+  buyerReview: boolean;
+  createdAt: string;
+};
+
+export type AdminOperations = {
+  summary: AdminOperationsSummary;
+  lowStockProducts: AdminLowStockProduct[];
+  suspiciousOrders: AdminSuspiciousOrder[];
+  trendingProducts: AdminTrendingProductDetail[];
+  lowRatingReviews: AdminLowRatingReview[];
+};
+
 export type AdminDashboard = {
   display: AdminDisplay;
   productCount: number;

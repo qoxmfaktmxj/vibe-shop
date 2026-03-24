@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { AdminCategoryManager } from "@/components/admin-category-manager";
 import { AdminDisplayManager } from "@/components/admin-display-manager";
 import { AdminMemberManager } from "@/components/admin-member-manager";
+import { AdminOperationsPanel } from "@/components/admin-operations-panel";
 import { AdminReviewManager } from "@/components/admin-review-manager";
 import { AdminStatisticsPanel } from "@/components/admin-statistics-panel";
 import { updateDisplay, updateOrderStatus, updateProduct } from "@/lib/client-api";
@@ -16,6 +17,7 @@ import type {
   AdminDashboard,
   AdminDisplay,
   AdminMember,
+  AdminOperations,
   AdminOrder,
   AdminProduct,
   AdminReview,
@@ -72,6 +74,7 @@ export function AdminWorkspace({
   initialMembers,
   initialStatistics,
   initialReviews,
+  initialOperations,
 }: {
   initialDashboard: AdminDashboard;
   initialDisplay: AdminDisplay;
@@ -81,6 +84,7 @@ export function AdminWorkspace({
   initialMembers: AdminMember[];
   initialStatistics: AdminStatistics;
   initialReviews: AdminReview[];
+  initialOperations: AdminOperations;
 }) {
   const router = useRouter();
   const { session, signOut } = useAdminAuth();
@@ -330,6 +334,7 @@ export function AdminWorkspace({
 
             <AdminDisplayManager initialDisplay={display} />
             <AdminCategoryManager initialCategories={initialCategories} />
+            <AdminOperationsPanel initialOperations={initialOperations} />
             <AdminStatisticsPanel statistics={initialStatistics} />
             <AdminMemberManager members={members} onMemberUpdated={handleMemberUpdated} />
             <AdminReviewManager reviews={reviews} />

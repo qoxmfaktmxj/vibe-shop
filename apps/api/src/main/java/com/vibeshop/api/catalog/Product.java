@@ -67,6 +67,24 @@ public class Product {
     @Column(name = "popularity_score", nullable = false)
     private int popularityScore;
 
+    @Column(length = 40)
+    private String color;
+
+    @Column(name = "season_tag", length = 40)
+    private String seasonTag;
+
+    @Column(name = "use_case_tag", length = 60)
+    private String useCaseTag;
+
+    @Column(name = "gender_tag", length = 20)
+    private String genderTag;
+
+    @Column(name = "material_tag", length = 60)
+    private String materialTag;
+
+    @Column(name = "search_keywords", columnDefinition = "TEXT")
+    private String searchKeywords;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 

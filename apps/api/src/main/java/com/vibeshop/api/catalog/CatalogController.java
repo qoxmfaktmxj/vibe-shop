@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vibeshop.api.auth.AuthService;
+import com.vibeshop.api.catalog.SearchDtos.ProductSearchResponse;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -18,10 +19,16 @@ public class CatalogController {
     private static final String AUTH_SESSION_COOKIE = "vibe_shop_session";
 
     private final CatalogService catalogService;
+    private final ProductSearchService productSearchService;
     private final AuthService authService;
 
-    public CatalogController(CatalogService catalogService, AuthService authService) {
+    public CatalogController(
+        CatalogService catalogService,
+        ProductSearchService productSearchService,
+        AuthService authService
+    ) {
         this.catalogService = catalogService;
+        this.productSearchService = productSearchService;
         this.authService = authService;
     }
 
@@ -58,5 +65,20 @@ public class CatalogController {
         @PathVariable String slug
     ) {
         return catalogService.getProduct(slug, authService.resolveAuthenticatedUserId(authSessionToken));
+    }
+
+    @GetMapping("/search/products")
+    ProductSearchResponse searchProducts(
+        @CookieValue(value = AUTH_SESSION_COOKIE, required = false) String authSessionToken,
+        @RequestParam(required = false, name = "q") String keyword,
+        @RequestParam(required = false) String category,
+        @RequestParam(required = false) String sort
+    ) {
+        return productSearchService.search(
+            keyword,
+            category,
+            sort,
+            authService.resolveAuthenticatedUserId(authSessionToken)
+        );
     }
 }

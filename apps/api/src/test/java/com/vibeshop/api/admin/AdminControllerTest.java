@@ -43,6 +43,11 @@ class AdminControllerTest {
     @BeforeEach
     void setUp() {
         jdbcClient.sql("DELETE FROM shopping_cart_items").update();
+        jdbcClient.sql("DELETE FROM wishlist_items").update();
+        jdbcClient.sql("DELETE FROM review_helpful_votes").update();
+        jdbcClient.sql("DELETE FROM review_images").update();
+        jdbcClient.sql("DELETE FROM product_reviews").update();
+        jdbcClient.sql("DELETE FROM product_view_events").update();
         jdbcClient.sql("DELETE FROM customer_order_lines").update();
         jdbcClient.sql("DELETE FROM order_payments").update();
         jdbcClient.sql("DELETE FROM customer_orders").update();
@@ -532,6 +537,282 @@ class AdminControllerTest {
             .andExpect(jsonPath("$.sevenDay.cancelledOrderCount").value(1))
             .andExpect(jsonPath("$.categorySales[0].categorySlug").value("living"))
             .andExpect(jsonPath("$.topProducts[0].productId").value(10));
+    }
+
+    @Test
+    void adminOperationsDashboardAggregatesOperationalSignals() throws Exception {
+        OffsetDateTime now = OffsetDateTime.now(SEOUL);
+
+        jdbcClient.sql("UPDATE products SET stock = 2, popularity_score = 880 WHERE id = 10").update();
+
+        jdbcClient.sql("""
+            INSERT INTO users (
+                id,
+                name,
+                email,
+                password_hash,
+                provider,
+                role,
+                status,
+                phone,
+                marketing_opt_in,
+                created_at,
+                last_login_at
+            ) VALUES (
+                101,
+                'Reviewer',
+                'reviewer@example.com',
+                ?,
+                'LOCAL',
+                'CUSTOMER',
+                'ACTIVE',
+                '01055556666',
+                FALSE,
+                ?,
+                ?
+            )
+            """)
+            .param(passwordEncoder.encode("password123"))
+            .param(now.minusDays(5))
+            .param(now.minusHours(2))
+            .update();
+
+        jdbcClient.sql("""
+            INSERT INTO customer_orders (
+                id,
+                order_number,
+                idempotency_key,
+                customer_type,
+                user_id,
+                customer_name,
+                phone,
+                postal_code,
+                address1,
+                address2,
+                note,
+                subtotal,
+                shipping_fee,
+                total,
+                status,
+                created_at
+            ) VALUES (
+                701,
+                'VS-OPS-701',
+                'ops-701',
+                'GUEST',
+                NULL,
+                'Risk Guest',
+                '01099998888',
+                '06236',
+                'Teheran-ro 1',
+                '9F',
+                'ops note',
+                320000,
+                0,
+                320000,
+                'PENDING_PAYMENT',
+                ?
+            )
+            """)
+            .param(now.minusHours(3))
+            .update();
+
+        jdbcClient.sql("""
+            INSERT INTO customer_order_lines (
+                id,
+                order_id,
+                product_id,
+                product_name,
+                quantity,
+                unit_price,
+                line_total
+            ) VALUES
+                (801, 701, 10, 'Linen Bed Set', 5, 64000, 320000)
+            """).update();
+
+        jdbcClient.sql("""
+            INSERT INTO order_payments (
+                id,
+                order_id,
+                payment_method,
+                payment_status,
+                provider_code,
+                reference_code,
+                message,
+                approved_at,
+                created_at,
+                updated_at
+            ) VALUES (
+                901,
+                701,
+                'BANK_TRANSFER',
+                'PENDING',
+                'mock',
+                'ops-payment-701',
+                'pending',
+                NULL,
+                ?,
+                ?
+            )
+            """)
+            .param(now.minusHours(3))
+            .param(now.minusHours(3))
+            .update();
+
+        jdbcClient.sql("""
+            INSERT INTO customer_orders (
+                id,
+                order_number,
+                idempotency_key,
+                customer_type,
+                user_id,
+                customer_name,
+                phone,
+                postal_code,
+                address1,
+                address2,
+                note,
+                subtotal,
+                shipping_fee,
+                total,
+                status,
+                created_at
+            ) VALUES (
+                702,
+                'VS-OPS-702',
+                'ops-702',
+                'GUEST',
+                NULL,
+                'Risk Guest Repeat',
+                '01099998888',
+                '06236',
+                'Teheran-ro 1',
+                '9F',
+                'repeat',
+                120000,
+                0,
+                120000,
+                'PAID',
+                ?
+            )
+            """)
+            .param(now.minusHours(2))
+            .update();
+
+        jdbcClient.sql("""
+            INSERT INTO customer_order_lines (
+                id,
+                order_id,
+                product_id,
+                product_name,
+                quantity,
+                unit_price,
+                line_total
+            ) VALUES
+                (802, 702, 10, 'Linen Bed Set', 2, 60000, 120000)
+            """).update();
+
+        jdbcClient.sql("""
+            INSERT INTO order_payments (
+                id,
+                order_id,
+                payment_method,
+                payment_status,
+                provider_code,
+                reference_code,
+                message,
+                approved_at,
+                created_at,
+                updated_at
+            ) VALUES (
+                902,
+                702,
+                'CARD',
+                'SUCCEEDED',
+                'mock',
+                'ops-payment-702',
+                'paid',
+                ?,
+                ?,
+                ?
+            )
+            """)
+            .param(now.minusHours(2))
+            .param(now.minusHours(2))
+            .param(now.minusHours(2))
+            .update();
+
+        jdbcClient.sql("""
+            INSERT INTO product_view_events (product_id, user_id, visitor_key, source, viewed_at)
+            VALUES
+                (10, NULL, 'guest-1', 'PRODUCT_DETAIL', ?),
+                (10, NULL, 'guest-2', 'PRODUCT_DETAIL', ?)
+            """)
+            .param(now.minusHours(1))
+            .param(now.minusHours(4))
+            .update();
+
+        jdbcClient.sql("""
+            INSERT INTO wishlist_items (user_id, product_id, created_at)
+            VALUES (101, 10, ?)
+            """)
+            .param(now.minusDays(1))
+            .update();
+
+        jdbcClient.sql("""
+            INSERT INTO product_reviews (
+                id,
+                product_id,
+                user_id,
+                rating,
+                title,
+                content,
+                fit_tag,
+                repurchase_yn,
+                delivery_satisfaction,
+                packaging_satisfaction,
+                status,
+                helpful_count,
+                is_buyer_review,
+                created_at,
+                updated_at
+            ) VALUES (
+                1001,
+                10,
+                101,
+                2,
+                '포장 개선 필요',
+                '생각보다 아쉬웠습니다.',
+                NULL,
+                FALSE,
+                2,
+                2,
+                'PUBLISHED',
+                0,
+                TRUE,
+                ?,
+                ?
+            )
+            """)
+            .param(now.minusHours(5))
+            .param(now.minusHours(5))
+            .update();
+
+        Cookie adminCookie = loginAsAdmin();
+
+        mockMvc.perform(get("/api/v1/admin/operations")
+                .cookie(adminCookie)
+                .param("lowStockThreshold", "5")
+                .param("lowRatingThreshold", "2")
+                .param("suspiciousScoreThreshold", "3"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.summary.lowStockCount").value(1))
+            .andExpect(jsonPath("$.summary.suspiciousOrderCount").value(1))
+            .andExpect(jsonPath("$.summary.lowRatingReviewCount").value(1))
+            .andExpect(jsonPath("$.lowStockProducts[0].productId").value(10))
+            .andExpect(jsonPath("$.suspiciousOrders[0].orderNumber").value("VS-OPS-701"))
+            .andExpect(jsonPath("$.trendingProducts[0].productId").value(10))
+            .andExpect(jsonPath("$.lowRatingReviews[0].reviewId").value(1001));
     }
 
     private Cookie loginAsAdmin() throws Exception {

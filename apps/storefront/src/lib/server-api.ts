@@ -9,7 +9,10 @@ import type {
   OrderResponse,
   OrderSummaryResponse,
   ProductDetail,
+  ProductSearchResponse,
   ProductSummary,
+  RecommendationCollection,
+  RecentlyViewedResponse,
   ShippingAddress,
   WishlistItem,
 } from "@/lib/contracts";
@@ -83,13 +86,37 @@ export async function searchProducts(keyword: string, sort?: string, category?: 
     params.set("sort", sort);
   }
   const query = `?${params.toString()}`;
-  return fetchFromApi<ProductSummary[]>(`/api/v1/products${query}`, {
+  return fetchFromApi<ProductSearchResponse>(`/api/v1/search/products${query}`, {
     headers: await getCookieHeaders(),
   });
 }
 
 export async function getProduct(slug: string) {
   return fetchFromApi<ProductDetail>(`/api/v1/products/${slug}`, {
+    headers: await getCookieHeaders(),
+  });
+}
+
+export async function getRecentlyViewed() {
+  return fetchFromApi<RecentlyViewedResponse>("/api/v1/recently-viewed", {
+    headers: await getCookieHeaders(),
+  });
+}
+
+export async function getHomeRecommendations() {
+  return fetchFromApi<RecommendationCollection>("/api/v1/recommendations/home", {
+    headers: await getCookieHeaders(),
+  });
+}
+
+export async function getProductRecommendations(productId: number) {
+  return fetchFromApi<RecommendationCollection>(`/api/v1/recommendations/products/${productId}`, {
+    headers: await getCookieHeaders(),
+  });
+}
+
+export async function getRecentlyViewedRecommendations() {
+  return fetchFromApi<RecommendationCollection>("/api/v1/recommendations/recently-viewed", {
     headers: await getCookieHeaders(),
   });
 }

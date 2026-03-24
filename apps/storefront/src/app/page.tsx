@@ -2,17 +2,30 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { ProductCard } from "@/components/catalog/product-card";
+import { RecommendationShelf } from "@/components/recommendation/recommendation-shelf";
+import { RecentlyViewedShelf } from "@/components/recommendation/recently-viewed-shelf";
 import type { HomeDisplaySection } from "@/lib/contracts";
 import { formatPrice } from "@/lib/currency";
 import { productGradient } from "@/lib/gradient";
-import { getHomeData } from "@/lib/server-api";
+import {
+  getHomeData,
+  getHomeRecommendations,
+  getRecentlyViewed,
+  getRecentlyViewedRecommendations,
+} from "@/lib/server-api";
 
 function getSection(sections: HomeDisplaySection[], code: string) {
   return sections.find((section) => section.code === code);
 }
 
 export default async function HomePage() {
-  const home = await getHomeData();
+  const [home, recentlyViewed, recentlyViewedRecommendations, homeRecommendations] =
+    await Promise.all([
+      getHomeData(),
+      getRecentlyViewed(),
+      getRecentlyViewedRecommendations(),
+      getHomeRecommendations(),
+    ]);
   const heroProduct = home.curatedPicks[0] ?? home.newArrivals[0] ?? home.bestSellers[0];
   const heroSection = getSection(home.displaySections, "HERO");
   const featuredCategorySection = getSection(home.displaySections, "FEATURED_CATEGORY");
@@ -195,6 +208,12 @@ export default async function HomePage() {
           </div>
         </section>
       ) : null}
+
+      <RecentlyViewedShelf recentlyViewed={recentlyViewed} />
+      <RecommendationShelf
+        collection={recentlyViewed.items.length > 0 ? recentlyViewedRecommendations : homeRecommendations}
+        eyebrow={recentlyViewed.items.length > 0 ? "Continue Exploring" : "Trending for You"}
+      />
 
       {promotionSection?.visible && promotionSection.items.length > 0 ? (
         <section className="space-y-6">

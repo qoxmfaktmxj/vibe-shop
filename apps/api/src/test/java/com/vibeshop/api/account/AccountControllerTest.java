@@ -36,6 +36,7 @@ class AccountControllerTest {
         jdbcClient.sql("DELETE FROM shipping_addresses").update();
         jdbcClient.sql("DELETE FROM user_sessions").update();
         jdbcClient.sql("DELETE FROM users").update();
+        jdbcClient.sql("DELETE FROM product_view_events").update();
         jdbcClient.sql("DELETE FROM products").update();
         jdbcClient.sql("DELETE FROM categories").update();
 

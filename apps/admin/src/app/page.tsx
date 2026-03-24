@@ -6,6 +6,7 @@ import {
   getAdminDashboard,
   getAdminDisplay,
   getAdminMembers,
+  getAdminOperations,
   getAdminOrders,
   getAdminProducts,
   getAdminReviews,
@@ -20,7 +21,7 @@ export default async function AdminPage() {
     redirect("/login");
   }
 
-  const [dashboard, display, products, orders, categories, members, statistics, reviews] = await Promise.all([
+  const [dashboard, display, products, orders, categories, members, statistics, reviews, operations] = await Promise.all([
     getAdminDashboard(),
     getAdminDisplay(),
     getAdminProducts(),
@@ -29,6 +30,7 @@ export default async function AdminPage() {
     getAdminMembers(),
     getAdminStatistics(),
     getAdminReviews(),
+    getAdminOperations(),
   ]);
 
   return (
@@ -41,6 +43,7 @@ export default async function AdminPage() {
       initialMembers={members}
       initialStatistics={statistics}
       initialReviews={reviews}
+      initialOperations={operations}
     />
   );
 }

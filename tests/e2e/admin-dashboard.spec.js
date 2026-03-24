@@ -18,7 +18,7 @@ test("admin dashboard can manage display, products, and order status", async ({ 
   await page.waitForLoadState("networkidle");
   await page.goto("/products/brew-mug", { waitUntil: "networkidle" });
   await expect(page).toHaveURL(/\/products\/brew-mug$/);
-  await page.getByRole("button", { name: "Add to Bag" }).click();
+  await page.getByRole("complementary").getByRole("button", { name: "Add to Bag" }).click();
 
   await expect
     .poll(async () => {
@@ -38,7 +38,7 @@ test("admin dashboard can manage display, products, and order status", async ({ 
   await checkoutInputs.nth(4).fill("15F");
   await page.locator("form textarea").fill("Admin dashboard test order.");
   await page.locator('input[name="paymentMethod"][value="CARD"]').check({ force: true });
-  await page.locator('button[type="submit"]').click();
+  await page.getByRole("button", { name: "주문하기" }).click();
 
   await expect(page).toHaveURL(/\/orders\/[A-Z0-9]+(?:\?phone=.*)?$/);
   const orderNumber = new URL(page.url()).pathname.split("/").at(-1);
@@ -79,6 +79,8 @@ test("admin dashboard can manage display, products, and order status", async ({ 
 
   await page.goto(`${adminUrl}/`, { waitUntil: "networkidle" });
   await expect(orderCard.locator("select")).toHaveValue("PREPARING");
+  await expect(page.getByRole("heading", { name: "운영 보조 대시보드" })).toBeVisible();
+  await expect(page.getByText("Low Stock Queue")).toBeVisible();
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "12-admin-dashboard.png"),
     fullPage: true,

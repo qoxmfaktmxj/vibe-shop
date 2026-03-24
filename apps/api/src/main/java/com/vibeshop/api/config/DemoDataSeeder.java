@@ -26,6 +26,8 @@ public class DemoDataSeeder implements ApplicationRunner {
 
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
     private static final String DEMO_PASSWORD = "Password123!";
+    private static final String DEMO_ADMIN_EMAIL = "admin@vibeshop.local";
+    private static final String DEMO_ADMIN_PASSWORD = "admin1234!";
 
     private final DemoSeedProperties properties;
     private final JdbcTemplate jdbcTemplate;
@@ -48,9 +50,49 @@ public class DemoDataSeeder implements ApplicationRunner {
             return;
         }
 
+        seedAdminUser();
         seedCustomers();
         seedProducts();
         seedReviews();
+    }
+
+    private void seedAdminUser() {
+        Integer adminCount = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM users WHERE LOWER(email) = LOWER(?)",
+            Integer.class,
+            DEMO_ADMIN_EMAIL
+        );
+        if (adminCount != null && adminCount > 0) {
+            return;
+        }
+
+        OffsetDateTime now = OffsetDateTime.now(SEOUL);
+        jdbcTemplate.update(
+            """
+                INSERT INTO users (
+                    name,
+                    email,
+                    password_hash,
+                    provider,
+                    role,
+                    status,
+                    phone,
+                    marketing_opt_in,
+                    last_login_at,
+                    created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+            "Vibe Shop Admin",
+            DEMO_ADMIN_EMAIL,
+            passwordEncoder.encode(DEMO_ADMIN_PASSWORD),
+            "LOCAL",
+            "OWNER",
+            "ACTIVE",
+            "01099990000",
+            false,
+            now,
+            now
+        );
     }
 
     private void seedCustomers() {

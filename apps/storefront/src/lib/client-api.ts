@@ -15,10 +15,12 @@ import type {
   LoginPayload,
   MyReview,
   ProductReviewListResponse,
+  RecommendationCollection,
   ReviewHelpfulState,
   ShippingAddress,
   ShippingAddressPayload,
   SignUpPayload,
+  TrackProductViewResponse,
   UpdateAccountProfilePayload,
   UpdateReviewPayload,
   WishlistItem,
@@ -289,5 +291,23 @@ export async function cancelOrder(
   const query = phone ? `?phone=${encodeURIComponent(phone)}` : "";
   return fetchJson<CancelOrderResponse>(`/api/v1/orders/${orderNumber}/cancel${query}`, {
     method: "POST",
+  });
+}
+
+export async function trackProductView(
+  productId: number,
+  source = "PRODUCT_DETAIL",
+): Promise<TrackProductViewResponse> {
+  return fetchJson<TrackProductViewResponse>(
+    `/api/v1/recently-viewed/items/${productId}?source=${encodeURIComponent(source)}`,
+    {
+      method: "POST",
+    },
+  );
+}
+
+export async function getCartRecommendations(): Promise<RecommendationCollection> {
+  return fetchJson<RecommendationCollection>("/api/v1/recommendations/cart", {
+    method: "GET",
   });
 }

@@ -6,6 +6,7 @@ import type {
   AdminDashboard,
   AdminDisplay,
   AdminMember,
+  AdminOperations,
   AdminOrder,
   AdminProduct,
   AdminReview,
@@ -92,6 +93,12 @@ export async function getAdminStatistics(): Promise<AdminStatistics> {
 
 export async function getAdminReviews(): Promise<AdminReview[]> {
   return fetchFromApi<AdminReview[]>("/api/v1/admin/reviews", {
+    headers: await getCookieHeaders(),
+  });
+}
+
+export async function getAdminOperations(): Promise<AdminOperations> {
+  return fetchFromApi<AdminOperations>("/api/v1/admin/operations", {
     headers: await getCookieHeaders(),
   });
 }

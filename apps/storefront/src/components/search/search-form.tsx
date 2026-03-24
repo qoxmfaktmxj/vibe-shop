@@ -42,7 +42,7 @@ export function SearchForm({
       <input
         value={keyword}
         onChange={(event) => setKeyword(event.target.value)}
-        placeholder="상품명, 카테고리, 분위기로 검색해 보세요."
+        placeholder="예: 여름 리빙 10만원 이하 베이지 선물"
         className="min-w-0 rounded-2xl border border-[var(--line)] bg-[rgba(255,255,255,0.9)] px-4 py-3"
       />
       <select
@@ -64,6 +64,10 @@ export function SearchForm({
       >
         {isPending ? "검색하고 있습니다." : "검색"}
       </button>
+
+      <p className="text-xs leading-6 text-[var(--ink-soft)] lg:col-span-3">
+        색상, 가격대, 카테고리, 계절, 사용 목적을 자연어로 함께 입력하면 규칙 기반으로 해석합니다.
+      </p>
     </form>
   );
 }

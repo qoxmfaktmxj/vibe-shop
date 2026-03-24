@@ -317,6 +317,81 @@ public final class AdminDtos {
     ) {
     }
 
+    public record AdminOperationsSummaryResponse(
+        int lowStockThreshold,
+        int suspiciousScoreThreshold,
+        int lowRatingThreshold,
+        long lowStockCount,
+        long suspiciousOrderCount,
+        long trendingProductCount,
+        long lowRatingReviewCount,
+        long fulfillmentAttentionCount
+    ) {
+    }
+
+    public record AdminLowStockProductResponse(
+        Long productId,
+        String productName,
+        String categoryName,
+        int stock,
+        int popularityScore,
+        boolean featured
+    ) {
+    }
+
+    public record AdminSuspiciousOrderResponse(
+        String orderNumber,
+        String customerName,
+        String customerType,
+        String phone,
+        String status,
+        String paymentStatus,
+        String paymentMethod,
+        BigDecimal total,
+        int itemCount,
+        String riskLevel,
+        int riskScore,
+        List<String> reasons,
+        OffsetDateTime createdAt
+    ) {
+    }
+
+    public record AdminTrendingProductDetailResponse(
+        Long productId,
+        String productName,
+        String categoryName,
+        int stock,
+        long recentViewCount,
+        long paidOrderQuantity,
+        long wishlistCount,
+        int trendScore
+    ) {
+    }
+
+    public record AdminLowRatingReviewResponse(
+        Long reviewId,
+        Long productId,
+        String productName,
+        String reviewerName,
+        String reviewerEmail,
+        int rating,
+        String title,
+        String status,
+        int helpfulCount,
+        boolean buyerReview,
+        OffsetDateTime createdAt
+    ) {
+    }
+
+    public record AdminOperationsResponse(
+        AdminOperationsSummaryResponse summary,
+        List<AdminLowStockProductResponse> lowStockProducts,
+        List<AdminSuspiciousOrderResponse> suspiciousOrders,
+        List<AdminTrendingProductDetailResponse> trendingProducts,
+        List<AdminLowRatingReviewResponse> lowRatingReviews
+    ) {
+    }
+
     public record AdminDashboardResponse(
         AdminDisplayResponse display,
         long productCount,

@@ -4,6 +4,7 @@ import type {
   AdminDisplay,
   AdminDisplayItem,
   AdminMember,
+  AdminOperations,
   AdminOrder,
   AdminProduct,
   AdminReview,
@@ -228,5 +229,27 @@ export async function updateReviewStatus(
   return fetchJson<AdminReview>(`/api/v1/admin/reviews/${reviewId}/status`, {
     method: "PUT",
     body: JSON.stringify(payload),
+  });
+}
+
+export async function getOperations(query?: {
+  lowStockThreshold?: number;
+  lowRatingThreshold?: number;
+  suspiciousScoreThreshold?: number;
+}): Promise<AdminOperations> {
+  const params = new URLSearchParams();
+  if (typeof query?.lowStockThreshold === "number") {
+    params.set("lowStockThreshold", String(query.lowStockThreshold));
+  }
+  if (typeof query?.lowRatingThreshold === "number") {
+    params.set("lowRatingThreshold", String(query.lowRatingThreshold));
+  }
+  if (typeof query?.suspiciousScoreThreshold === "number") {
+    params.set("suspiciousScoreThreshold", String(query.suspiciousScoreThreshold));
+  }
+
+  const search = params.toString();
+  return fetchJson<AdminOperations>(`/api/v1/admin/operations${search ? `?${search}` : ""}`, {
+    method: "GET",
   });
 }

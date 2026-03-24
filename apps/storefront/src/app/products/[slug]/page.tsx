@@ -6,9 +6,11 @@ import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { ProductReviewSection } from "@/components/engagement/product-review-section";
 import { RatingStars } from "@/components/engagement/rating-stars";
 import { WishlistToggleButton } from "@/components/engagement/wishlist-toggle-button";
+import { ProductViewTracker } from "@/components/recommendation/product-view-tracker";
+import { RecommendationShelf } from "@/components/recommendation/recommendation-shelf";
 import { formatPrice } from "@/lib/currency";
 import { productGradient } from "@/lib/gradient";
-import { ApiNotFoundError, getProduct } from "@/lib/server-api";
+import { ApiNotFoundError, getProduct, getProductRecommendations } from "@/lib/server-api";
 
 export default async function ProductPage({
   params,
@@ -27,8 +29,11 @@ export default async function ProductPage({
     throw error;
   }
 
+  const recommendations = await getProductRecommendations(product.id);
+
   return (
     <div className="grid-shell space-y-8">
+      <ProductViewTracker productId={product.id} />
       <div className="grid-shell lg:grid-cols-[1.1fr_0.9fr]">
         <section
           className="surface-card min-h-[420px] rounded-[36px] p-8 sm:p-10"
@@ -136,6 +141,8 @@ export default async function ProductPage({
           </div>
         </aside>
       </div>
+
+      <RecommendationShelf collection={recommendations} eyebrow="Product Match" />
 
       <ProductReviewSection
         productId={product.id}

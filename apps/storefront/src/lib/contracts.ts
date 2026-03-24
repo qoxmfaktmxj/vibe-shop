@@ -114,6 +114,65 @@ export type HomeResponse = {
   bestSellers: ProductSummary[];
 };
 
+export type RecentlyViewedItem = ProductSummary & {
+  viewedAt: string;
+};
+
+export type RecentlyViewedResponse = {
+  items: RecentlyViewedItem[];
+};
+
+export type RecommendationProduct = ProductSummary & {
+  reasonCode: string;
+  reasonLabel: string;
+  reasonDetail: string;
+  score: number;
+};
+
+export type RecommendationCollection = {
+  context: string;
+  title: string;
+  subtitle: string;
+  items: RecommendationProduct[];
+};
+
+export type TrackProductViewResponse = {
+  productId: number;
+  viewedAt: string;
+};
+
+export type ParsedSearchQuery = {
+  raw: string;
+  normalized: string;
+  keyword: string | null;
+  category: string | null;
+  color: string | null;
+  minPrice: number | null;
+  maxPrice: number | null;
+  season: string | null;
+  useCase: string | null;
+  gender: string | null;
+};
+
+export type AppliedSearchFilter = {
+  type: string;
+  value: string;
+  label: string;
+};
+
+export type SearchFallback = {
+  applied: boolean;
+  reason: string;
+  relaxedFilters: string[];
+};
+
+export type ProductSearchResponse = {
+  items: ProductSummary[];
+  parsedQuery: ParsedSearchQuery;
+  appliedFilters: AppliedSearchFilter[];
+  fallback: SearchFallback | null;
+};
+
 export type AuthenticatedUser = {
   id: number;
   name: string;
