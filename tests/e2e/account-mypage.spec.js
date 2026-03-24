@@ -17,7 +17,7 @@ test("member can manage my page profile and shipping addresses", async ({ page }
   await page.waitForLoadState("networkidle");
   await page.goto("/products/brew-mug", { waitUntil: "networkidle" });
   await expect(page).toHaveURL(/\/products\/brew-mug$/);
-  await page.getByRole("button", { name: "Add to Bag" }).click();
+  await page.getByRole("complementary").getByRole("button", { name: "Add to Bag" }).click();
 
   await expect
     .poll(async () => {
@@ -30,7 +30,7 @@ test("member can manage my page profile and shipping addresses", async ({ page }
   await signupInputs.nth(0).fill("Mypage Tester");
   await signupInputs.nth(1).fill(email);
   await signupInputs.nth(2).fill("password123");
-  await page.locator('button[type="submit"]').click();
+  await page.locator('button[form="checkout-form"]').last().click();
 
   await expect(page).toHaveURL(/\/account$/);
   await page.goto("/cart", { waitUntil: "networkidle" });
@@ -54,7 +54,7 @@ test("member can manage my page profile and shipping addresses", async ({ page }
 
   await page.goto("/account", { waitUntil: "networkidle" });
   await expect(page).toHaveURL(/\/account$/);
-  await expect(page.locator('input[name="profileEmail"]')).toHaveValue(email);
+  await expect(page.locator('input[name="profileEmail"]').first()).toHaveValue(email);
 
   await page.locator('input[name="profileName"]').fill("Mypage QA");
   await page.getByRole("button", { name: "계정 저장" }).click();

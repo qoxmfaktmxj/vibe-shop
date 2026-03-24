@@ -17,7 +17,7 @@ test("member auth flow keeps session and scopes orders to the account", async ({
   await page.waitForLoadState("networkidle");
   await page.goto("/products/brew-mug", { waitUntil: "networkidle" });
   await expect(page).toHaveURL(/\/products\/brew-mug$/);
-  await page.getByRole("button", { name: "Add to Bag" }).click();
+  await page.getByRole("complementary").getByRole("button", { name: "Add to Bag" }).click();
 
   await expect
     .poll(async () => {
@@ -33,7 +33,7 @@ test("member auth flow keeps session and scopes orders to the account", async ({
   await page.locator('button[type="submit"]').click();
 
   await expect(page).toHaveURL(/\/account$/);
-  await expect(page.locator('input[name="profileEmail"]')).toHaveValue(email);
+  await expect(page.locator('input[name="profileEmail"]').first()).toHaveValue(email);
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "07-account.png"),
     fullPage: true,
@@ -53,7 +53,7 @@ test("member auth flow keeps session and scopes orders to the account", async ({
   await page.locator('input[name="paymentMethod"][value="CARD"]').check({
     force: true,
   });
-  await page.locator('button[type="submit"]').click();
+  await page.locator('button[form="checkout-form"]').last().click();
 
   await expect(page).toHaveURL(/\/orders\/[A-Z0-9]+$/);
   await expect(page.getByRole("heading", { name: "결제가 완료되었습니다." })).toBeVisible();

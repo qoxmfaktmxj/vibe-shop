@@ -4,7 +4,7 @@ const path = require("node:path");
 const { expect, test } = require("playwright/test");
 
 const OUTPUT_DIR = path.join(process.cwd(), "output", "playwright");
-const adminUrl = process.env.E2E_ADMIN_URL ?? "http://127.0.0.1:3200";
+const adminUrl = process.env.E2E_ADMIN_URL ?? "http://127.0.0.1:4200";
 
 test("admin dashboard can manage display, products, and order status", async ({ page }) => {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });

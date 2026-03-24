@@ -1,6 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
-
 import { SOCIAL_PROVIDERS } from "@/lib/social-auth";
 
 export function SocialLoginButtons({ nextPath }: { nextPath: string }) {
@@ -14,7 +12,7 @@ export function SocialLoginButtons({ nextPath }: { nextPath: string }) {
 
       <div className="grid gap-3">
         {SOCIAL_PROVIDERS.map((item) => (
-          <Link
+          <a
             key={item.provider}
             href={`/api/auth/social/login/${item.provider}?next=${encodeURIComponent(nextPath)}`}
             className={`group flex items-center gap-3 rounded-[18px] border px-4 py-3 transition hover:-translate-y-[1px] hover:shadow-[var(--shadow-soft)] ${item.accentClassName}`}
@@ -30,7 +28,7 @@ export function SocialLoginButtons({ nextPath }: { nextPath: string }) {
               />
             </span>
             <span className="text-sm font-semibold">{item.label}</span>
-          </Link>
+          </a>
         ))}
       </div>
     </div>

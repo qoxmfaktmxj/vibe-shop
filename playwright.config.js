@@ -13,8 +13,8 @@ const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ??
   "http://127.0.0.1:8180";
 
-const storefrontUrl = process.env.E2E_STOREFRONT_URL ?? "http://127.0.0.1:3100";
-const adminUrl = process.env.E2E_ADMIN_URL ?? "http://127.0.0.1:3200";
+const storefrontUrl = process.env.E2E_STOREFRONT_URL ?? "http://127.0.0.1:4100";
+const adminUrl = process.env.E2E_ADMIN_URL ?? "http://127.0.0.1:4200";
 const apiPort = process.env.E2E_API_PORT ?? getPort(apiBaseUrl, 8180);
 const storefrontPort = process.env.E2E_STOREFRONT_PORT ?? getPort(storefrontUrl, 3100);
 const adminPort = process.env.E2E_ADMIN_PORT ?? getPort(adminUrl, 3200);
@@ -51,18 +51,20 @@ module.exports = defineConfig({
       env: {
         ...process.env,
         APP_PORT: process.env.APP_PORT ?? apiPort,
+        SPRING_PROFILES_ACTIVE: process.env.SPRING_PROFILES_ACTIVE ?? "local",
         DB_HOST: process.env.DB_HOST ?? "127.0.0.1",
-        DB_PORT: process.env.DB_PORT ?? "5433",
+        DB_PORT: process.env.DB_PORT ?? "55432",
         DB_NAME: process.env.DB_NAME ?? "vibeshop",
         DB_USERNAME: process.env.DB_USERNAME ?? "vibeshop",
         DB_PASSWORD: process.env.DB_PASSWORD ?? "vibeshop",
+        APP_DEMO_ADMIN_PASSWORD: process.env.E2E_ADMIN_PASSWORD ?? process.env.APP_DEMO_ADMIN_PASSWORD ?? "admin1234!",
         CORS_ALLOWED_ORIGINS:
           process.env.CORS_ALLOWED_ORIGINS ??
           `${adminUrl},${storefrontUrl},http://127.0.0.1:3000,http://localhost:3000`,
       },
     },
     {
-      command: `node scripts/run-storefront-tool.mjs next dev --hostname 127.0.0.1 --port ${storefrontPort}`,
+      command: `node scripts/run-storefront-tool.mjs next start --hostname 127.0.0.1 --port ${storefrontPort}`,
       cwd: ".",
       url: storefrontUrl,
       reuseExistingServer,
@@ -80,7 +82,7 @@ module.exports = defineConfig({
       },
     },
     {
-      command: `node scripts/run-admin-tool.mjs next dev --hostname 127.0.0.1 --port ${adminPort}`,
+      command: `node scripts/run-admin-tool.mjs next start --hostname 127.0.0.1 --port ${adminPort}`,
       cwd: ".",
       url: adminUrl,
       reuseExistingServer,

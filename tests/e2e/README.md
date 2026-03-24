@@ -5,8 +5,9 @@
 
 Expected local services:
 
-- postgres at `localhost:5433`
-- storefront at `http://127.0.0.1:3100`
+- postgres at `localhost:55432`
+- storefront at `http://127.0.0.1:4100`
+- admin at `http://127.0.0.1:4200`
 - api at `http://127.0.0.1:8180`
 
 Recommended local flow:

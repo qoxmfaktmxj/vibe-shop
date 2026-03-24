@@ -22,9 +22,9 @@
     "build:api": "node scripts/run-api-gradle.mjs build",
     "test:api": "node scripts/run-api-gradle.mjs test",
     "qa": "npm run lint:storefront && npm run lint:admin && npm run typecheck && npm run build:storefront && npm run build:admin && npm run test:api",
-    "qa:e2e": "node scripts/ensure-postgres.mjs && node node_modules/playwright/cli.js test",
-    "qa:e2e:headed": "node scripts/ensure-postgres.mjs && node node_modules/playwright/cli.js test --headed",
-    "qa:e2e:ui": "node scripts/ensure-postgres.mjs && node node_modules/playwright/cli.js test --ui",
+    "qa:e2e": "npm run build:storefront && npm run build:admin && node scripts/ensure-postgres.mjs && node scripts/clear-next-dev-locks.mjs && node node_modules/playwright/cli.js test",
+    "qa:e2e:headed": "npm run build:storefront && npm run build:admin && node scripts/ensure-postgres.mjs && node scripts/clear-next-dev-locks.mjs && node node_modules/playwright/cli.js test --headed",
+    "qa:e2e:ui": "npm run build:storefront && npm run build:admin && node scripts/ensure-postgres.mjs && node scripts/clear-next-dev-locks.mjs && node node_modules/playwright/cli.js test --ui",
     "qa:e2e:install": "node node_modules/playwright/cli.js install chromium"
   },
   "devDependencies": {

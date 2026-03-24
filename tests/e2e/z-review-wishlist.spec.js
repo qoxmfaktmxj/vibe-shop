@@ -4,7 +4,7 @@ const path = require("node:path");
 const { expect, test } = require("playwright/test");
 
 const OUTPUT_DIR = path.join(process.cwd(), "output", "playwright");
-const adminUrl = process.env.E2E_ADMIN_URL ?? "http://127.0.0.1:3200";
+const adminUrl = process.env.E2E_ADMIN_URL ?? "http://127.0.0.1:4200";
 
 test("member can create photo review, another member can mark it helpful, then admin can moderate it", async ({ page, browser }) => {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -29,7 +29,7 @@ test("member can create photo review, another member can mark it helpful, then a
   await page.getByRole("button", { name: /찜 추가|찜 해제/ }).click();
   await expect(page.getByRole("button", { name: /찜 해제/ })).toBeVisible();
 
-  await page.getByRole("button", { name: "Add to Bag" }).click();
+  await page.getByRole("complementary").getByRole("button", { name: "Add to Bag" }).click();
   await expect
     .poll(async () => {
       return (await page.getByRole("link", { name: /Bag/i }).textContent()) ?? "";

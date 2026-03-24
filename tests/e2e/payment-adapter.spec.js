@@ -7,7 +7,7 @@ test("mobile payment failure keeps the cart for retry", async ({ page }) => {
   await page.waitForLoadState("networkidle");
   await page.goto("/products/brew-mug", { waitUntil: "networkidle" });
   await expect(page).toHaveURL(/\/products\/brew-mug$/);
-  await page.getByRole("button", { name: "Add to Bag" }).click();
+  await page.getByRole("complementary").getByRole("button", { name: "Add to Bag" }).click();
 
   await expect
     .poll(async () => {
@@ -29,7 +29,7 @@ test("mobile payment failure keeps the cart for retry", async ({ page }) => {
   await page.locator('input[name="paymentMethod"][value="MOBILE"]').check({
     force: true,
   });
-  await page.locator('button[type="submit"]').click();
+  await page.locator('button[form="checkout-form"]').last().click();
 
   await expect(page).toHaveURL(/\/orders\/[^?]+\?phone=01055556666$/);
   await expect(page.getByRole("heading", { name: "결제에 실패했습니다." })).toBeVisible();

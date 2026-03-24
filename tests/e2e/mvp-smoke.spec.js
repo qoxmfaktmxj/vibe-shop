@@ -35,7 +35,7 @@ test("storefront MVP smoke flow", async ({ page }) => {
     fullPage: true,
   });
 
-  await page.getByRole("button", { name: "Add to Bag" }).click();
+  await page.getByRole("complementary").getByRole("button", { name: "Add to Bag" }).click();
   await expect(page.getByRole("button", { name: "담기 완료" })).toBeVisible();
 
   await expect
