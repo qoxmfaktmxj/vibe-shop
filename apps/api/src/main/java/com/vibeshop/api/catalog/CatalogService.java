@@ -179,9 +179,9 @@ public class CatalogService {
         return adminDisplaySettingsRepository.findById(DISPLAY_SETTINGS_ID)
             .orElseGet(() -> adminDisplaySettingsRepository.save(new AdminDisplaySettings(
                 DISPLAY_SETTINGS_ID,
-                "由щ벉怨?怨꾩젅???곕씪 怨좊Ⅸ ?대쾲 ?쒖쫵 ??됱뀡",
-                "由щ튃, ?ㅼ튇, ?곕땲??移댄뀒怨좊━?먯꽌 吏湲?諛붾줈 蹂닿린 醫뗭? ?좎긽?덇낵 ?멸린 ?곹뭹??臾띠뼱 ?쒖븞?⑸땲??",
-                "而щ젆??蹂닿린",
+                "리빙의 결을 따라 고른 이번 시즌 셀렉션",
+                "리빙, 키친, 웰니스 카테고리에서 지금 바로 보기 좋은 신상품과 인기 상품만 따로 제안합니다.",
+                "컬렉션 보기",
                 "/search",
                 now()
             )));

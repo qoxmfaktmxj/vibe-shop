@@ -59,7 +59,24 @@ public class DemoDataSeeder implements ApplicationRunner {
         seedAdminUser();
         seedCustomers();
         seedProducts();
+        if (properties.normalizeE2eStock()) {
+            normalizeE2eFixtureStock();
+        }
         seedReviews();
+    }
+
+    private void normalizeE2eFixtureStock() {
+        jdbcTemplate.update(
+            """
+                UPDATE products
+                SET stock = CASE
+                    WHEN slug = 'brew-mug' AND stock < 500 THEN 500
+                    WHEN slug = 'linen-bed-set' AND stock < 200 THEN 200
+                    ELSE stock
+                END
+                WHERE slug IN ('brew-mug', 'linen-bed-set')
+                """
+        );
     }
 
     private void seedAdminUser() {

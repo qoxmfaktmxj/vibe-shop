@@ -6,6 +6,7 @@ const { expect, test } = require("playwright/test");
 const OUTPUT_DIR = path.join(process.cwd(), "output", "playwright");
 const storefrontUrl = process.env.E2E_STOREFRONT_URL ?? "http://127.0.0.1:4100";
 const adminUrl = `${storefrontUrl}/admin`;
+const adminPassword = process.env.E2E_ADMIN_PASSWORD ?? process.env.APP_DEMO_ADMIN_PASSWORD ?? "admin1234!";
 
 test("admin dashboard can manage display, products, and order status", async ({ page }) => {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -15,6 +16,9 @@ test("admin dashboard can manage display, products, and order status", async ({ 
 
   await page.goto("/products/brew-mug", { waitUntil: "networkidle" });
   await page.getByRole("complementary").getByRole("button", { name: "Add to Bag" }).click();
+  await expect(
+    page.getByRole("complementary").getByRole("button", { name: "담기 완료" }),
+  ).toBeVisible();
 
   await page.goto("/checkout", { waitUntil: "networkidle" });
   const checkoutInputs = page.locator("form input");
@@ -31,7 +35,7 @@ test("admin dashboard can manage display, products, and order status", async ({ 
 
   await page.goto(`${adminUrl}/login`, { waitUntil: "networkidle" });
   await page.locator('input[type="email"]').fill("admin@vibeshop.local");
-  await page.locator('input[type="password"]').fill("admin1234!");
+  await page.locator('input[type="password"]').fill(adminPassword);
   await page.locator('form button[type="submit"]').click();
   await expect(page).toHaveURL(adminUrl);
 

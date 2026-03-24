@@ -13,6 +13,9 @@ test("member auth flow keeps session and scopes orders to the account", async ({
 
   await page.goto("/products/brew-mug", { waitUntil: "networkidle" });
   await page.getByRole("complementary").getByRole("button", { name: "Add to Bag" }).click();
+  await expect(
+    page.getByRole("complementary").getByRole("button", { name: "담기 완료" }),
+  ).toBeVisible();
 
   await page.goto("/signup", { waitUntil: "networkidle" });
   const signupInputs = page.locator("form input");

@@ -21,7 +21,7 @@ type CartContextValue = {
   itemCount: number;
   subtotal: number;
   hydrated: boolean;
-  addItem: (product: CartProduct) => void;
+  addItem: (product: CartProduct) => Promise<boolean>;
   updateQuantity: (productId: number, quantity: number) => void;
   removeItem: (productId: number) => void;
   clearCart: () => void;
@@ -63,15 +63,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const cart = await request();
       setItems(cart.items);
       setHydrated(true);
+      return true;
     } catch {
       setHydrated(true);
+      return false;
     }
   };
 
-  const addItem = (product: CartProduct) => {
+  const addItem = async (product: CartProduct) => {
     const existing = items.find((item) => item.productId === product.productId);
     const nextQuantity = (existing?.quantity ?? 0) + 1;
-    void syncCart(() => setCartItemQuantity(product.productId, nextQuantity));
+    return syncCart(() => setCartItemQuantity(product.productId, nextQuantity));
   };
 
   const updateQuantity = (productId: number, quantity: number) => {

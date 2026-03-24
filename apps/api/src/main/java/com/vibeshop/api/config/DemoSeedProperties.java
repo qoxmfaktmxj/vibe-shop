@@ -7,6 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "app.demo.seed")
 public record DemoSeedProperties(
     boolean enabled,
+    boolean normalizeE2eStock,
     int targetCustomerCount,
     int targetProductsPerCategory,
     String adminEmail,

@@ -55,6 +55,7 @@ module.exports = defineConfig({
         DB_NAME: process.env.DB_NAME ?? "vibeshop",
         DB_USERNAME: process.env.DB_USERNAME ?? "vibeshop",
         DB_PASSWORD: process.env.DB_PASSWORD ?? "vibeshop",
+        APP_DEMO_SEED_NORMALIZE_E2E_STOCK: process.env.APP_DEMO_SEED_NORMALIZE_E2E_STOCK ?? "true",
         APP_DEMO_ADMIN_PASSWORD: process.env.E2E_ADMIN_PASSWORD ?? process.env.APP_DEMO_ADMIN_PASSWORD ?? "admin1234!",
         CORS_ALLOWED_ORIGINS:
           process.env.CORS_ALLOWED_ORIGINS ??
