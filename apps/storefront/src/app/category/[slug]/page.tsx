@@ -46,7 +46,7 @@ export default async function CategoryPage({
 
         <div className="relative max-w-2xl text-white">
           <p className="display-eyebrow text-white/70">{category.name}</p>
-          <h1 className="display-heading mt-3 text-4xl font-semibold">
+          <h1 className="display-heading mt-3 text-4xl">
             {category.heroTitle || category.description}
           </h1>
           <p className="mt-4 text-sm leading-7 text-white/78">
@@ -56,11 +56,11 @@ export default async function CategoryPage({
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">
-        <article className="surface-card rounded-[32px] p-6 sm:p-8">
+        <article className="surface-card rounded-none p-6 sm:p-8">
           <div className="flex items-end justify-between gap-4">
             <div>
-              <p className="display-eyebrow">New Arrivals</p>
-              <h2 className="display-heading mt-3 text-3xl font-semibold">이번 주 신상품</h2>
+              <p className="display-eyebrow">신상품</p>
+              <h2 className="display-heading mt-3 text-3xl">이번 주 신상품</h2>
             </div>
             <Link href={`/category/${slug}?sort=newest`} className="text-sm font-medium text-[var(--primary)]">
               최신순으로 보기
@@ -73,11 +73,11 @@ export default async function CategoryPage({
           </div>
         </article>
 
-        <article className="surface-card rounded-[32px] p-6 sm:p-8">
+        <article className="surface-card rounded-none p-6 sm:p-8">
           <div className="flex items-end justify-between gap-4">
             <div>
-              <p className="display-eyebrow">Best Sellers</p>
-              <h2 className="display-heading mt-3 text-3xl font-semibold">인기 상품</h2>
+              <p className="display-eyebrow">인기</p>
+              <h2 className="display-heading mt-3 text-3xl">인기 상품</h2>
             </div>
             <Link href={`/category/${slug}?sort=popular`} className="text-sm font-medium text-[var(--primary)]">
               인기순으로 보기
@@ -94,8 +94,8 @@ export default async function CategoryPage({
       <section className="surface-card rounded-[36px] p-6 sm:p-8">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="display-eyebrow">Collection</p>
-            <h2 className="display-heading mt-3 text-3xl font-semibold">전체 컬렉션</h2>
+            <p className="display-eyebrow">전체</p>
+            <h2 className="display-heading mt-3 text-3xl">전체 컬렉션</h2>
           </div>
           <ProductSortTabs
             pathname={`/category/${slug}`}

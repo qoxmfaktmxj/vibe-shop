@@ -15,7 +15,7 @@ export function ContentPage({
     <div className="grid-shell lg:grid-cols-[1.1fr_0.9fr]">
       <section className="surface-card rounded-[36px] p-8 sm:p-10">
         <p className="display-eyebrow">{eyebrow}</p>
-        <h1 className="display-heading mt-4 text-4xl font-semibold">{title}</h1>
+        <h1 className="display-heading mt-4 text-4xl">{title}</h1>
         <p className="mt-4 max-w-3xl text-base leading-8 text-[var(--ink-soft)]">
           {description}
         </p>

@@ -40,7 +40,7 @@ export default async function ProductPage({
           style={{ background: productGradient(product.accentColor) }}
         >
           <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-            <div className="relative aspect-[4/5] overflow-hidden rounded-[28px]">
+            <div className="relative aspect-[4/5] overflow-hidden rounded-sm">
               <Image
                 src={product.imageUrl}
                 alt={product.imageAlt}
@@ -55,7 +55,7 @@ export default async function ProductPage({
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="display-eyebrow">{product.categoryName}</p>
-                  <h1 className="display-heading mt-4 text-4xl font-semibold sm:text-5xl">
+                  <h1 className="display-heading mt-4 text-4xl sm:text-5xl">
                     {product.name}
                   </h1>
                 </div>
@@ -107,12 +107,12 @@ export default async function ProductPage({
         </section>
 
         <aside className="surface-card rounded-[36px] p-8 sm:p-10">
-          <p className="display-eyebrow">Details</p>
+          <p className="display-eyebrow">상세</p>
           <p className="mt-4 text-base leading-8 text-[var(--ink-soft)]">
             {product.description}
           </p>
 
-          <div className="mt-8 rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.76)] p-6">
+          <div className="mt-8 rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.76)] p-6">
             <p className="text-sm uppercase tracking-[0.18em] text-[var(--ink-soft)]">
               Purchase
             </p>
@@ -142,7 +142,7 @@ export default async function ProductPage({
         </aside>
       </div>
 
-      <RecommendationShelf collection={recommendations} eyebrow="Product Match" />
+      <RecommendationShelf collection={recommendations} eyebrow="비슷한 상품" />
 
       <ProductReviewSection
         productId={product.id}

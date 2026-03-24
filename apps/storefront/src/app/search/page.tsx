@@ -28,21 +28,16 @@ export default async function SearchPage({
 
   return (
     <div className="grid-shell space-y-8">
-      <section className="surface-card rounded-[36px] p-8 sm:p-10">
-        <p className="display-eyebrow">Search</p>
-        <h1 className="display-heading mt-4 text-4xl font-semibold">상품 검색</h1>
-        <p className="mt-4 max-w-2xl text-base leading-8 text-[var(--ink-soft)]">
-          상품명과 카테고리, 분위기 키워드를 함께 사용해 원하는 아이템을 빠르게 찾아보세요.
-        </p>
+      <section>
         <SearchForm categories={categories} initialCategory={currentCategory} />
       </section>
 
       {shouldRenderResults ? (
-        <section className="surface-card rounded-[36px] p-6 sm:p-8">
+        <section className="surface-card p-6 sm:p-8">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="display-eyebrow">Results</p>
-              <h2 className="display-heading mt-3 text-3xl font-semibold">
+              <p className="display-eyebrow">검색 결과</p>
+              <h2 className="display-heading mt-3 text-3xl">
                 {keyword
                   ? `“${keyword}” 검색 결과`
                   : `${selectedCategory?.name ?? "카테고리"} 전시 결과`}
@@ -94,7 +89,7 @@ export default async function SearchPage({
               ))}
             </div>
           ) : (
-            <div className="mt-8 rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm text-[var(--ink-soft)]">
+            <div className="mt-8 rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm text-[var(--ink-soft)]">
               검색 결과가 없습니다. 다른 키워드나 카테고리 조합으로 다시 시도해 주세요.
             </div>
           )}
@@ -105,10 +100,10 @@ export default async function SearchPage({
             <Link
               key={item.id}
               href={`/search?category=${item.slug}`}
-              className="surface-card rounded-[28px] p-6 transition hover:-translate-y-1"
+              className="surface-card rounded-sm p-6 transition hover:-translate-y-1"
             >
               <p className="display-eyebrow">{item.name}</p>
-              <p className="display-heading mt-4 text-2xl font-semibold text-[var(--ink)]">
+              <p className="display-heading mt-4 text-2xl text-[var(--ink)]">
                 {item.description}
               </p>
             </Link>

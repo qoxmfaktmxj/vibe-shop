@@ -20,35 +20,26 @@ export function SearchForm({
 
   return (
     <form
-      className="mt-8 grid gap-3 lg:grid-cols-[minmax(0,1fr)_14rem_auto]"
+      className="flex h-14 w-full border border-[var(--line)] bg-[var(--surface-card)]"
       onSubmit={(event) => {
         event.preventDefault();
         const trimmedKeyword = keyword.trim();
         const trimmedCategory = category.trim();
         const params = new URLSearchParams();
 
-        if (trimmedKeyword) {
-          params.set("q", trimmedKeyword);
-        }
-        if (trimmedCategory) {
-          params.set("category", trimmedCategory);
-        }
+        if (trimmedKeyword) params.set("q", trimmedKeyword);
+        if (trimmedCategory) params.set("category", trimmedCategory);
 
         startTransition(() => {
           router.push(params.size > 0 ? `/search?${params.toString()}` : "/search");
         });
       }}
     >
-      <input
-        value={keyword}
-        onChange={(event) => setKeyword(event.target.value)}
-        placeholder="예: 여름 리빙 10만원 이하 베이지 선물"
-        className="min-w-0 rounded-2xl border border-[var(--line)] bg-[rgba(255,255,255,0.9)] px-4 py-3"
-      />
       <select
         value={category}
         onChange={(event) => setCategory(event.target.value)}
-        className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,255,0.9)] px-4 py-3 text-sm text-[var(--ink)]"
+        className="shrink-0 border-r border-[var(--line)] bg-transparent px-4 text-xs font-medium uppercase tracking-[0.1em] text-[var(--ink-soft)] outline-none"
+        style={{ fontFamily: "var(--font-display), monospace" }}
       >
         <option value="">전체 카테고리</option>
         {categories.map((item) => (
@@ -57,17 +48,22 @@ export function SearchForm({
           </option>
         ))}
       </select>
+
+      <input
+        value={keyword}
+        onChange={(event) => setKeyword(event.target.value)}
+        placeholder="여름 리빙 10만원 이하 베이지 선물"
+        className="min-w-0 flex-1 bg-transparent px-5 text-sm text-[var(--ink)] outline-none placeholder:text-[var(--ink-muted)]"
+      />
+
       <button
         type="submit"
         disabled={isPending}
-        className="button-primary px-5 py-3 disabled:opacity-60"
+        className="shrink-0 bg-[var(--ink)] px-6 text-xs font-bold uppercase tracking-[0.1em] disabled:opacity-60"
+        style={{ color: "#ffffff", fontFamily: "var(--font-display), monospace" }}
       >
-        {isPending ? "검색하고 있습니다." : "검색"}
+        {isPending ? "…" : "검색"}
       </button>
-
-      <p className="text-xs leading-6 text-[var(--ink-soft)] lg:col-span-3">
-        색상, 가격대, 카테고리, 계절, 사용 목적을 자연어로 함께 입력하면 규칙 기반으로 해석합니다.
-      </p>
     </form>
   );
 }

@@ -11,8 +11,8 @@ export default async function GuestOrderLookupPage({
   return (
     <div className="grid-shell lg:grid-cols-[1.15fr_0.85fr]">
       <section className="surface-card rounded-[36px] p-8 sm:p-10">
-        <p className="display-eyebrow">Order Lookup</p>
-        <h1 className="display-heading mt-4 text-4xl font-semibold">비회원 주문 조회</h1>
+        <p className="display-eyebrow">주문 조회</p>
+        <h1 className="display-heading mt-4 text-4xl">비회원 주문 조회</h1>
         <p className="mt-4 max-w-2xl text-base leading-8 text-[var(--ink-soft)]">
           주문 완료 화면에서 확인한 주문번호와 주문 시 입력한 연락처로 주문 상태를 다시 조회할 수 있습니다.
         </p>

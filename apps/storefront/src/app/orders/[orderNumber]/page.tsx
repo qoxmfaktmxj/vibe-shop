@@ -78,11 +78,11 @@ export default async function OrderPage({
   return (
     <div className="grid-shell lg:grid-cols-[1.2fr_0.8fr]">
       <section className="surface-card rounded-[36px] p-8 sm:p-10">
-        <p className="display-eyebrow">Order</p>
-        <h1 className="display-heading mt-4 text-4xl font-semibold">{heading.title}</h1>
+        <p className="display-eyebrow">주문</p>
+        <h1 className="display-heading mt-4 text-4xl">{heading.title}</h1>
         <p className="mt-4 text-base leading-8 text-[var(--ink-soft)]">{heading.description}</p>
 
-        <div className="mt-8 rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.76)] p-6">
+        <div className="mt-8 rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.76)] p-6">
           <dl className="grid gap-4 text-sm sm:grid-cols-2">
             <div>
               <dt className="text-[var(--ink-soft)]">주문 상태</dt>
@@ -138,7 +138,7 @@ export default async function OrderPage({
       </section>
 
       <aside className="surface-card rounded-[36px] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(241,239,233,0.76))] p-8 sm:p-10">
-        <p className="display-eyebrow">Order Lines</p>
+        <p className="display-eyebrow">주문 상품</p>
         <div className="mt-6 space-y-4 text-sm">
           {order.lines.map((line) => (
             <div key={`${line.productId}-${line.productName}`} className="flex justify-between gap-4">

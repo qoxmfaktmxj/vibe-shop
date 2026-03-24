@@ -92,11 +92,11 @@ export function ProductReviewSection({
 
   return (
     <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-      <article className="surface-card rounded-[32px] p-6 sm:p-8">
+      <article className="surface-card rounded-none p-6 sm:p-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="display-eyebrow">Reviews</p>
-            <h2 className="display-heading mt-3 text-3xl font-semibold">구매자 리뷰</h2>
+            <p className="display-eyebrow">리뷰</p>
+            <h2 className="display-heading mt-3 text-3xl">구매자 리뷰</h2>
             <p className="mt-3 text-sm leading-7 text-[var(--ink-soft)]">
               사진 리뷰, 별점 분포, 도움이 돼요 순 정렬까지 한 번에 확인할 수 있습니다.
             </p>
@@ -113,7 +113,7 @@ export function ProductReviewSection({
         </div>
 
         <div className="mt-8 grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
-          <section className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
+          <section className="rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div className="rounded-[20px] bg-white/80 p-4">
                 <p className="text-xs uppercase tracking-[0.16em] text-[var(--ink-soft)]">Photo</p>
@@ -140,7 +140,7 @@ export function ProductReviewSection({
             </div>
           </section>
 
-          <section className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
+          <section className="rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
             <p className="text-sm font-semibold">별점 분포</p>
             <div className="mt-4 space-y-3">
               {summary.ratingDistribution.map((item) => (
@@ -159,7 +159,7 @@ export function ProductReviewSection({
           </section>
         </div>
 
-        <div className="mt-8 rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
+        <div className="mt-8 rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold">포토 리뷰</p>
@@ -201,7 +201,7 @@ export function ProductReviewSection({
           )}
         </div>
 
-        <div className="mt-8 flex flex-col gap-3 rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
+        <div className="mt-8 flex flex-col gap-3 rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap gap-2">
               {[
@@ -261,7 +261,7 @@ export function ProductReviewSection({
               return (
                 <article
                   key={review.id}
-                  className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6"
+                  className="rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6"
                 >
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
@@ -384,7 +384,7 @@ export function ProductReviewSection({
               );
             })
           ) : (
-            <div className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
+            <div className="rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
               선택한 조건에 맞는 리뷰가 없습니다. 필터를 해제하거나 첫 리뷰를 남겨 보세요.
             </div>
           )}

@@ -82,7 +82,7 @@ public class DemoDataSeeder implements ApplicationRunner {
                     created_at
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
-            "Vibe Shop Admin",
+            "MARU Admin",
             DEMO_ADMIN_EMAIL,
             passwordEncoder.encode(DEMO_ADMIN_PASSWORD),
             "LOCAL",

@@ -17,7 +17,7 @@ export function RecommendationShelf({
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="display-eyebrow">{eyebrow}</p>
-          <h2 className="display-heading mt-3 text-3xl font-semibold text-[var(--ink)] sm:text-4xl">
+          <h2 className="display-heading mt-3 text-3xl text-[var(--ink)] sm:text-4xl">
             {collection.title}
           </h2>
         </div>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Manrope, Noto_Sans_KR } from "next/font/google";
+import { Geist_Mono, Noto_Sans_KR } from "next/font/google";
 
 import { SiteFooter } from "@/components/shell/site-footer";
 import { SiteHeader } from "@/components/shell/site-header";
@@ -9,10 +9,10 @@ import { getAuthSession, getCategories } from "@/lib/server-api";
 
 import "./globals.css";
 
-const manrope = Manrope({
-  variable: "--font-manrope",
+const geistMono = Geist_Mono({
+  variable: "--font-display",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["200", "400", "500", "700"],
 });
 
 const notoSans = Noto_Sans_KR({
@@ -22,8 +22,8 @@ const notoSans = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: "Vibe Shop",
-  description: "리빙, 키친, 웰니스 셀렉션을 담은 감도 높은 라이프스타일 쇼핑몰.",
+  title: "MARU",
+  description: "리빙, 키친, 웰니스 — 삶에 어울리는 오브제를 엄선한 디지털 아틀리에.",
   icons: {
     icon: "/vibe-shop-favicon.svg",
     shortcut: "/vibe-shop-favicon.svg",
@@ -43,7 +43,7 @@ export default async function RootLayout({
 
   return (
     <html lang="ko">
-      <body className={`${manrope.variable} ${notoSans.variable} antialiased`}>
+      <body className={`${geistMono.variable} ${notoSans.variable} antialiased`}>
         <AuthProvider initialSession={authSession}>
           <CartProvider>
             <div className="min-h-screen bg-[var(--surface)] text-[var(--ink)]">

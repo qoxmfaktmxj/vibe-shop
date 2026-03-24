@@ -174,7 +174,7 @@ export function AdminWorkspace({
       <section className="admin-dark rounded-[40px] p-8 sm:p-10">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="eyebrow text-[rgba(237,244,239,0.64)]">Vibe Shop Admin</p>
+            <p className="eyebrow text-[rgba(237,244,239,0.64)]">MARU Admin</p>
             <h1 className="display mt-5 text-5xl font-semibold leading-[0.92] sm:text-6xl">
               운영 전시와 상품 흐름을 한 화면에서 조정합니다.
             </h1>

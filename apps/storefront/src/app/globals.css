@@ -1,28 +1,32 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f9fb;
-  --surface: #f7f9fb;
-  --surface-low: #f0f4f7;
-  --surface-high: #e1e9ee;
+  --background: #E8E9EB;
+  --surface: #E8E9EB;
+  --surface-low: #DDDEE0;
+  --surface-high: #E0E0E0;
   --surface-card: #ffffff;
-  --ink: #2a3439;
-  --ink-soft: #566166;
-  --primary: #575e70;
-  --primary-dim: #4b5264;
+  --ink: #1A1A1A;
+  --ink-soft: #666666;
+  --ink-muted: #999999;
+  --primary: #1A1A1A;
+  --primary-dim: #333333;
   --secondary: #1c6b51;
   --secondary-soft: #a6f2d1;
-  --line: rgba(113, 124, 130, 0.14);
-  --line-strong: rgba(113, 124, 130, 0.24);
-  --shadow: 0 20px 40px rgba(42, 52, 57, 0.06);
-  --shadow-soft: 0 10px 24px rgba(42, 52, 57, 0.04);
+  --line: #E0E0E0;
+  --line-strong: #C8C8C8;
+  --shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.05);
+  --accent-caramel: #C2956A;
+  --accent-sienna: #8F5A3C;
+  --accent-taupe: #A38979;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--ink);
   --font-sans: var(--font-body);
-  --font-display: var(--font-manrope);
+  --font-display: var(--font-display);
 }
 
 * {
@@ -34,7 +38,7 @@ html {
 }
 
 body {
-  background: linear-gradient(180deg, #f7f9fb 0%, #f0f4f7 100%);
+  background: var(--background);
   color: var(--ink);
   font-family: var(--font-body), sans-serif;
   min-height: 100vh;
@@ -58,31 +62,33 @@ textarea {
 
 input::placeholder,
 textarea::placeholder {
-  color: #7d878c;
+  color: var(--ink-muted);
 }
 
 ::selection {
-  background: rgba(87, 94, 112, 0.16);
+  background: rgba(26, 26, 26, 0.1);
 }
 
 .surface-card {
   background: var(--surface-card);
-  border: 1px solid rgba(113, 124, 130, 0.08);
-  box-shadow: var(--shadow);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-soft);
 }
 
 .display-eyebrow {
-  color: var(--primary);
-  font-family: var(--font-manrope), sans-serif;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.28em;
+  color: var(--ink-muted);
+  font-family: var(--font-display), monospace;
+  font-size: 0.625rem;
+  font-weight: 400;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
 }
 
 .display-heading {
-  font-family: var(--font-manrope), sans-serif;
-  letter-spacing: -0.04em;
+  font-family: var(--font-display), monospace;
+  font-weight: 200;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
 }
 
 .grid-shell {
@@ -95,12 +101,12 @@ textarea::placeholder {
 .button-ink,
 .button-hot {
   align-items: center;
-  border-radius: 0.5rem;
+  border-radius: 0;
   display: inline-flex;
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 700;
   justify-content: center;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   line-height: 1;
   text-transform: uppercase;
   transition:
@@ -108,42 +114,35 @@ textarea::placeholder {
     border-color 140ms ease,
     color 140ms ease,
     transform 140ms ease,
-    box-shadow 140ms ease;
+    opacity 140ms ease;
 }
 
 .button-primary:hover,
 .button-secondary:hover,
 .button-ink:hover,
 .button-hot:hover {
-  transform: translateY(-1px);
+  opacity: 0.8;
 }
 
 .button-primary,
 .button-ink {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dim) 100%);
-  box-shadow: var(--shadow-soft);
+  background: var(--primary);
   color: #fff;
 }
 
-.button-primary:hover,
-.button-ink:hover {
-  background: linear-gradient(135deg, #4f5768 0%, #43495a 100%);
-}
-
 .button-secondary {
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid var(--line);
+  background: transparent;
+  border: 1px solid var(--line-strong);
   color: var(--ink-soft);
 }
 
 .button-secondary:hover {
-  background: var(--surface-card);
-  border-color: var(--line-strong);
+  border-color: var(--ink);
+  color: var(--ink);
 }
 
 .button-hot {
   background: var(--secondary);
-  box-shadow: 0 14px 28px rgba(28, 107, 81, 0.14);
   color: #e5fff1;
 }
 
@@ -152,12 +151,12 @@ textarea::placeholder {
 }
 
 .stat-divider {
-  border-top: 1px solid rgba(113, 124, 130, 0.12);
+  border-top: 1px solid var(--line);
 }
 
 .glass-nav {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(24px);
+  background: rgba(232, 233, 235, 0.92);
+  backdrop-filter: blur(16px);
 }
 
 .editorial-shadow {
@@ -174,13 +173,12 @@ textarea::placeholder {
 }
 
 .soft-input {
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(113, 124, 130, 0.16);
-  border-radius: 0.5rem;
+  background: var(--surface-card);
+  border: 1px solid var(--line);
 }
 
 .soft-input:focus-visible {
-  outline: 1px solid rgba(87, 94, 112, 0.24);
+  outline: 1px solid var(--ink);
   outline-offset: 0;
 }
 
@@ -194,6 +192,19 @@ textarea::placeholder {
 
 .surface-highlight {
   background: var(--surface-high);
+}
+
+.link-cta {
+  font-family: var(--font-display), monospace;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.link-cta:hover {
+  opacity: 0.6;
 }
 
 @media (min-width: 768px) {

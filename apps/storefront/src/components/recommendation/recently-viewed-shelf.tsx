@@ -10,8 +10,8 @@ export function RecentlyViewedShelf({ recentlyViewed }: { recentlyViewed: Recent
     <section className="space-y-6">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="display-eyebrow">Recently Viewed</p>
-          <h2 className="display-heading mt-3 text-3xl font-semibold text-[var(--ink)] sm:text-4xl">
+          <p className="display-eyebrow">최근 본 상품</p>
+          <h2 className="display-heading mt-3 text-3xl text-[var(--ink)] sm:text-4xl">
             최근 본 상품
           </h2>
         </div>

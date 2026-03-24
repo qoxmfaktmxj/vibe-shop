@@ -177,27 +177,27 @@ export function AccountDashboard({
     <div className="grid-shell space-y-6">
       <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <article className="surface-card rounded-[36px] p-8 sm:p-10">
-          <p className="display-eyebrow">My Page</p>
-          <h1 className="display-heading mt-4 text-4xl font-semibold">내 계정</h1>
+          <p className="display-eyebrow">마이페이지</p>
+          <h1 className="display-heading mt-4 text-4xl">내 계정</h1>
           <p className="mt-4 max-w-2xl text-base leading-8 text-[var(--ink-soft)]">
             주문, 배송지, 찜, 리뷰를 한 곳에서 관리합니다.
           </p>
 
           <dl className="mt-8 grid gap-4 sm:grid-cols-4">
-            <div className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
-              <dt className="display-eyebrow">Joined</dt>
+            <div className="rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
+              <dt className="display-eyebrow">가입일</dt>
               <dd className="mt-3 text-lg font-semibold">{joinedDate}</dd>
             </div>
-            <div className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
-              <dt className="display-eyebrow">Orders</dt>
+            <div className="rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
+              <dt className="display-eyebrow">주문</dt>
               <dd className="mt-3 text-3xl font-semibold">{profile.orderCount}</dd>
             </div>
-            <div className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
-              <dt className="display-eyebrow">Wishlist</dt>
+            <div className="rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
+              <dt className="display-eyebrow">찜</dt>
               <dd className="mt-3 text-3xl font-semibold">{profile.wishlistCount}</dd>
             </div>
-            <div className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
-              <dt className="display-eyebrow">Reviews</dt>
+            <div className="rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
+              <dt className="display-eyebrow">리뷰</dt>
               <dd className="mt-3 text-3xl font-semibold">{profile.reviewCount}</dd>
             </div>
           </dl>
@@ -206,8 +206,8 @@ export function AccountDashboard({
         <article className="surface-card rounded-[36px] p-8 sm:p-10">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="display-eyebrow">Profile</p>
-              <h2 className="display-heading mt-4 text-3xl font-semibold">기본 정보</h2>
+              <p className="display-eyebrow">프로필</p>
+              <h2 className="display-heading mt-4 text-3xl">기본 정보</h2>
             </div>
             <div className="rounded-full border border-[var(--line)] px-4 py-2 text-xs font-semibold tracking-[0.14em] uppercase text-[var(--ink-soft)]">
               {PROVIDER_LABELS[profile.provider] ?? profile.provider}
@@ -279,8 +279,8 @@ export function AccountDashboard({
         <article className="surface-card rounded-[36px] p-8 sm:p-10">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="display-eyebrow">Shipping</p>
-              <h2 className="display-heading mt-4 text-3xl font-semibold">배송지 관리</h2>
+              <p className="display-eyebrow">배송지</p>
+              <h2 className="display-heading mt-4 text-3xl">배송지 관리</h2>
             </div>
             <button
               type="button"
@@ -296,7 +296,7 @@ export function AccountDashboard({
               addresses.map((address) => (
                 <article
                   key={address.id}
-                  className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6"
+                  className="rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6"
                 >
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="space-y-2">
@@ -357,7 +357,7 @@ export function AccountDashboard({
                 </article>
               ))
             ) : (
-              <div className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
+              <div className="rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
                 등록된 배송지가 없습니다. 첫 배송지는 기본 배송지로 설정됩니다.
               </div>
             )}
@@ -365,8 +365,8 @@ export function AccountDashboard({
         </article>
 
         <article className="surface-card rounded-[36px] p-8 sm:p-10">
-          <p className="display-eyebrow">Address Form</p>
-          <h2 className="display-heading mt-4 text-3xl font-semibold">
+          <p className="display-eyebrow">주소</p>
+          <h2 className="display-heading mt-4 text-3xl">
             {editingAddressId ? "배송지 수정" : "배송지 추가"}
           </h2>
 
@@ -557,8 +557,8 @@ export function AccountDashboard({
         <article className="surface-card rounded-[36px] p-8 sm:p-10">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="display-eyebrow">Wishlist</p>
-              <h2 className="display-heading mt-4 text-3xl font-semibold">찜한 상품</h2>
+              <p className="display-eyebrow">찜</p>
+              <h2 className="display-heading mt-4 text-3xl">찜한 상품</h2>
             </div>
             <Link href="/search" className="button-secondary px-4 py-3">
               상품 더 보기
@@ -570,7 +570,7 @@ export function AccountDashboard({
               wishlist.map((item) => (
                 <article
                   key={item.productId}
-                  className="grid gap-4 rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5 sm:grid-cols-[120px_minmax(0,1fr)]"
+                  className="grid gap-4 rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5 sm:grid-cols-[120px_minmax(0,1fr)]"
                 >
                   <Link href={`/products/${item.slug}`} className="relative min-h-[140px] overflow-hidden rounded-[24px]">
                     <Image
@@ -632,7 +632,7 @@ export function AccountDashboard({
                 </article>
               ))
             ) : (
-              <div className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
+              <div className="rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
                 아직 찜한 상품이 없습니다. 마음에 드는 상품을 저장해 보세요.
               </div>
             )}
@@ -644,8 +644,8 @@ export function AccountDashboard({
         <article className="surface-card rounded-[36px] p-8 sm:p-10">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="display-eyebrow">Reviews</p>
-              <h2 className="display-heading mt-4 text-3xl font-semibold">내 리뷰</h2>
+              <p className="display-eyebrow">리뷰</p>
+              <h2 className="display-heading mt-4 text-3xl">내 리뷰</h2>
             </div>
             <div className="flex flex-wrap gap-3">
               <Link href="/search" className="button-secondary px-4 py-3">
@@ -664,7 +664,7 @@ export function AccountDashboard({
                 return (
                   <article
                     key={review.id}
-                    className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6"
+                    className="rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6"
                   >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div>
@@ -934,7 +934,7 @@ export function AccountDashboard({
                 );
               })
             ) : (
-              <div className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
+              <div className="rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
                 아직 작성한 리뷰가 없습니다. 구매 후 상품 상세에서 바로 작성할 수 있습니다.
               </div>
             )}
@@ -948,8 +948,8 @@ export function AccountDashboard({
         <article className="surface-card rounded-[36px] p-8 sm:p-10">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="display-eyebrow">Orders</p>
-              <h2 className="display-heading mt-4 text-3xl font-semibold">최근 주문</h2>
+              <p className="display-eyebrow">주문</p>
+              <h2 className="display-heading mt-4 text-3xl">최근 주문</h2>
             </div>
             <Link href="/orders" className="button-secondary px-4 py-3">
               전체 주문 보기
@@ -962,7 +962,7 @@ export function AccountDashboard({
                 <Link
                   key={order.orderNumber}
                   href={`/orders/${order.orderNumber}`}
-                  className="block rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 transition hover:translate-y-[-2px]"
+                  className="block rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 transition hover:translate-y-[-2px]"
                 >
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="space-y-2">
@@ -981,7 +981,7 @@ export function AccountDashboard({
                 </Link>
               ))
             ) : (
-              <div className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
+              <div className="rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
                 아직 주문 내역이 없습니다.
               </div>
             )}
@@ -989,12 +989,12 @@ export function AccountDashboard({
         </article>
 
         <article className="surface-card rounded-[36px] p-8 sm:p-10">
-          <p className="display-eyebrow">Shortcuts</p>
-          <h2 className="display-heading mt-4 text-3xl font-semibold">빠른 이동</h2>
+          <p className="display-eyebrow">바로가기</p>
+          <h2 className="display-heading mt-4 text-3xl">빠른 이동</h2>
           <div className="mt-8 grid gap-4">
             <Link
               href="/search"
-              className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 transition hover:translate-y-[-2px]"
+              className="rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 transition hover:translate-y-[-2px]"
             >
               <p className="text-lg font-semibold">상품 둘러보기</p>
               <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">
@@ -1003,7 +1003,7 @@ export function AccountDashboard({
             </Link>
             <Link
               href="/cart"
-              className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 transition hover:translate-y-[-2px]"
+              className="rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 transition hover:translate-y-[-2px]"
             >
               <p className="text-lg font-semibold">장바구니 확인</p>
               <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">
@@ -1012,7 +1012,7 @@ export function AccountDashboard({
             </Link>
             <Link
               href="/lookup-order"
-              className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 transition hover:translate-y-[-2px]"
+              className="rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 transition hover:translate-y-[-2px]"
             >
               <p className="text-lg font-semibold">비회원 주문 조회</p>
               <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">

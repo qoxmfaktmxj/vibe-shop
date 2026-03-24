@@ -13,7 +13,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
       <div className="relative">
         <Link
           href={`/products/${product.slug}`}
-          className="block overflow-hidden rounded-xl border border-black/5 bg-white"
+          className="block overflow-hidden rounded-none border border-black/5 bg-white"
           style={{ background: productGradient(product.accentColor) }}
         >
           <div className="transition duration-500 group-hover:scale-[1.02]">
@@ -37,7 +37,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
 
               <div className="absolute inset-x-0 bottom-0 p-5">
                 <div className="rounded-xl bg-[rgba(255,255,255,0.82)] p-4 shadow-[var(--shadow-soft)] backdrop-blur-sm">
-                  <p className="display-heading max-w-[14rem] text-3xl font-semibold leading-[1.05] text-[var(--ink)]">
+                  <p className="display-heading max-w-[14rem] text-3xl leading-[1.05] text-[var(--ink)]">
                     {product.name}
                   </p>
                   <p className="mt-2 max-w-xs text-sm leading-6 text-[var(--ink-soft)]">

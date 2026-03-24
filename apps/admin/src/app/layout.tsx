@@ -19,8 +19,8 @@ const notoSans = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: "Vibe Shop Admin",
-  description: "Vibe Shop 운영용 관리자 앱",
+  title: "MARU Admin",
+  description: "MARU 운영용 관리자 앱",
 };
 
 export default async function RootLayout({

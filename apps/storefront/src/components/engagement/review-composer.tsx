@@ -88,11 +88,11 @@ export function ReviewComposer({
   }
 
   return (
-    <section className="surface-card rounded-[32px] p-6 sm:p-8">
+    <section className="surface-card rounded-none p-6 sm:p-8">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="display-eyebrow">Write Review</p>
-          <h2 className="display-heading mt-3 text-3xl font-semibold">리뷰 작성</h2>
+          <p className="display-eyebrow">리뷰</p>
+          <h2 className="display-heading mt-3 text-3xl">리뷰 작성</h2>
         </div>
         <div className="rounded-full border border-[var(--line)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-soft)]">
           Member Only

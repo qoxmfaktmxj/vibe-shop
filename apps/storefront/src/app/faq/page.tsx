@@ -27,7 +27,7 @@ export default function FaqPage() {
     >
       {FAQ_ITEMS.map((item) => (
         <article key={item.question} className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
-          <h2 className="display-heading text-xl font-semibold text-[var(--ink)]">
+          <h2 className="display-heading text-xl text-[var(--ink)]">
             {item.question}
           </h2>
           <p className="mt-3">{item.answer}</p>

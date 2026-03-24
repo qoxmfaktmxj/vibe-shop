@@ -59,8 +59,8 @@ export function CartScreen() {
   if (items.length === 0) {
     return (
       <div className="surface-card rounded-xl p-10 text-center">
-        <p className="display-eyebrow">Shopping Bag</p>
-        <h1 className="display-heading mt-4 text-4xl font-semibold text-[var(--ink)]">
+        <p className="display-eyebrow">장바구니</p>
+        <h1 className="display-heading mt-4 text-4xl text-[var(--ink)]">
           아직 담긴 상품이 없습니다.
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-[var(--ink-soft)]">
@@ -78,7 +78,7 @@ export function CartScreen() {
       <div className="grid gap-14 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start">
         <section className="min-w-0">
         <header className="mb-10">
-          <p className="display-eyebrow">Shopping Bag</p>
+          <p className="display-eyebrow">장바구니</p>
           <h1 className="display-heading mt-4 text-4xl font-light tracking-tight text-[var(--ink)]">
             장바구니
           </h1>
@@ -112,7 +112,7 @@ export function CartScreen() {
               <div className="flex min-w-0 flex-col">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
-                    <h2 className="display-heading text-2xl font-semibold text-[var(--ink)]">{item.name}</h2>
+                    <h2 className="display-heading text-2xl text-[var(--ink)]">{item.name}</h2>
                     <p className="mt-2 max-w-2xl text-sm leading-7 text-[var(--ink-soft)]">
                       MVP 장바구니 화면을 레퍼런스처럼 상품 리스트 중심의 에디토리얼 레이아웃으로 재구성했습니다.
                     </p>
@@ -163,8 +163,8 @@ export function CartScreen() {
         </div>
         </section>
 
-        <aside className="surface-card editorial-shadow rounded-xl p-8 lg:sticky lg:top-32">
-        <p className="display-eyebrow">Summary</p>
+        <aside className="surface-card editorial-shadow rounded-none p-8 lg:sticky lg:top-32">
+        <p className="display-eyebrow">결제 요약</p>
         <h2 className="display-heading mt-4 text-3xl font-light text-[var(--ink)]">주문 요약</h2>
         <div className="mt-8 space-y-4 text-sm">
           <div className="flex justify-between">

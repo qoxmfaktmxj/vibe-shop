@@ -258,8 +258,8 @@ export function CheckoutForm() {
 
   if (hydrated && items.length === 0) {
     return (
-      <div className="surface-card rounded-[28px] p-8 text-center">
-        <p className="display-heading text-3xl font-semibold">주문할 상품이 없습니다.</p>
+      <div className="surface-card rounded-none p-8 text-center">
+        <p className="display-heading text-3xl">주문할 상품이 없습니다.</p>
         <p className="mt-3 text-sm text-[var(--ink-soft)]">
           장바구니에 상품을 담은 뒤 주문서를 작성해 주세요.
         </p>
@@ -271,11 +271,11 @@ export function CheckoutForm() {
     <div className="pb-28 lg:pb-0">
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-start">
         <section className="space-y-6">
-          <article className="surface-card rounded-[32px] p-6 sm:p-8">
+          <article className="surface-card rounded-none p-6 sm:p-8">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <p className="display-eyebrow">One-Step Checkout</p>
-                <h1 className="display-heading mt-3 text-3xl font-semibold sm:text-4xl">
+                <p className="display-eyebrow">주문서</p>
+                <h1 className="display-heading mt-3 text-3xl sm:text-4xl">
                   모바일 우선 주문서
                 </h1>
                 <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--ink-soft)]">
@@ -362,11 +362,11 @@ export function CheckoutForm() {
               });
             }}
           >
-            <article className="surface-card rounded-[32px] p-6 sm:p-8">
+            <article className="surface-card rounded-none p-6 sm:p-8">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="display-eyebrow">Contact</p>
-                  <h2 className="display-heading mt-3 text-2xl font-semibold">받는 분 정보</h2>
+                  <p className="display-eyebrow">연락처</p>
+                  <h2 className="display-heading mt-3 text-2xl">받는 분 정보</h2>
                 </div>
                 {session.authenticated ? (
                   <Link href="/account" className="text-sm font-medium text-[var(--primary)]">
@@ -414,11 +414,11 @@ export function CheckoutForm() {
               )}
             </article>
 
-            <article className="surface-card rounded-[32px] p-6 sm:p-8">
+            <article className="surface-card rounded-none p-6 sm:p-8">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <p className="display-eyebrow">Delivery</p>
-                  <h2 className="display-heading mt-3 text-2xl font-semibold">배송지 입력</h2>
+                  <p className="display-eyebrow">배송</p>
+                  <h2 className="display-heading mt-3 text-2xl">배송지 입력</h2>
                 </div>
                 {loadingProfile ? (
                   <p className="text-sm text-[var(--ink-soft)]">저장 배송지를 불러오는 중입니다.</p>
@@ -506,10 +506,10 @@ export function CheckoutForm() {
               </label>
             </article>
 
-            <article className="surface-card rounded-[32px] p-6 sm:p-8">
+            <article className="surface-card rounded-none p-6 sm:p-8">
               <div>
-                <p className="display-eyebrow">Payment</p>
-                <h2 className="display-heading mt-3 text-2xl font-semibold">결제 수단 선택</h2>
+                <p className="display-eyebrow">결제</p>
+                <h2 className="display-heading mt-3 text-2xl">결제 수단 선택</h2>
               </div>
 
               <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -549,9 +549,9 @@ export function CheckoutForm() {
           </form>
         </section>
 
-        <aside className="surface-card rounded-[32px] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(241,239,233,0.86))] p-6 sm:p-8 lg:sticky lg:top-28">
-          <p className="display-eyebrow">Order Summary</p>
-          <h2 className="display-heading mt-3 text-2xl font-semibold">최종 확인</h2>
+        <aside className="surface-card rounded-none bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(241,239,233,0.86))] p-6 sm:p-8 lg:sticky lg:top-28">
+          <p className="display-eyebrow">주문 확인</p>
+          <h2 className="display-heading mt-3 text-2xl">최종 확인</h2>
           <p className="mt-3 text-sm leading-7 text-[var(--ink-soft)]">
             입력한 정보는 이 화면에서 바로 검토하고 결제까지 한 번에 진행됩니다.
           </p>
@@ -605,7 +605,7 @@ export function CheckoutForm() {
       </div>
 
       <div className="fixed inset-x-4 bottom-4 z-40 lg:hidden">
-        <div className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.96)] p-4 shadow-[0_24px_60px_rgba(12,16,24,0.18)] backdrop-blur">
+        <div className="rounded-none border border-[var(--line)] bg-[rgba(255,255,255,0.96)] p-4 shadow-[0_24px_60px_rgba(12,16,24,0.18)] backdrop-blur">
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ink-soft)]">

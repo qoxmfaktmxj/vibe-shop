@@ -3,8 +3,8 @@ import Link from "next/link";
 export default function NotFound() {
   return (
     <div className="surface-card rounded-[36px] p-8 text-center sm:p-10">
-      <p className="display-eyebrow">Page</p>
-      <h1 className="display-heading mt-4 text-4xl font-semibold">
+      <p className="display-eyebrow">페이지</p>
+      <h1 className="display-heading mt-4 text-4xl">
         페이지를 찾을 수 없습니다.
       </h1>
       <p className="mt-4 text-[var(--ink-soft)]">
