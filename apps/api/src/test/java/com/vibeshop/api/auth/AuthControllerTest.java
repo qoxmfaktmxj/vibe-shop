@@ -3,6 +3,7 @@ package com.vibeshop.api.auth;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -13,9 +14,12 @@ import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
@@ -129,9 +133,11 @@ class AuthControllerTest {
                     }
                     """))
             .andExpect(status().isOk())
+            .andExpect(header().doesNotExist("X-Session-Token"))
             .andExpect(cookie().exists("vibe_shop_session"))
             .andExpect(jsonPath("$.authenticated").value(true))
             .andExpect(jsonPath("$.user.email").value("minsu@example.com"))
+            .andExpect(jsonPath("$.sessionToken").doesNotExist())
             .andReturn();
 
         Cookie authCookie = signUpResult.getResponse().getCookie("vibe_shop_session");
@@ -139,7 +145,8 @@ class AuthControllerTest {
         mockMvc.perform(get("/api/v1/auth/session").cookie(authCookie))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.authenticated").value(true))
-            .andExpect(jsonPath("$.user.name").value("Kim Minsu"));
+            .andExpect(jsonPath("$.user.name").value("Kim Minsu"))
+            .andExpect(jsonPath("$.sessionToken").doesNotExist());
     }
 
     @Test
@@ -181,8 +188,10 @@ class AuthControllerTest {
                     }
                     """))
             .andExpect(status().isOk())
+            .andExpect(header().doesNotExist("X-Session-Token"))
             .andExpect(cookie().exists("vibe_shop_session"))
             .andExpect(jsonPath("$.authenticated").value(true))
+            .andExpect(jsonPath("$.sessionToken").doesNotExist())
             .andReturn();
 
         Cookie authCookie = loginResult.getResponse().getCookie("vibe_shop_session");
@@ -200,14 +209,14 @@ class AuthControllerTest {
                 .content("""
                     {
                       "provider": "GOOGLE",
-                      "providerUserId": "google-user-1",
-                      "email": "social@example.com",
-                      "displayName": "Social Shopper"
+                      "accessToken": "fake-token-for-test"
                     }
                     """))
             .andExpect(status().isOk())
+            .andExpect(header().doesNotExist("X-Session-Token"))
             .andExpect(cookie().exists("vibe_shop_session"))
             .andExpect(jsonPath("$.authenticated").value(true))
+            .andExpect(jsonPath("$.sessionToken").doesNotExist())
             .andExpect(jsonPath("$.user.email").value("social@example.com"))
             .andExpect(jsonPath("$.user.provider").value("GOOGLE"));
     }
@@ -230,7 +239,8 @@ class AuthControllerTest {
 
         mockMvc.perform(post("/api/v1/auth/logout").cookie(authCookie))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.authenticated").value(false));
+            .andExpect(jsonPath("$.authenticated").value(false))
+            .andExpect(jsonPath("$.sessionToken").doesNotExist());
 
         mockMvc.perform(get("/api/v1/auth/session").cookie(authCookie))
             .andExpect(status().isOk())
@@ -273,5 +283,25 @@ class AuthControllerTest {
         mockMvc.perform(get("/api/v1/auth/session").cookie(authCookie))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.authenticated").value(false));
+    }
+
+    @TestConfiguration
+    static class SocialVerifierTestConfig {
+        @Bean
+        @Primary
+        SocialIdentityVerifier socialIdentityVerifier() {
+            return (provider, accessToken) -> {
+                if (provider != AuthProviderType.GOOGLE || !"fake-token-for-test".equals(accessToken)) {
+                    throw new IllegalArgumentException("소셜 계정을 확인할 수 없습니다.");
+                }
+                return new SocialIdentity(
+                    AuthProviderType.GOOGLE,
+                    "google-user-1",
+                    "social@example.com",
+                    "Social Shopper",
+                    true
+                );
+            };
+        }
     }
 }

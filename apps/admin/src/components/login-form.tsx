@@ -9,8 +9,8 @@ export function LoginForm() {
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
   const [form, setForm] = useState({
-    email: "admin@vibeshop.local",
-    password: "admin1234!",
+    email: "",
+    password: "",
   });
 
   return (
@@ -44,7 +44,7 @@ export function LoginForm() {
           value={form.email}
           onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
           className="admin-input px-4 py-3"
-          placeholder="admin@vibeshop.local"
+          placeholder="owner@example.com"
         />
       </label>
 
@@ -56,7 +56,7 @@ export function LoginForm() {
           value={form.password}
           onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
           className="admin-input px-4 py-3"
-          placeholder="admin1234!"
+          placeholder="비밀번호를 입력해 주세요"
         />
       </label>
 

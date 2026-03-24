@@ -3,15 +3,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { sanitizeNextPath } from "@/lib/auth-paths";
 import { isSocialProvider, type SocialProvider } from "@/lib/social-auth";
 
-type SocialProfile = {
-  providerUserId: string;
-  email: string;
-  displayName: string;
-};
-
 type AuthSessionResponse = {
   authenticated: boolean;
-  sessionToken?: string | null;
+  user: {
+    id: number;
+    name: string;
+    email: string;
+    provider: string;
+  } | null;
 };
 
 const API_BASE_URL =
@@ -19,9 +18,7 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ??
   "http://localhost:8080";
 
-const AUTH_SESSION_COOKIE = "vibe_shop_session";
 const OAUTH_NEXT_COOKIE = "vibe_shop_oauth_next";
-const AUTH_SESSION_MAX_AGE = 60 * 60 * 24 * 30;
 
 function resolveAppOrigin(request: NextRequest) {
   const configuredOrigin =
@@ -50,7 +47,6 @@ function getProviderConfig(provider: SocialProvider, appOrigin: string) {
         process.env.GOOGLE_REDIRECT_URI ??
         `${appOrigin}/api/auth/social/callback/google`,
       tokenUrl: "https://oauth2.googleapis.com/token",
-      profileUrl: "https://www.googleapis.com/oauth2/v2/userinfo",
     };
   }
 
@@ -61,7 +57,6 @@ function getProviderConfig(provider: SocialProvider, appOrigin: string) {
       process.env.KAKAO_REDIRECT_URI ??
       `${appOrigin}/api/auth/social/callback/kakao`,
     tokenUrl: "https://kauth.kakao.com/oauth/token",
-    profileUrl: "https://kapi.kakao.com/v2/user/me",
   };
 }
 
@@ -144,54 +139,9 @@ async function exchangeToken(
   };
 }
 
-async function fetchProfile(provider: SocialProvider, accessToken: string, request: NextRequest) {
-  const appOrigin = resolveAppOrigin(request);
-  const config = getProviderConfig(provider, appOrigin);
-
-  const profileResponse = await fetch(config.profileUrl, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-    cache: "no-store",
-  });
-
-  const profileJson = (await profileResponse.json().catch(() => null)) as Record<string, unknown> | null;
-  if (!profileResponse.ok || !profileJson) {
-    return {
-      error: "profile_fetch_failed",
-      profile: null,
-    };
-  }
-
-  if (provider === "google") {
-    const profile = {
-      providerUserId: String(profileJson.id ?? ""),
-      email: String(profileJson.email ?? "").trim().toLowerCase(),
-      displayName: String(profileJson.name ?? profileJson.email ?? "Google User"),
-    };
-    return {
-      error: profile.providerUserId && profile.email ? "" : "email_required",
-      profile,
-    };
-  }
-
-  const kakaoAccount = (profileJson.kakao_account ?? {}) as Record<string, unknown>;
-  const kakaoProfile = (kakaoAccount.profile ?? {}) as Record<string, unknown>;
-  const profile = {
-    providerUserId: String(profileJson.id ?? ""),
-    email: String(kakaoAccount.email ?? "").trim().toLowerCase(),
-    displayName: String(kakaoProfile.nickname ?? "Kakao User"),
-  };
-  return {
-    error: profile.providerUserId && profile.email ? "" : "email_required",
-    profile,
-  };
-}
-
 async function createStorefrontSession(
-  profile: SocialProfile,
   provider: SocialProvider,
+  accessToken: string,
   cartSessionToken?: string,
 ) {
   const response = await fetch(`${API_BASE_URL}/api/v1/auth/social/exchange`, {
@@ -206,24 +156,23 @@ async function createStorefrontSession(
     },
     body: JSON.stringify({
       provider: provider.toUpperCase(),
-      providerUserId: profile.providerUserId,
-      email: profile.email,
-      displayName: profile.displayName,
+      accessToken,
     }),
     cache: "no-store",
   });
 
   const json = (await response.json().catch(() => null)) as AuthSessionResponse | null;
-  if (!response.ok || !json?.authenticated || !json.sessionToken) {
+  const setCookieHeader = response.headers.get("set-cookie");
+  if (!response.ok || !json?.authenticated || !setCookieHeader) {
     return {
       error: "social_exchange_failed",
-      sessionToken: "",
+      setCookieHeader: "",
     };
   }
 
   return {
     error: "",
-    sessionToken: json.sessionToken,
+    setCookieHeader,
   };
 }
 
@@ -259,20 +208,10 @@ export async function GET(
     return redirectToLogin(request, tokenResult.error, nextPath, rawProvider);
   }
 
-  const profileResult = await fetchProfile(rawProvider, tokenResult.accessToken, request);
-  if (profileResult.error || !profileResult.profile) {
-    return redirectToLogin(
-      request,
-      profileResult.error || "profile_fetch_failed",
-      nextPath,
-      rawProvider,
-    );
-  }
-
   const cartSessionToken = request.cookies.get("vibe_shop_cart")?.value;
   const sessionResult = await createStorefrontSession(
-    profileResult.profile,
     rawProvider,
+    tokenResult.accessToken,
     cartSessionToken,
   );
   if (sessionResult.error) {
@@ -281,14 +220,7 @@ export async function GET(
 
   const appOrigin = resolveAppOrigin(request);
   const response = NextResponse.redirect(new URL(nextPath, appOrigin));
-  response.cookies.set({
-    name: AUTH_SESSION_COOKIE,
-    value: sessionResult.sessionToken,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: AUTH_SESSION_MAX_AGE,
-  });
+  response.headers.append("set-cookie", sessionResult.setCookieHeader);
   response.cookies.set({
     name: OAUTH_NEXT_COOKIE,
     value: "",

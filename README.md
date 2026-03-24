@@ -1,145 +1,137 @@
-# vibe-shop
+# Vibe Shop
 
-`vibe-shop`은 세일즈온 레거시를 참고해 새 구조로 다시 만드는 커머스 웹앱 저장소다.  
-지금 단계는 "구매 퍼널 MVP를 실제 운영 구조에 가깝게 다듬는 Phase 1 초반"에 가깝다.
+Vibe Shop은 **Next.js 기반 storefront / admin** 과 **Spring Boot 기반 API** 로 구성된 풀스택 커머스 프로젝트다.  
+단순 화면 데모가 아니라, 상품 탐색부터 인증·세션, 장바구니, 주문, 계정, 리뷰, 위시리스트, 관리자 운영 흐름까지 **실제 서비스 구조에 가깝게 단계적으로 구현**하는 것을 목표로 한다.
 
-레거시 코드를 그대로 옮기기보다, 화면 흐름과 API 계약을 현재 구조에 맞게 다시 설계하는 방식을 기본 원칙으로 잡고 있다.
+## 프로젝트 개요
 
-## 이 저장소에 들어 있는 앱
+현재 저장소는 아래 3개 앱을 중심으로 동작한다.
 
 - `apps/storefront`
-  - 사용자용 쇼핑 화면
-  - 홈, 카테고리, 상품 상세, 서버 장바구니, 체크아웃, 주문 완료, 비회원 주문조회까지 구현
+  - 고객용 쇼핑 경험
+  - 홈, 카테고리, 상품 목록/상세, 장바구니, 로그인, 회원가입, 마이페이지, 주문, 소셜 로그인 흐름 포함
 - `apps/api`
-  - storefront가 사용하는 API
-  - 카탈로그 조회, 서버 장바구니, 주문 preview/create/get, 비회원 주문조회 제공
+  - Spring Boot API 서버
+  - 카탈로그, 인증/세션, 장바구니, 주문, 계정, 리뷰, 위시리스트, 관리자 API 제공
 - `apps/admin`
-  - 2차 범위인 관리자 앱 자리
-  - 현재는 착수 전 상태
+  - 운영자용 관리자 화면
+  - 관리자 로그인, 대시보드, 상품/주문/회원/리뷰/전시 관리 기본 흐름 포함
 - `tests/e2e`
-  - Playwright 기반 브라우저 시나리오
-
-앱별 세부 설명:
-
-- [apps/storefront/README.md](./apps/storefront/README.md)
-- [apps/api/README.md](./apps/api/README.md)
-- [apps/admin/README.md](./apps/admin/README.md)
-
-## 화면 예시
-
-### 홈 화면
-
-에디토리얼 히어로와 큐레이션 블록을 중심으로 재정비한 storefront 첫 화면이다.
-
-![홈 화면](./docs/screenshots/readme/home.png)
-
-### 카테고리 화면
-
-슬레이트 톤 레이아웃과 정렬 UI를 적용한 리빙 카테고리 목록 화면이다.
-
-![카테고리 화면](./docs/screenshots/readme/category-living.png)
-
-### 상품 상세 화면
-
-대표 상품을 기준으로 새 카드 톤과 상세 콘텐츠 밀도를 확인할 수 있는 상품 상세 화면이다.
-
-![상품 상세 화면](./docs/screenshots/readme/product-linen-bed-set.png)
-
-### 장바구니 화면
-
-선택 상품과 요약 패널을 한 번에 읽을 수 있도록 재구성한 서버 장바구니 화면이다.
-
-![장바구니 화면](./docs/screenshots/readme/cart.png)
-
-### 체크아웃 화면
-
-배송지 입력과 주문 요약을 분리해 구매 완료 직전 단계의 가독성을 높인 체크아웃 화면이다.
-
-![체크아웃 화면](./docs/screenshots/readme/checkout.png)
+  - Playwright 기반 브라우저 E2E 시나리오
 
 ## 현재 구현 범위
 
-현재는 아래 흐름을 MVP로 검증하고 있다.
+### 구현 완료 또는 기본 흐름 구현
 
-1. 홈 진입
-2. 카테고리 이동
-3. 상품 상세 진입
-4. 서버 장바구니 담기
-5. 주문 금액 미리보기
-6. 주문 생성
-7. 주문 완료 페이지 확인
-8. 비회원 주문 조회 재진입
+#### 고객(Storefront)
+- 홈 전시 데이터 조회
+- 카테고리 탐색
+- 상품 목록 조회 (`category`, `q`, `sort` 지원)
+- 상품 상세 조회
+- 장바구니 조회 / 수량 변경 / 삭제 / 비우기
+- 비회원 장바구니와 로그인 후 회원 장바구니 병합
+- 이메일 회원가입 / 로그인 / 로그아웃
+- 세션 조회 (`HttpOnly` 쿠키 기반)
+- Google / Kakao 소셜 로그인 교환 흐름
+- 마이페이지 프로필 조회 / 수정
+- 배송지 조회 / 추가 / 수정 / 삭제
+- 위시리스트 조회 / 추가 / 제거
+- 내 리뷰 조회
+- 리뷰 작성
+- 주문 미리보기 / 주문 생성 / 주문 조회 / 주문 취소
+- 비회원 주문 조회 / 주문 목록 조회
 
-현재 들어간 보강:
+#### 관리자(Admin)
+- 관리자 로그인 / 로그아웃 / 세션 조회
+- 운영 대시보드 조회
+- 상품 목록 조회 / 수정
+- 주문 목록 조회 / 상태 변경
+- 카테고리 목록 조회 / 생성 / 수정 / 삭제
+- 메인 전시 정보 조회 / 수정
+- 전시 섹션 / 전시 아이템 생성·수정·삭제
+- 회원 목록 조회 / 상태 변경
+- 리뷰 목록 조회 / 상태 변경
+- 통계 조회
 
-- 장바구니를 `localStorage` 단독 상태에서 서버 세션 장바구니로 변경
-- 주문 생성 시 `idempotency key`로 중복 제출 방지
-- 주문 상태 필드 추가
-- 비회원 주문번호 + 연락처 조회 API 및 화면 추가
-- `리빙`, `키친`, `웰니스` 카테고리에 테스트 상품을 각각 20개씩 확장
-- 테스트 상품 이미지를 로컬 자산으로 고정하고 카드, 상세, 장바구니 화면에 반영
+### 부분 구현 / 제한사항
 
-아직 없는 범위:
+- 결제는 실제 PG 연동이 아니라 **시뮬레이션 중심 흐름**이다.
+- 인증은 **세션 쿠키 기반**이며, JWT/Redis 기반 확장 구조는 아직 적용하지 않았다.
+- 소셜 로그인은 provider access token을 서버에서 검증하지만, 운영 수준 설정/예외 처리 고도화는 여지가 있다.
+- 관리자 기능은 핵심 운영 흐름 중심이며, 완전한 백오피스 수준은 아니다.
+- 재고 / 배송 / 취소 / 환불 정책은 일부 단순화된 규칙을 사용한다.
 
-- 로그인, 회원가입, 비회원/회원 주문 분기
-- 검색
-- 마이페이지
-- 리뷰, 상품문의, 위시리스트
-- 실제 결제 승인
-- 관리자 기능
+### 향후 예정
 
-## 기술 스택
+- 실제 결제 게이트웨이 연동
+- 쿠폰 / 프로모션 / 포인트 정책
+- 재고 예약 / 이력 관리 고도화
+- 운영 로그 / 감사 이력 / 관리자 권한 정책 확장
+- OpenAPI 등 자동 문서화 체계 도입
+- 세션 저장소 분리(Redis 등) 및 인증 운영 고도화
 
-### 프런트엔드
+## 아키텍처
 
+### Frontend
 - Next.js 16
 - React 19
 - TypeScript
-- Tailwind CSS 4
+- App Router
+- SSR + CSR 혼합 구조
+- API 호출은 server/client 유틸을 분리해서 관리
 
-### 백엔드
-
+### Backend
 - Spring Boot 4
 - Java 21
 - Spring Web MVC
+- Spring Validation
 - Spring Data JPA
 - Flyway
 - PostgreSQL
 
-### 테스트와 검증
+### 인증 / 세션
+- 고객 인증 쿠키: `vibe_shop_session`
+- 관리자 인증 쿠키: `vibe_shop_admin_session`
+- 장바구니 쿠키: `vibe_shop_cart`
+- 인증 토큰은 **응답 body/header로 노출하지 않고 `Set-Cookie` 로만 전달**
+- 서버는 `user_sessions.session_token_hash` 기준으로 세션을 조회
 
-- Playwright
-- JUnit
-- ESLint
-
-## 디렉터리 구조
+## 저장소 구조
 
 ```text
 apps/
-  storefront/   사용자 화면
-  api/          API 서버
-  admin/        관리자 화면(준비 중)
-docs/           분석 문서, 계약 문서, ERD, 로드맵
-tests/e2e/      브라우저 E2E 시나리오
-scripts/        루트 실행 보조 스크립트
+  storefront/   Next.js storefront
+  admin/        Next.js admin
+  api/          Spring Boot API
+
+docs/
+  api-contract-v1.md
+  erd-v1.md
+  test-product-image-sources.md
+
+tests/
+  e2e/          Playwright end-to-end tests
+
+scripts/        실행 / 빌드 보조 스크립트
 ```
 
-## 로컬 실행 환경
+## 실행 환경
 
-필수 환경:
+필수 권장 환경:
 
-- Node.js 22 이상
-- npm 10 이상
+- Node.js 22+
+- npm 10+
 - Java 21
-- Docker Desktop
+- Docker
 
-## 시작 방법
+## 실행 방법
 
 ### 1. 의존성 설치
 
 ```bash
 npm ci
 npm ci --prefix apps/storefront
+npm ci --prefix apps/admin
 ```
 
 ### 2. 로컬 DB 실행
@@ -159,52 +151,22 @@ npm run infra:up
 ### 3. 개발 서버 실행
 
 ```bash
-npm run dev
-```
-
-개별 실행도 가능하다.
-
-```bash
 npm run dev:api
 npm run dev:storefront
+npm run dev:admin
+```
+
+또는 storefront + api를 함께 실행:
+
+```bash
+npm run dev
 ```
 
 기본 개발 포트:
 
 - storefront: `http://127.0.0.1:3000`
+- admin: `http://127.0.0.1:3200`
 - api: `http://127.0.0.1:8080`
-
-## 환경 변수
-
-### API
-
-기본 예시는 [apps/api/.env.example](./apps/api/.env.example)에 있다.
-
-주요 값:
-
-- `APP_PORT`
-- `DB_HOST`
-- `DB_PORT`
-- `DB_NAME`
-- `DB_USERNAME`
-- `DB_PASSWORD`
-- `CORS_ALLOWED_ORIGINS`
-
-### storefront
-
-기본 예시는 [apps/storefront/.env.local.example](./apps/storefront/.env.local.example)에 있다.
-
-주요 값:
-
-- `API_BASE_URL`
-- `NEXT_PUBLIC_API_BASE_URL`
-
-현재 규칙:
-
-1. 서버 컴포넌트는 `API_BASE_URL`을 우선 사용한다.
-2. 없으면 `NEXT_PUBLIC_API_BASE_URL`을 사용한다.
-3. 브라우저에서는 `NEXT_PUBLIC_API_BASE_URL`을 우선 사용한다.
-4. 둘 다 없으면 현재 host 기준 `:8080`을 기본값으로 잡는다.
 
 ## 자주 쓰는 명령
 
@@ -212,74 +174,62 @@ npm run dev:storefront
 npm run infra:up
 npm run infra:down
 npm run dev
+npm run dev:admin
 npm run lint:storefront
+npm run lint:admin
 npm run build:storefront
+npm run build:admin
 npm run build:api
 npm run test:api
 npm run qa:e2e
 ```
 
-## 테스트 방법
+## 테스트 체계
 
-### 1. storefront 정적 검증
+### 정적 검증
+- `npm run lint:storefront`
+- `npm run lint:admin`
+- `npm run build:storefront`
+- `npm run build:admin`
 
-```bash
-npm run lint:storefront
-npm run build:storefront
-```
+### API 테스트
+- `npm run test:api`
+- Spring Boot + JUnit 기반 통합 테스트
+- 인증/세션, 장바구니, 주문, 리뷰, 관리자 흐름 검증 포함
 
-### 2. API 테스트
+### 브라우저 E2E
+- `npm run qa:e2e`
+- Playwright 기반
+- storefront / api를 띄운 뒤 구매 퍼널과 핵심 사용자 흐름을 검증
 
-```bash
-npm run test:api
-```
+## CI
 
-현재는 Spring context 외에 서버 장바구니와 주문 idempotency 서비스 테스트까지 포함한다.
+GitHub Actions 기반 `CI` 워크플로가 구성되어 있다.
 
-### 3. 브라우저 E2E
+현재 파이프라인은 아래를 수행한다.
 
-Playwright smoke는 로컬 Postgres가 없으면 먼저 띄우고, 그다음 API와 storefront를 자동으로 실행해서 구매 퍼널을 끝까지 검증한다.
-
-```bash
-npm run qa:e2e:install
-npm run qa:e2e
-```
-
-E2E 전용 포트:
-
-- storefront: `3100`
-- api: `8180`
-
-기존 3000/8080 포트에 다른 로컬 앱이 떠 있어도 충돌하지 않게 분리했다.
-
-실행 결과는 아래 위치에 남는다.
-
-- `output/playwright/`
-- `output/playwright-report/`
-- `output/test-results/`
+- Node.js / Java 환경 구성
+- storefront lint / build
+- API test
+- Playwright smoke
 
 ## 문서
 
-- 재베이스라인 로드맵: [docs/saleson-rebaseline-roadmap-2026-03-14.md](./docs/saleson-rebaseline-roadmap-2026-03-14.md)
-- 현재 API 계약: [docs/api-contract-v1.md](./docs/api-contract-v1.md)
-- 현재 ERD 초안: [docs/erd-v1.md](./docs/erd-v1.md)
+- API 계약: [docs/api-contract-v1.md](./docs/api-contract-v1.md)
+- ERD: [docs/erd-v1.md](./docs/erd-v1.md)
 - 테스트 이미지 출처: [docs/test-product-image-sources.md](./docs/test-product-image-sources.md)
 
-## 현재 판단
+## 현재 상태 요약
 
-이 프로젝트는 방향이 틀린 상태가 아니라, 아직 범위는 작지만 구매 퍼널 코어를 하나씩 운영형 구조로 바꾸는 단계다.
+Vibe Shop은 더 이상 단순한 상품 목록 데모가 아니라,
 
-다음 우선순위는 아래 순서가 맞다.
+- **세션 기반 인증**
+- **회원/비회원 주문 흐름**
+- **계정 / 리뷰 / 위시리스트**
+- **관리자 운영 기능 기본 구조**
 
-1. 인증과 세션
-2. 회원/비회원 주문 분기
-3. 주문 상태 확장, 재고, 결제 어댑터
-4. 검색과 전시 확장
-5. 마이페이지
-6. 관리자 앱
+까지 포함한 **커머스 실전형 포트폴리오 프로젝트** 단계에 들어와 있다.
 
-## 참고 메모
+---
 
-- 관리자 화면은 2차 범위다.
-- 현재 compose는 로컬 Postgres만 다룬다.
-- 운영 가능한 수준의 주문/결제/재고/회원 체계는 아직 후속 작업이다.
+현재 문서는 **수동 관리 중**이며, 향후 OpenAPI/스키마 기반 **자동 문서화 체계로 전환 예정**이다.

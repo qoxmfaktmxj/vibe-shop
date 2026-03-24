@@ -21,22 +21,22 @@ import com.vibeshop.api.auth.AuthDtos.SocialExchangeRequest;
 public class AuthService {
 
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
-    private static final String BOOTSTRAP_ADMIN_EMAIL = "admin@vibeshop.local";
-    private static final String BOOTSTRAP_ADMIN_PASSWORD = "admin1234!";
-    private static final String BOOTSTRAP_ADMIN_NAME = "Vibe Shop Admin";
 
     private final UserRepository userRepository;
     private final UserSessionRepository userSessionRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SocialIdentityVerifier socialIdentityVerifier;
 
     public AuthService(
         UserRepository userRepository,
         UserSessionRepository userSessionRepository,
-        PasswordEncoder passwordEncoder
+        PasswordEncoder passwordEncoder,
+        SocialIdentityVerifier socialIdentityVerifier
     ) {
         this.userRepository = userRepository;
         this.userSessionRepository = userSessionRepository;
         this.passwordEncoder = passwordEncoder;
+        this.socialIdentityVerifier = socialIdentityVerifier;
     }
 
     @Transactional
@@ -73,21 +73,26 @@ public class AuthService {
 
     @Transactional
     public AuthenticatedSession socialExchange(SocialExchangeRequest request) {
-        AuthProviderType provider = parseSocialProvider(request.provider());
-        String normalizedEmail = normalizeEmail(request.email());
-        String displayName = request.displayName().trim();
+        AuthProviderType requestedProvider = parseSocialProvider(request.provider());
+        SocialIdentity identity = socialIdentityVerifier.verify(requestedProvider, request.accessToken());
+        if (identity.provider() != requestedProvider) {
+            throw new IllegalArgumentException("지원하지 않는 소셜 로그인 공급자입니다.");
+        }
+
+        String normalizedEmail = requireSocialEmail(identity.email(), identity.emailVerified());
+        String displayName = normalizeDisplayName(identity.displayName(), normalizedEmail);
         OffsetDateTime now = OffsetDateTime.now(SEOUL);
 
         User user = userRepository.findByEmailIgnoreCase(normalizedEmail)
             .map(existingUser -> {
-                existingUser.syncSocialProfile(displayName, provider);
+                existingUser.syncSocialProfile(displayName, requestedProvider);
                 return existingUser;
             })
             .orElseGet(() -> userRepository.save(new User(
                 displayName,
                 normalizedEmail,
-                passwordEncoder.encode(buildSocialPassword(provider, request.providerUserId())),
-                provider,
+                passwordEncoder.encode(buildSyntheticSocialPassword(requestedProvider, identity.providerUserId())),
+                requestedProvider,
                 UserRole.CUSTOMER,
                 now
             )));
@@ -159,7 +164,7 @@ public class AuthService {
     private User authenticateAdminUser(LoginRequest request) {
         String normalizedEmail = normalizeEmail(request.email());
         User user = userRepository.findByEmailIgnoreCase(normalizedEmail)
-            .orElseGet(() -> maybeCreateBootstrapAdmin(normalizedEmail, request.password()));
+            .orElseThrow(() -> new IllegalArgumentException("관리자 이메일 또는 비밀번호가 올바르지 않습니다."));
 
         if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
             throw new IllegalArgumentException("관리자 이메일 또는 비밀번호가 올바르지 않습니다.");
@@ -173,22 +178,6 @@ public class AuthService {
         return user;
     }
 
-    private User maybeCreateBootstrapAdmin(String normalizedEmail, String rawPassword) {
-        if (!BOOTSTRAP_ADMIN_EMAIL.equals(normalizedEmail) || !BOOTSTRAP_ADMIN_PASSWORD.equals(rawPassword)) {
-            throw new IllegalArgumentException("관리자 이메일 또는 비밀번호가 올바르지 않습니다.");
-        }
-
-        OffsetDateTime now = OffsetDateTime.now(SEOUL);
-        return userRepository.save(new User(
-            BOOTSTRAP_ADMIN_NAME,
-            normalizedEmail,
-            passwordEncoder.encode(rawPassword),
-            AuthProviderType.LOCAL,
-            UserRole.OWNER,
-            now
-        ));
-    }
-
     private AuthProviderType parseSocialProvider(String provider) {
         String normalizedProvider = provider.trim().toUpperCase();
         if ("GOOGLE".equals(normalizedProvider)) {
@@ -200,12 +189,13 @@ public class AuthService {
         throw new IllegalArgumentException("지원하지 않는 소셜 로그인 공급자입니다.");
     }
 
-    private String buildSocialPassword(AuthProviderType provider, String providerUserId) {
-        return "social-" + provider.name().toLowerCase() + "-" + providerUserId.trim();
+    private String buildSyntheticSocialPassword(AuthProviderType provider, String providerUserId) {
+        return UUID.randomUUID() + "-social-" + provider.name().toLowerCase() + "-" + providerUserId.trim();
     }
 
     private AuthenticatedSession createSession(User user, OffsetDateTime now) {
         clearExpiredSessions();
+        ensureAccountCanAuthenticate(user);
         user.markLoggedIn(now);
 
         String rawToken = UUID.randomUUID().toString().replace("-", "");
@@ -227,6 +217,23 @@ public class AuthService {
 
     private String normalizeEmail(String email) {
         return email.trim().toLowerCase();
+    }
+
+    private String requireSocialEmail(String email, boolean emailVerified) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("이메일 제공 동의가 필요합니다. 공급자 동의 화면에서 이메일 권한을 허용해 주세요.");
+        }
+        if (!emailVerified) {
+            throw new IllegalArgumentException("이메일 검증이 완료되지 않은 소셜 계정입니다.");
+        }
+        return normalizeEmail(email);
+    }
+
+    private String normalizeDisplayName(String displayName, String fallbackEmail) {
+        if (displayName == null || displayName.isBlank()) {
+            return fallbackEmail;
+        }
+        return displayName.trim();
     }
 
     private String hashToken(String rawToken) {

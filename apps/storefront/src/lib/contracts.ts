@@ -90,7 +90,11 @@ export type AuthenticatedUser = {
 export type AuthSession = {
   authenticated: boolean;
   user: AuthenticatedUser | null;
-  sessionToken?: string | null;
+};
+
+export type SocialExchangePayload = {
+  provider: string;
+  accessToken: string;
 };
 
 export type AccountProfile = {
@@ -294,4 +298,3 @@ export type CartResponse = {
   itemCount: number;
   subtotal: number;
 };
-

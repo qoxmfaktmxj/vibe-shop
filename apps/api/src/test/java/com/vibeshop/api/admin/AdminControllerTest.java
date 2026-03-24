@@ -4,6 +4,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -27,6 +28,8 @@ import org.springframework.test.web.servlet.MvcResult;
 class AdminControllerTest {
 
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
+    private static final String ADMIN_EMAIL = "owner@vibeshop.local";
+    private static final String ADMIN_PASSWORD = "owner1234!";
 
     @Autowired
     private MockMvc mockMvc;
@@ -116,6 +119,36 @@ class AdminControllerTest {
                 CURRENT_TIMESTAMP
             )
             """).update();
+
+        jdbcClient.sql("""
+            INSERT INTO users (
+                id,
+                name,
+                email,
+                password_hash,
+                provider,
+                role,
+                status,
+                marketing_opt_in,
+                created_at,
+                last_login_at
+            )
+            VALUES (
+                900,
+                'Owner',
+                ?,
+                ?,
+                'LOCAL',
+                'OWNER',
+                'ACTIVE',
+                FALSE,
+                CURRENT_TIMESTAMP,
+                NULL
+            )
+            """)
+            .param(ADMIN_EMAIL)
+            .param(passwordEncoder.encode(ADMIN_PASSWORD))
+            .update();
     }
 
     @Test
@@ -125,7 +158,7 @@ class AdminControllerTest {
         mockMvc.perform(get("/api/v1/admin/session").cookie(adminCookie))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.authenticated").value(true))
-            .andExpect(jsonPath("$.user.email").value("admin@vibeshop.local"))
+            .andExpect(jsonPath("$.user.email").value(ADMIN_EMAIL))
             .andExpect(jsonPath("$.user.role").value("OWNER"));
 
         mockMvc.perform(get("/api/v1/admin/dashboard").cookie(adminCookie))
@@ -506,12 +539,14 @@ class AdminControllerTest {
                 .contentType("application/json")
                 .content("""
                     {
-                      "email": "admin@vibeshop.local",
-                      "password": "admin1234!"
+                      "email": "%s",
+                      "password": "%s"
                     }
-                    """))
+                    """.formatted(ADMIN_EMAIL, ADMIN_PASSWORD)))
             .andExpect(status().isOk())
+            .andExpect(header().doesNotExist("X-Admin-Session-Token"))
             .andExpect(cookie().exists("vibe_shop_admin_session"))
+            .andExpect(jsonPath("$.sessionToken").doesNotExist())
             .andReturn();
 
         return loginResult.getResponse().getCookie("vibe_shop_admin_session");
