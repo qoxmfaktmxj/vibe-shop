@@ -1,5 +1,13 @@
 const { defineConfig } = require("playwright/test");
 
+function getPort(url, fallbackPort) {
+  try {
+    return String(new URL(url).port || fallbackPort);
+  } catch {
+    return String(fallbackPort);
+  }
+}
+
 const apiBaseUrl =
   process.env.API_BASE_URL ??
   process.env.NEXT_PUBLIC_API_BASE_URL ??
@@ -7,6 +15,9 @@ const apiBaseUrl =
 
 const storefrontUrl = process.env.E2E_STOREFRONT_URL ?? "http://127.0.0.1:3100";
 const adminUrl = process.env.E2E_ADMIN_URL ?? "http://127.0.0.1:3200";
+const apiPort = process.env.E2E_API_PORT ?? getPort(apiBaseUrl, 8180);
+const storefrontPort = process.env.E2E_STOREFRONT_PORT ?? getPort(storefrontUrl, 3100);
+const adminPort = process.env.E2E_ADMIN_PORT ?? getPort(adminUrl, 3200);
 const reuseExistingServer = process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER === "1";
 
 module.exports = defineConfig({
@@ -32,14 +43,14 @@ module.exports = defineConfig({
   },
   webServer: [
     {
-      command: "node scripts/run-api-gradle.mjs bootRun",
+      command: `node scripts/run-api-gradle.mjs bootRun`,
       cwd: ".",
       url: `${apiBaseUrl}/actuator/health`,
       reuseExistingServer,
       timeout: 120_000,
       env: {
         ...process.env,
-        APP_PORT: process.env.APP_PORT ?? "8180",
+        APP_PORT: process.env.APP_PORT ?? apiPort,
         DB_HOST: process.env.DB_HOST ?? "127.0.0.1",
         DB_PORT: process.env.DB_PORT ?? "5433",
         DB_NAME: process.env.DB_NAME ?? "vibeshop",
@@ -47,11 +58,11 @@ module.exports = defineConfig({
         DB_PASSWORD: process.env.DB_PASSWORD ?? "vibeshop",
         CORS_ALLOWED_ORIGINS:
           process.env.CORS_ALLOWED_ORIGINS ??
-          "http://127.0.0.1:3200,http://127.0.0.1:3100,http://127.0.0.1:3000,http://localhost:3000",
+          `${adminUrl},${storefrontUrl},http://127.0.0.1:3000,http://localhost:3000`,
       },
     },
     {
-      command: "node scripts/run-storefront-tool.mjs next dev --hostname 127.0.0.1 --port 3100",
+      command: `node scripts/run-storefront-tool.mjs next dev --hostname 127.0.0.1 --port ${storefrontPort}`,
       cwd: ".",
       url: storefrontUrl,
       reuseExistingServer,
@@ -69,7 +80,7 @@ module.exports = defineConfig({
       },
     },
     {
-      command: "node scripts/run-admin-tool.mjs next dev --hostname 127.0.0.1 --port 3200",
+      command: `node scripts/run-admin-tool.mjs next dev --hostname 127.0.0.1 --port ${adminPort}`,
       cwd: ".",
       url: adminUrl,
       reuseExistingServer,

@@ -39,6 +39,8 @@ npm ci --prefix apps/admin
 npm run infra:up
 ```
 
+The local compose stack exposes Postgres on `127.0.0.1:55432` by default.
+
 3. Run the apps
 
 ```bash
