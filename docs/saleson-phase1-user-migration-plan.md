@@ -1,3 +1,7 @@
+Status: historical
+Owner: planning
+Last reviewed: 2026-03-24
+
 # SalesOn 1차 분석 및 마이그레이션 계획
 
 ## 범위
@@ -154,3 +158,7 @@ DB 로그 기준으로 2차에서 우선 분석할 관리자 도메인은 아래
 - 사용자 화면 기준 Next.js 정보 구조 설계
 - 도메인별 API 계약서 초안 작성
 - 1차 MVP 백로그를 이슈 단위로 분해
+Status: historical
+Status: historical
+Owner: planning archive
+Last reviewed: 2026-03-24

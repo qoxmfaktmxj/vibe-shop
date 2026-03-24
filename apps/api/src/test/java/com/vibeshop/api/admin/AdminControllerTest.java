@@ -1,5 +1,6 @@
 package com.vibeshop.api.admin;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -830,6 +831,11 @@ class AdminControllerTest {
             .andExpect(jsonPath("$.sessionToken").doesNotExist())
             .andReturn();
 
-        return loginResult.getResponse().getCookie("vibe_shop_admin_session");
+        Cookie adminCookie = loginResult.getResponse().getCookie("vibe_shop_admin_session");
+        assertThat(adminCookie).isNotNull();
+        assertThat(adminCookie.isHttpOnly()).isTrue();
+        assertThat(adminCookie.getSecure()).isFalse();
+        assertThat(loginResult.getResponse().getHeader("Set-Cookie")).contains("SameSite=Lax");
+        return adminCookie;
     }
 }

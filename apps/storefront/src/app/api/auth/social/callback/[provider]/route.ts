@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { sanitizeNextPath } from "@/lib/auth-paths";
+import { resolveApiBaseUrl } from "@/lib/api-base-url";
 import { isSocialProvider, type SocialProvider } from "@/lib/social-auth";
 
 type AuthSessionResponse = {
@@ -13,16 +14,10 @@ type AuthSessionResponse = {
   } | null;
 };
 
-const API_BASE_URL =
-  process.env.API_BASE_URL ??
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
-  "http://localhost:8080";
-
 const OAUTH_NEXT_COOKIE = "vibe_shop_oauth_next";
 
 function resolveAppOrigin(request: NextRequest) {
-  const configuredOrigin =
-    process.env.APP_ORIGIN ?? process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const configuredOrigin = process.env.APP_ORIGIN ?? process.env.NEXT_PUBLIC_APP_URL ?? "";
   if (configuredOrigin) {
     return configuredOrigin;
   }
@@ -43,9 +38,7 @@ function getProviderConfig(provider: SocialProvider, appOrigin: string) {
     return {
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
-      redirectUri:
-        process.env.GOOGLE_REDIRECT_URI ??
-        `${appOrigin}/api/auth/social/callback/google`,
+      redirectUri: process.env.GOOGLE_REDIRECT_URI ?? `${appOrigin}/api/auth/social/callback/google`,
       tokenUrl: "https://oauth2.googleapis.com/token",
     };
   }
@@ -53,9 +46,7 @@ function getProviderConfig(provider: SocialProvider, appOrigin: string) {
   return {
     clientId: process.env.KAKAO_CLIENT_ID ?? "",
     clientSecret: process.env.KAKAO_CLIENT_SECRET ?? "",
-    redirectUri:
-      process.env.KAKAO_REDIRECT_URI ??
-      `${appOrigin}/api/auth/social/callback/kakao`,
+    redirectUri: process.env.KAKAO_REDIRECT_URI ?? `${appOrigin}/api/auth/social/callback/kakao`,
     tokenUrl: "https://kauth.kakao.com/oauth/token",
   };
 }
@@ -72,6 +63,7 @@ function redirectToLogin(
   if (nextPath !== "/account") {
     url.searchParams.set("next", nextPath);
   }
+
   const response = NextResponse.redirect(url);
   response.cookies.set({
     name: OAUTH_NEXT_COOKIE,
@@ -79,6 +71,7 @@ function redirectToLogin(
     path: "/",
     maxAge: 0,
   });
+
   if (provider) {
     response.cookies.set({
       name: `vibe_shop_oauth_state_${provider}`,
@@ -87,6 +80,7 @@ function redirectToLogin(
       maxAge: 0,
     });
   }
+
   return response;
 }
 
@@ -110,6 +104,7 @@ async function exchangeToken(
     redirect_uri: config.redirectUri,
     code,
   });
+
   if (config.clientSecret) {
     body.set("client_secret", config.clientSecret);
   }
@@ -144,16 +139,17 @@ async function createStorefrontSession(
   accessToken: string,
   cartSessionToken?: string,
 ) {
-  const response = await fetch(`${API_BASE_URL}/api/v1/auth/social/exchange`, {
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+
+  if (cartSessionToken) {
+    headers.Cookie = `vibe_shop_cart=${cartSessionToken}`;
+  }
+
+  const response = await fetch(`${resolveApiBaseUrl()}/api/v1/auth/social/exchange`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(cartSessionToken
-        ? {
-            Cookie: `vibe_shop_cart=${cartSessionToken}`,
-          }
-        : {}),
-    },
+    headers,
     body: JSON.stringify({
       provider: provider.toUpperCase(),
       accessToken,
@@ -183,6 +179,7 @@ export async function GET(
   const { provider: rawProvider } = await context.params;
   const requestedNextPath = request.cookies.get(OAUTH_NEXT_COOKIE)?.value;
   const nextPath = sanitizeNextPath(requestedNextPath);
+
   if (!isSocialProvider(rawProvider)) {
     return redirectToLogin(request, "unsupported_provider", nextPath);
   }

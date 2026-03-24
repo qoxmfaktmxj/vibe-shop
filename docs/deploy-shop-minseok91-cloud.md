@@ -1,28 +1,45 @@
-# shop.minseok91.cloud 배포 가이드 (Docker)
+Status: current
+Owner: deploy
+Last reviewed: 2026-03-24
 
-## 1) 배포 환경 변수 준비
+# shop.minseok91.cloud Deployment Guide
+
+This guide deploys all runtime services defined in `compose.deploy.yaml`:
+
+- PostgreSQL
+- API
+- storefront
+- admin
+
+## 1. Prepare environment variables
 
 ```bash
 cd /root/.openclaw/workspace/vibe-shop
 cp .env.deploy.example .env.deploy
 ```
 
-`.env.deploy`에서 최소한 아래 값 수정:
+At minimum, set these values in `.env.deploy`:
 
+- `DOMAIN`
+- `ADMIN_DOMAIN`
 - `POSTGRES_PASSWORD`
-- `DB_PASSWORD` (보통 `POSTGRES_PASSWORD`와 동일)
-- 필요 시 포트
+- `DB_PASSWORD`
+- `CORS_ALLOWED_ORIGINS`
+- `APP_SESSION_COOKIE_SECURE`
+- `APP_DEMO_SEED_ENABLED`
+- `MANAGEMENT_HEALTH_SHOW_DETAILS`
+- host ports if your server already uses the defaults
 
-## 2) 컨테이너 배포
+## 2. Build and start the stack
 
 ```bash
 docker compose --env-file .env.deploy -f compose.deploy.yaml up -d --build
 docker compose --env-file .env.deploy -f compose.deploy.yaml ps
 ```
 
-## 3) Nginx 리버스 프록시
+## 3. Nginx reverse proxy
 
-`/etc/nginx/sites-available/shop.minseok91.cloud`:
+Create `/etc/nginx/sites-available/shop.minseok91.cloud`:
 
 ```nginx
 server {
@@ -45,14 +62,38 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
 
+server {
+    listen 80;
+    server_name admin.shop.minseok91.cloud;
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:38080/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:3320;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
     }
 }
 ```
 
-활성화:
+Enable it:
 
 ```bash
 ln -s /etc/nginx/sites-available/shop.minseok91.cloud /etc/nginx/sites-enabled/shop.minseok91.cloud
@@ -60,20 +101,21 @@ nginx -t
 systemctl reload nginx
 ```
 
-## 4) SSL 인증서 (DNS 연결 후)
+## 4. TLS
 
-A 레코드가 서버 IP를 가리키는 상태에서:
+After DNS for both domains points at the server:
 
 ```bash
-certbot --nginx -d shop.minseok91.cloud
+certbot --nginx -d shop.minseok91.cloud -d admin.shop.minseok91.cloud
 ```
 
-## 5) 헬스체크
+## 5. Health checks
 
-- API 내부: `http://127.0.0.1:38080/actuator/health`
-- 외부: `https://shop.minseok91.cloud`
+- API: `http://127.0.0.1:38080/actuator/health`
+- storefront: `https://shop.minseok91.cloud`
+- admin: `https://admin.shop.minseok91.cloud`
 
-## 6) 업데이트 배포
+## 6. Rolling out updates
 
 ```bash
 cd /root/.openclaw/workspace/vibe-shop

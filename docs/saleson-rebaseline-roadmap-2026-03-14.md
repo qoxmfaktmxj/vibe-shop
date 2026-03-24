@@ -1,3 +1,7 @@
+Status: historical
+Owner: planning
+Last reviewed: 2026-03-24
+
 # SalesOn 재분석 기반 재베이스라인 로드맵
 
 ## 목적
@@ -325,3 +329,7 @@
 - 레거시 원본 재분석 결과, 1차 사용자 범위는 이전 판단처럼 넓고 현재 구현은 그 일부에 해당한다.
 - 다음 개발은 화면 수를 급히 늘리기보다 `기반 안정화 -> 인증/장바구니/주문 하드닝 -> 검색/전시 -> 마이페이지` 순서가 맞다.
 - 관리자와 판매자 기능은 storefront P0 안정화 이후 별도 트랙으로 가는 것이 안전하다.
+Status: historical
+Status: historical
+Owner: planning archive
+Last reviewed: 2026-03-24

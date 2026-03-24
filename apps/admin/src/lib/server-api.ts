@@ -13,11 +13,7 @@ import type {
   AdminSession,
   AdminStatistics,
 } from "@/lib/contracts";
-
-const API_BASE_URL =
-  process.env.API_BASE_URL ??
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
-  "http://localhost:8080";
+import { resolveApiBaseUrl } from "@/lib/api-base-url";
 
 async function getCookieHeaders() {
   const cookieStore = await cookies();
@@ -31,7 +27,7 @@ async function getCookieHeaders() {
 }
 
 async function fetchFromApi<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await fetch(`${resolveApiBaseUrl()}${path}`, {
     cache: "no-store",
     ...init,
   });
@@ -43,11 +39,11 @@ async function fetchFromApi<T>(path: string, init?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-export async function getAdminSession(): Promise<AdminSession> {
-  return fetchFromApi<AdminSession>("/api/v1/admin/session", {
+export const getAdminSession = cache(async (): Promise<AdminSession> =>
+  fetchFromApi<AdminSession>("/api/v1/admin/session", {
     headers: await getCookieHeaders(),
-  });
-}
+  }),
+);
 
 export const getAdminDashboard = cache(async () =>
   fetchFromApi<AdminDashboard>("/api/v1/admin/dashboard", {

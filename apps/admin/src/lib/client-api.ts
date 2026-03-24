@@ -21,21 +21,10 @@ import type {
   UpdateAdminProductPayload,
   UpdateAdminReviewStatusPayload,
 } from "@/lib/contracts";
-
-function getApiBaseUrl() {
-  if (process.env.NEXT_PUBLIC_API_BASE_URL) {
-    return process.env.NEXT_PUBLIC_API_BASE_URL;
-  }
-
-  if (typeof window !== "undefined") {
-    return `${window.location.protocol}//${window.location.hostname}:8080`;
-  }
-
-  return "http://localhost:8080";
-}
+import { resolveApiBaseUrl } from "@/lib/api-base-url";
 
 async function fetchJson<T>(path: string, init: RequestInit): Promise<T> {
-  const response = await fetch(`${getApiBaseUrl()}${path}`, {
+  const response = await fetch(`${resolveApiBaseUrl()}${path}`, {
     credentials: "include",
     ...init,
     headers: {

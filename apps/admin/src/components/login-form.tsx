@@ -26,18 +26,14 @@ export function LoginForm() {
               await signIn(form);
               window.location.assign("/");
             } catch (loginError) {
-              setError(
-                loginError instanceof Error
-                  ? loginError.message
-                  : "관리자 로그인 처리 중 문제가 발생했습니다.",
-              );
+              setError(loginError instanceof Error ? loginError.message : "Failed to sign in.");
             }
           })();
         });
       }}
     >
       <label className="grid gap-2">
-        <span className="text-sm font-medium">이메일</span>
+        <span className="text-sm font-medium">Email</span>
         <input
           required
           type="email"
@@ -49,21 +45,21 @@ export function LoginForm() {
       </label>
 
       <label className="grid gap-2">
-        <span className="text-sm font-medium">비밀번호</span>
+        <span className="text-sm font-medium">Password</span>
         <input
           required
           type="password"
           value={form.password}
           onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
           className="admin-input px-4 py-3"
-          placeholder="비밀번호를 입력해 주세요"
+          placeholder="Enter your password"
         />
       </label>
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
       <button type="submit" disabled={isPending} className="admin-button px-6 py-4 disabled:opacity-60">
-        {isPending ? "로그인 중입니다." : "로그인"}
+        {isPending ? "Signing in..." : "Sign in"}
       </button>
     </form>
   );

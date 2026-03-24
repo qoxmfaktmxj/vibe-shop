@@ -1,3 +1,7 @@
+Status: current
+Owner: frontend
+Last reviewed: 2026-03-24
+
 # Vibe Shop 화면 인벤토리 및 UX 감사 기록
 
 작성일: 2026-03-24
@@ -1165,3 +1169,7 @@ spotlight 상품 요약 확인
 에 있다.
 
 이 문서는 그 재설계를 위한 **현행 구조 기준서**로 사용하면 된다.
+Status: current
+Status: current
+Owner: product + frontend
+Last reviewed: 2026-03-24

@@ -1,11 +1,13 @@
 package com.vibeshop.api.config;
 
 import java.math.BigDecimal;
+import java.security.SecureRandom;
 import java.sql.PreparedStatement;
 import java.sql.Types;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -14,20 +16,24 @@ import java.util.Map;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
+@Profile({ "local", "dev" })
 public class DemoDataSeeder implements ApplicationRunner {
 
+    private static final Logger log = LoggerFactory.getLogger(DemoDataSeeder.class);
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     private static final String DEMO_PASSWORD = "Password123!";
-    private static final String DEMO_ADMIN_EMAIL = "admin@vibeshop.local";
-    private static final String DEMO_ADMIN_PASSWORD = "admin1234!";
 
     private final DemoSeedProperties properties;
     private final JdbcTemplate jdbcTemplate;
@@ -60,12 +66,15 @@ public class DemoDataSeeder implements ApplicationRunner {
         Integer adminCount = jdbcTemplate.queryForObject(
             "SELECT COUNT(*) FROM users WHERE LOWER(email) = LOWER(?)",
             Integer.class,
-            DEMO_ADMIN_EMAIL
+            properties.adminEmail()
         );
         if (adminCount != null && adminCount > 0) {
             return;
         }
 
+        String adminPassword = properties.adminPassword().isBlank()
+            ? generateAdminPassword()
+            : properties.adminPassword();
         OffsetDateTime now = OffsetDateTime.now(SEOUL);
         jdbcTemplate.update(
             """
@@ -82,9 +91,9 @@ public class DemoDataSeeder implements ApplicationRunner {
                     created_at
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
-            "MARU Admin",
-            DEMO_ADMIN_EMAIL,
-            passwordEncoder.encode(DEMO_ADMIN_PASSWORD),
+            properties.adminName(),
+            properties.adminEmail(),
+            passwordEncoder.encode(adminPassword),
             "LOCAL",
             "OWNER",
             "ACTIVE",
@@ -93,6 +102,18 @@ public class DemoDataSeeder implements ApplicationRunner {
             now,
             now
         );
+
+        log.warn(
+            "Seeded local demo admin account email={} password={}. Set APP_DEMO_ADMIN_PASSWORD to override.",
+            properties.adminEmail(),
+            adminPassword
+        );
+    }
+
+    private String generateAdminPassword() {
+        byte[] randomBytes = new byte[18];
+        SECURE_RANDOM.nextBytes(randomBytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
     }
 
     private void seedCustomers() {

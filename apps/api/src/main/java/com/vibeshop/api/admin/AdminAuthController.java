@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +18,7 @@ import com.vibeshop.api.admin.AdminDtos.AdminSessionUserResponse;
 import com.vibeshop.api.auth.AuthDtos.LoginRequest;
 import com.vibeshop.api.auth.AuthService;
 import com.vibeshop.api.auth.User;
+import com.vibeshop.api.config.SessionCookieFactory;
 
 @RestController
 @RequestMapping("/api/v1/admin/session")
@@ -26,13 +26,13 @@ public class AdminAuthController {
 
     private static final String ADMIN_SESSION_COOKIE = "vibe_shop_admin_session";
     private static final Duration ADMIN_SESSION_MAX_AGE = Duration.ofDays(30);
-    private static final boolean ADMIN_COOKIE_SECURE = false;
-    private static final String ADMIN_COOKIE_SAME_SITE = "Lax";
 
     private final AuthService authService;
+    private final SessionCookieFactory sessionCookieFactory;
 
-    public AdminAuthController(AuthService authService) {
+    public AdminAuthController(AuthService authService, SessionCookieFactory sessionCookieFactory) {
         this.authService = authService;
+        this.sessionCookieFactory = sessionCookieFactory;
     }
 
     @PostMapping("/login")
@@ -69,25 +69,14 @@ public class AdminAuthController {
     }
 
     private void applyAuthenticatedSession(HttpServletResponse response, AuthService.AuthenticatedSession session) {
-        response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from(ADMIN_SESSION_COOKIE, session.rawSessionToken())
-            .httpOnly(true)
-            .secure(ADMIN_COOKIE_SECURE)
-            .sameSite(ADMIN_COOKIE_SAME_SITE)
-            .path("/")
-            .maxAge(ADMIN_SESSION_MAX_AGE)
-            .build()
-            .toString());
+        response.addHeader(
+            HttpHeaders.SET_COOKIE,
+            sessionCookieFactory.create(ADMIN_SESSION_COOKIE, session.rawSessionToken(), ADMIN_SESSION_MAX_AGE)
+        );
     }
 
     private void clearSessionCookie(HttpServletResponse response) {
-        response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from(ADMIN_SESSION_COOKIE, "")
-            .httpOnly(true)
-            .secure(ADMIN_COOKIE_SECURE)
-            .sameSite(ADMIN_COOKIE_SAME_SITE)
-            .path("/")
-            .maxAge(Duration.ZERO)
-            .build()
-            .toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, sessionCookieFactory.clear(ADMIN_SESSION_COOKIE));
     }
 
     private AdminSessionResponse toResponse(User user) {

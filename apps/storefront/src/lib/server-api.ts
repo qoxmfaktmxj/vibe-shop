@@ -16,11 +16,7 @@ import type {
   ShippingAddress,
   WishlistItem,
 } from "@/lib/contracts";
-
-const API_BASE_URL =
-  process.env.API_BASE_URL ??
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
-  "http://localhost:8080";
+import { resolveApiBaseUrl } from "@/lib/api-base-url";
 
 export class ApiNotFoundError extends Error {}
 
@@ -36,7 +32,7 @@ async function getCookieHeaders() {
 }
 
 async function fetchFromApi<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await fetch(`${resolveApiBaseUrl()}${path}`, {
     cache: "no-store",
     ...init,
   });

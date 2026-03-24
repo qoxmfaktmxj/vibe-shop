@@ -1,38 +1,20 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 
 import { updateMemberStatus } from "@/lib/client-api";
 import type { AdminMember } from "@/lib/contracts";
 
-function formatPrice(value: number) {
-  return new Intl.NumberFormat("ko-KR").format(value);
-}
-
 function formatDateTime(value: string | null) {
   if (!value) {
-    return "기록 없음";
+    return "No recent login";
   }
+
   return new Date(value).toLocaleString("ko-KR");
 }
 
-function formatProvider(provider: string) {
-  const labels: Record<string, string> = {
-    LOCAL: "일반",
-    GOOGLE: "구글",
-    KAKAO: "카카오",
-    NAVER: "네이버",
-  };
-  return labels[provider] ?? provider;
-}
-
-function formatStatus(status: string) {
-  const labels: Record<string, string> = {
-    ACTIVE: "정상",
-    DORMANT: "휴면",
-    BLOCKED: "차단",
-  };
-  return labels[status] ?? status;
+function formatPrice(value: number) {
+  return new Intl.NumberFormat("ko-KR").format(value);
 }
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -40,12 +22,11 @@ function getErrorMessage(error: unknown, fallback: string) {
 }
 
 export function AdminMemberManager({
-  members,
-  onMemberUpdated,
+  initialMembers,
 }: {
-  members: AdminMember[];
-  onMemberUpdated: (member: AdminMember) => void;
+  initialMembers: AdminMember[];
 }) {
+  const [members, setMembers] = useState(initialMembers);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [providerFilter, setProviderFilter] = useState("ALL");
@@ -54,33 +35,35 @@ export function AdminMemberManager({
   const [error, setError] = useState("");
   const [isSaving, startSaving] = useTransition();
 
-  const filteredMembers = useMemo(() => {
+  const filteredMembers = members.filter((member) => {
     const normalizedQuery = query.trim().toLowerCase();
-    return members.filter((member) => {
-      if (statusFilter !== "ALL" && member.status !== statusFilter) {
-        return false;
-      }
-      if (providerFilter !== "ALL" && member.provider !== providerFilter) {
-        return false;
-      }
-      if (!normalizedQuery) {
-        return true;
-      }
-      return [member.name, member.email, member.phone ?? ""]
-        .join(" ")
-        .toLowerCase()
-        .includes(normalizedQuery);
-    });
-  }, [members, providerFilter, query, statusFilter]);
+
+    if (statusFilter !== "ALL" && member.status !== statusFilter) {
+      return false;
+    }
+
+    if (providerFilter !== "ALL" && member.provider !== providerFilter) {
+      return false;
+    }
+
+    if (!normalizedQuery) {
+      return true;
+    }
+
+    return [member.name, member.email, member.phone ?? ""]
+      .join(" ")
+      .toLowerCase()
+      .includes(normalizedQuery);
+  });
 
   return (
     <article className="admin-card rounded-[36px] p-8">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="eyebrow text-[var(--ink-soft)]">Members</p>
-          <h2 className="display mt-4 text-3xl font-semibold">회원 관리</h2>
+          <h2 className="display mt-4 text-3xl font-semibold">Member operations</h2>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--ink-soft)]">
-            가입 경로, 로그인 이력, 누적 주문 기준으로 회원 상태를 관리합니다.
+            Member moderation now lives on its own route and updates locally without reloading unrelated data.
           </p>
         </div>
 
@@ -90,7 +73,7 @@ export function AdminMemberManager({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             className="admin-input px-4 py-3"
-            placeholder="이름, 이메일, 연락처 검색"
+            placeholder="Search by name, email, or phone"
           />
           <select
             name="memberStatusFilter"
@@ -98,10 +81,10 @@ export function AdminMemberManager({
             onChange={(event) => setStatusFilter(event.target.value)}
             className="admin-input px-4 py-3"
           >
-            <option value="ALL">전체 상태</option>
-            <option value="ACTIVE">정상</option>
-            <option value="DORMANT">휴면</option>
-            <option value="BLOCKED">차단</option>
+            <option value="ALL">All statuses</option>
+            <option value="ACTIVE">ACTIVE</option>
+            <option value="DORMANT">DORMANT</option>
+            <option value="BLOCKED">BLOCKED</option>
           </select>
           <select
             name="memberProviderFilter"
@@ -109,10 +92,10 @@ export function AdminMemberManager({
             onChange={(event) => setProviderFilter(event.target.value)}
             className="admin-input px-4 py-3"
           >
-            <option value="ALL">전체 가입경로</option>
-            <option value="LOCAL">일반</option>
-            <option value="GOOGLE">구글</option>
-            <option value="KAKAO">카카오</option>
+            <option value="ALL">All providers</option>
+            <option value="LOCAL">LOCAL</option>
+            <option value="GOOGLE">GOOGLE</option>
+            <option value="KAKAO">KAKAO</option>
           </select>
         </div>
       </div>
@@ -120,6 +103,7 @@ export function AdminMemberManager({
       <div className="mt-8 grid gap-4">
         {filteredMembers.map((member) => {
           const draftStatus = draftStatuses[member.id] ?? member.status;
+
           return (
             <div
               key={member.id}
@@ -129,23 +113,23 @@ export function AdminMemberManager({
                 <div className="flex flex-wrap items-center gap-3">
                   <p className="text-lg font-semibold">{member.name}</p>
                   <span className="rounded-full bg-[rgba(36,93,90,0.12)] px-3 py-1 text-xs font-semibold text-[var(--teal)]">
-                    {formatStatus(member.status)}
+                    {member.status}
                   </span>
                   <span className="rounded-full bg-black/6 px-3 py-1 text-xs font-semibold text-[var(--ink-soft)]">
-                    {formatProvider(member.provider)}
+                    {member.provider}
                   </span>
                 </div>
                 <p className="text-sm leading-7 text-[var(--ink-soft)]">
-                  {member.email} · {member.phone ?? "연락처 미입력"}
+                  {member.email} / {member.phone ?? "No phone"}
                 </p>
                 <div className="grid gap-2 text-sm text-[var(--ink-soft)] sm:grid-cols-2 xl:grid-cols-4">
-                  <p>가입일 {formatDateTime(member.createdAt)}</p>
-                  <p>마지막 로그인 {formatDateTime(member.lastLoginAt)}</p>
-                  <p>주문 {member.orderCount}건 · 배송지 {member.shippingAddressCount}개</p>
-                  <p>누적 결제 {formatPrice(member.totalSpent)}원</p>
+                  <p>Joined {formatDateTime(member.createdAt)}</p>
+                  <p>Last login {formatDateTime(member.lastLoginAt)}</p>
+                  <p>Orders {member.orderCount} / Addresses {member.shippingAddressCount}</p>
+                  <p>Total spent {formatPrice(member.totalSpent)} KRW</p>
                 </div>
                 <p className="text-xs text-[var(--ink-soft)]">
-                  마케팅 수신동의 {member.marketingOptIn ? "동의" : "미동의"}
+                  Marketing opt-in: {member.marketingOptIn ? "yes" : "no"}
                 </p>
               </div>
 
@@ -161,9 +145,9 @@ export function AdminMemberManager({
                   }
                   className="admin-input px-4 py-3"
                 >
-                  <option value="ACTIVE">정상</option>
-                  <option value="DORMANT">휴면</option>
-                  <option value="BLOCKED">차단</option>
+                  <option value="ACTIVE">ACTIVE</option>
+                  <option value="DORMANT">DORMANT</option>
+                  <option value="BLOCKED">BLOCKED</option>
                 </select>
                 <button
                   type="button"
@@ -177,21 +161,24 @@ export function AdminMemberManager({
                           const updatedMember = await updateMemberStatus(member.id, {
                             status: draftStatus,
                           });
-                          onMemberUpdated(updatedMember);
+
+                          setMembers((current) =>
+                            current.map((item) => (item.id === updatedMember.id ? updatedMember : item)),
+                          );
                           setDraftStatuses((current) => ({
                             ...current,
                             [member.id]: updatedMember.status,
                           }));
-                          setMessage(`${updatedMember.name} 회원 상태를 변경했습니다.`);
-                        } catch (saveError) {
-                          setError(getErrorMessage(saveError, "회원 상태 변경 중 문제가 발생했습니다."));
+                          setMessage(`${updatedMember.name} updated.`);
+                        } catch (nextError) {
+                          setError(getErrorMessage(nextError, "Failed to update member status."));
                         }
                       })();
                     });
                   }}
                   className="admin-button-secondary px-5 py-3 disabled:opacity-60"
                 >
-                  상태 저장
+                  Save status
                 </button>
               </div>
             </div>

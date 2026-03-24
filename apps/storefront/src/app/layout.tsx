@@ -22,8 +22,8 @@ const notoSans = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: "MARU",
-  description: "리빙, 키친, 웰니스 — 삶에 어울리는 오브제를 엄선한 디지털 아틀리에.",
+  title: "Vibe Shop",
+  description: "Search-first commerce storefront for discovery, checkout, and account journeys.",
   icons: {
     icon: "/vibe-shop-favicon.svg",
     shortcut: "/vibe-shop-favicon.svg",

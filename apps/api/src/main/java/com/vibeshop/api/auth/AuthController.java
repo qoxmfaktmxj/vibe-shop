@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.vibeshop.api.config.SessionCookieFactory;
 import com.vibeshop.api.auth.AuthDtos.AuthSessionResponse;
 import com.vibeshop.api.auth.AuthDtos.AuthenticatedUserResponse;
 import com.vibeshop.api.auth.AuthDtos.LoginRequest;
@@ -28,15 +28,19 @@ public class AuthController {
     private static final String AUTH_SESSION_COOKIE = "vibe_shop_session";
     private static final String CART_SESSION_COOKIE = "vibe_shop_cart";
     private static final Duration AUTH_SESSION_MAX_AGE = Duration.ofDays(30);
-    private static final boolean AUTH_COOKIE_SECURE = false;
-    private static final String AUTH_COOKIE_SAME_SITE = "Lax";
 
     private final AuthService authService;
     private final CartService cartService;
+    private final SessionCookieFactory sessionCookieFactory;
 
-    public AuthController(AuthService authService, CartService cartService) {
+    public AuthController(
+        AuthService authService,
+        CartService cartService,
+        SessionCookieFactory sessionCookieFactory
+    ) {
         this.authService = authService;
         this.cartService = cartService;
+        this.sessionCookieFactory = sessionCookieFactory;
     }
 
     @PostMapping("/signup")
@@ -99,25 +103,14 @@ public class AuthController {
     }
 
     private void applyAuthenticatedSession(HttpServletResponse response, AuthService.AuthenticatedSession session) {
-        response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from(AUTH_SESSION_COOKIE, session.rawSessionToken())
-            .httpOnly(true)
-            .secure(AUTH_COOKIE_SECURE)
-            .sameSite(AUTH_COOKIE_SAME_SITE)
-            .path("/")
-            .maxAge(AUTH_SESSION_MAX_AGE)
-            .build()
-            .toString());
+        response.addHeader(
+            HttpHeaders.SET_COOKIE,
+            sessionCookieFactory.create(AUTH_SESSION_COOKIE, session.rawSessionToken(), AUTH_SESSION_MAX_AGE)
+        );
     }
 
     private void clearSessionCookie(HttpServletResponse response) {
-        response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from(AUTH_SESSION_COOKIE, "")
-            .httpOnly(true)
-            .secure(AUTH_COOKIE_SECURE)
-            .sameSite(AUTH_COOKIE_SAME_SITE)
-            .path("/")
-            .maxAge(Duration.ZERO)
-            .build()
-            .toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, sessionCookieFactory.clear(AUTH_SESSION_COOKIE));
     }
 
     private void mergeGuestCartIfPresent(String guestCartToken, Long userId) {

@@ -1,3 +1,7 @@
+Status: current
+Owner: api
+Last reviewed: 2026-03-24
+
 # API Contract v1
 
 Vibe Shop API 계약 문서다.  
@@ -854,3 +858,7 @@ Response
 ---
 
 현재 문서는 **수동 관리 중**이며, 향후 **자동 문서화 체계로 전환 예정**이다.
+Status: current
+Status: current
+Owner: api + frontend
+Last reviewed: 2026-03-24

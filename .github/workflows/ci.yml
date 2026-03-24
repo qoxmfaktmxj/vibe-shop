@@ -19,8 +19,9 @@ jobs:
       DB_PASSWORD: vibeshop
       API_BASE_URL: http://127.0.0.1:8180
       NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:8180
+      E2E_ADMIN_URL: http://127.0.0.1:3200
       E2E_STOREFRONT_URL: http://127.0.0.1:3100
-      CORS_ALLOWED_ORIGINS: http://127.0.0.1:3100,http://127.0.0.1:3000,http://localhost:3000
+      CORS_ALLOWED_ORIGINS: http://127.0.0.1:3200,http://127.0.0.1:3100,http://127.0.0.1:3000,http://localhost:3000
     services:
       postgres:
         image: postgres:17-alpine
@@ -48,6 +49,7 @@ jobs:
           cache-dependency-path: |
             package-lock.json
             apps/storefront/package-lock.json
+            apps/admin/package-lock.json
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -61,11 +63,26 @@ jobs:
       - name: Install storefront dependencies
         run: npm ci --prefix apps/storefront
 
+      - name: Install admin dependencies
+        run: npm ci --prefix apps/admin
+
       - name: Lint storefront
         run: npm run lint:storefront
 
+      - name: Typecheck storefront
+        run: npm run typecheck:storefront
+
       - name: Build storefront
         run: npm run build:storefront
+
+      - name: Lint admin
+        run: npm run lint:admin
+
+      - name: Typecheck admin
+        run: npm run typecheck:admin
+
+      - name: Build admin
+        run: npm run build:admin
 
       - name: Test API
         run: npm run test:api

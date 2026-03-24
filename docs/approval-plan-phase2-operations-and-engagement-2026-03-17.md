@@ -1,3 +1,7 @@
+Status: historical
+Owner: planning
+Last reviewed: 2026-03-24
+
 # Phase 2 운영/참여 기능 확장 계획서
 작성일: 2026-03-17
 대상 저장소: `vibe-shop`
@@ -500,3 +504,7 @@ QA 포인트:
 - 현재 관리자 앱에 가장 자연스럽게 이어붙일 수 있다.
 - storefront 가시 변화가 크고, 이후 기획전/배너/홈 운영의 기반이 된다.
 - 주문/결제 같은 고위험 영역을 건드리지 않고도 운영 수준을 올릴 수 있다.
+Status: historical
+Status: historical
+Owner: planning archive
+Last reviewed: 2026-03-24

@@ -21,14 +21,19 @@ function getSection(sections: HomeDisplaySection[], code: string) {
 const SEARCH_CHIPS = ["여름", "리빙", "선물", "10만원 이하", "베이지"];
 
 export default async function HomePage() {
-  const emptyCollection = { title: "", items: [] };
-  const emptyRecentlyViewed = { items: [] };
+  const emptyCollection: Awaited<ReturnType<typeof getHomeRecommendations>> = {
+    context: "",
+    title: "",
+    subtitle: "",
+    items: [],
+  };
+  const emptyRecentlyViewed: Awaited<ReturnType<typeof getRecentlyViewed>> = { items: [] };
   const [home, recentlyViewed, recentlyViewedRecommendations, homeRecommendations] =
     await Promise.all([
       getHomeData(),
-      getRecentlyViewed().catch(() => emptyRecentlyViewed as Awaited<ReturnType<typeof getRecentlyViewed>>),
-      getRecentlyViewedRecommendations().catch(() => emptyCollection as Awaited<ReturnType<typeof getRecentlyViewedRecommendations>>),
-      getHomeRecommendations().catch(() => emptyCollection as Awaited<ReturnType<typeof getHomeRecommendations>>),
+      getRecentlyViewed().catch(() => emptyRecentlyViewed),
+      getRecentlyViewedRecommendations().catch(() => emptyCollection),
+      getHomeRecommendations().catch(() => emptyCollection),
     ]);
   const heroProduct = home.curatedPicks[0] ?? home.newArrivals[0] ?? home.bestSellers[0];
   const heroSection = getSection(home.displaySections, "HERO");
@@ -93,7 +98,7 @@ export default async function HomePage() {
         </div>
 
         <Link
-          href="/category"
+          href={categoryCards[0] ? `/category/${categoryCards[0].slug}` : "/search"}
           className="link-cta inline-block"
         >
           카테고리 전체 보기 ↗

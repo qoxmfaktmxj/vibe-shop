@@ -1,5 +1,6 @@
 package com.vibeshop.api.auth;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
@@ -142,6 +143,10 @@ class AuthControllerTest {
             .andReturn();
 
         Cookie authCookie = signUpResult.getResponse().getCookie("vibe_shop_session");
+        assertThat(authCookie).isNotNull();
+        assertThat(authCookie.isHttpOnly()).isTrue();
+        assertThat(authCookie.getSecure()).isFalse();
+        assertThat(signUpResult.getResponse().getHeader("Set-Cookie")).contains("SameSite=Lax");
 
         mockMvc.perform(get("/api/v1/auth/session").cookie(authCookie))
             .andExpect(status().isOk())
@@ -196,6 +201,8 @@ class AuthControllerTest {
             .andReturn();
 
         Cookie authCookie = loginResult.getResponse().getCookie("vibe_shop_session");
+        assertThat(authCookie).isNotNull();
+        assertThat(authCookie.getSecure()).isFalse();
 
         mockMvc.perform(get("/api/v1/cart").cookie(authCookie))
             .andExpect(status().isOk())
