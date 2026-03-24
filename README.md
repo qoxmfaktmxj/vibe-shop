@@ -1,15 +1,13 @@
 # Vibe Shop
 
-Vibe Shop is a commerce monorepo with separate `storefront`, `admin`, and `api` apps. The current baseline includes route-based admin workspaces, API contracts, schema migrations, and Playwright E2E coverage.
+Vibe Shop is a commerce monorepo with a single Next.js web app in `apps/storefront` and a Spring Boot API in `apps/api`. The storefront app serves both customer routes and admin routes under `/admin`.
 
 ## Apps
 
 - `apps/storefront`
-  - Next.js customer storefront
-  - search, category browsing, product detail, cart, checkout, account, and social login flows
-- `apps/admin`
-  - Next.js admin console
-  - dedicated routes for dashboard, display, products, orders, members, reviews, analytics, and operations
+  - Next.js web app
+  - customer routes at `/...`
+  - admin routes at `/admin/...`
 - `apps/api`
   - Spring Boot API
   - auth/session, catalog, orders, account, review, wishlist, recommendation, and admin endpoints
@@ -30,7 +28,6 @@ Vibe Shop is a commerce monorepo with separate `storefront`, `admin`, and `api` 
 ```bash
 npm ci
 npm ci --prefix apps/storefront
-npm ci --prefix apps/admin
 ```
 
 2. Start local Postgres
@@ -46,13 +43,12 @@ The local compose stack exposes Postgres on `127.0.0.1:55432` by default.
 ```bash
 npm run dev:api
 npm run dev:storefront
-npm run dev:admin
 ```
 
 Default local ports:
 
 - storefront: `http://127.0.0.1:3000`
-- admin: `http://127.0.0.1:3200`
+- admin: `http://127.0.0.1:3000/admin`
 - api: `http://127.0.0.1:8080`
 
 ## Quality Gates
@@ -61,10 +57,8 @@ Use these from the repo root:
 
 ```bash
 npm run lint:storefront
-npm run lint:admin
 npm run typecheck
 npm run build:storefront
-npm run build:admin
 npm run test:api
 npm run qa
 npm run qa:e2e
@@ -73,7 +67,6 @@ npm run qa:e2e
 `npm run qa` is the repo-wide non-E2E gate:
 
 - storefront lint + typecheck + build
-- admin lint + typecheck + build
 - API tests
 
 ## Deployment
@@ -88,8 +81,7 @@ The deployment stack includes:
 
 - PostgreSQL
 - API
-- storefront
-- admin
+- storefront web app (customer + admin routes)
 
 ## Source of Truth
 
@@ -105,6 +97,6 @@ Historical planning documents remain in `docs/`, but they are explicitly marked 
 
 ## Current Risks
 
-- API, frontend, and E2E flows still need full end-to-end QA after large feature changes.
+- API, storefront, and `/admin` routes still need coordinated regression coverage after large route or auth changes.
 - Demo and deployment configuration must stay environment-driven; avoid restoring hard-coded production defaults.
 - Frontend contracts are centralized now, but API schema generation is still a future step.

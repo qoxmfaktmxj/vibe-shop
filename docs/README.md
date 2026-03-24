@@ -4,7 +4,7 @@ Last reviewed: 2026-03-24
 
 # Documentation Index
 
-This directory mixes current operating documents with older planning notes. Use the status markers in this index before treating any file as a source of truth.
+This directory mixes current operating documents with older planning notes. Use the status markers in this index before treating any file as a source of truth. The active frontend runtime is now a single `apps/storefront` app that also serves admin routes under `/admin`.
 
 ## Current
 

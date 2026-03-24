@@ -14,10 +14,8 @@ const apiBaseUrl =
   "http://127.0.0.1:8180";
 
 const storefrontUrl = process.env.E2E_STOREFRONT_URL ?? "http://127.0.0.1:4100";
-const adminUrl = process.env.E2E_ADMIN_URL ?? "http://127.0.0.1:4200";
 const apiPort = process.env.E2E_API_PORT ?? getPort(apiBaseUrl, 8180);
 const storefrontPort = process.env.E2E_STOREFRONT_PORT ?? getPort(storefrontUrl, 3100);
-const adminPort = process.env.E2E_ADMIN_PORT ?? getPort(adminUrl, 3200);
 const reuseExistingServer = process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER === "1";
 
 module.exports = defineConfig({
@@ -60,7 +58,7 @@ module.exports = defineConfig({
         APP_DEMO_ADMIN_PASSWORD: process.env.E2E_ADMIN_PASSWORD ?? process.env.APP_DEMO_ADMIN_PASSWORD ?? "admin1234!",
         CORS_ALLOWED_ORIGINS:
           process.env.CORS_ALLOWED_ORIGINS ??
-          `${adminUrl},${storefrontUrl},http://127.0.0.1:3000,http://localhost:3000`,
+          `${storefrontUrl},http://127.0.0.1:3000,http://localhost:3000`,
       },
     },
     {
@@ -79,18 +77,6 @@ module.exports = defineConfig({
         GOOGLE_CLIENT_SECRET: process.env.E2E_GOOGLE_CLIENT_SECRET ?? "",
         KAKAO_CLIENT_ID: process.env.E2E_KAKAO_CLIENT_ID ?? "",
         KAKAO_CLIENT_SECRET: process.env.E2E_KAKAO_CLIENT_SECRET ?? "",
-      },
-    },
-    {
-      command: `node scripts/run-admin-tool.mjs next dev --webpack --hostname 127.0.0.1 --port ${adminPort}`,
-      cwd: ".",
-      url: adminUrl,
-      reuseExistingServer,
-      timeout: 120_000,
-      env: {
-        ...process.env,
-        API_BASE_URL: apiBaseUrl,
-        NEXT_PUBLIC_API_BASE_URL: apiBaseUrl,
       },
     },
   ],

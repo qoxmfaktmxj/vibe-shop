@@ -33,6 +33,14 @@ test("storefront MVP smoke flow", async ({ page }) => {
   });
 
   await page.getByRole("complementary").getByRole("button", { name: "Add to Bag" }).click();
+  await expect
+    .poll(async () => {
+      const cartCookies = await page
+        .context()
+        .cookies(process.env.API_BASE_URL ?? "http://127.0.0.1:8180");
+      return cartCookies.some((cookie) => cookie.name === "vibe_shop_cart");
+    })
+    .toBeTruthy();
   await page.goto("/cart", { waitUntil: "networkidle" });
   await expect(page.getByRole("button", { name: "Remove" })).toBeVisible();
   await page.screenshot({

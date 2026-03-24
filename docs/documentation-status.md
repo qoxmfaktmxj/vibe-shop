@@ -32,3 +32,4 @@ Historical documents remain useful context, but they are not the default source 
 - Add `Status: current`, `Status: draft`, or `Status: historical` at the top of new docs.
 - When a document stops reflecting the live codebase, downgrade it to `historical` instead of silently leaving it in place.
 - Prefer creating a new current document over rewriting historical planning artifacts in place.
+- The current frontend architecture assumption is `apps/storefront` as the single web app, with admin served under `/admin`.

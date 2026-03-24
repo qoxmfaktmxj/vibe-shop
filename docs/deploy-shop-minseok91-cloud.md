@@ -8,8 +8,7 @@ This guide deploys all runtime services defined in `compose.deploy.yaml`:
 
 - PostgreSQL
 - API
-- storefront
-- admin
+- storefront web app (customer + admin routes)
 
 ## 1. Prepare environment variables
 
@@ -21,7 +20,6 @@ cp .env.deploy.example .env.deploy
 At minimum, set these values in `.env.deploy`:
 
 - `DOMAIN`
-- `ADMIN_DOMAIN`
 - `POSTGRES_PASSWORD`
 - `DB_PASSWORD`
 - `CORS_ALLOWED_ORIGINS`
@@ -68,29 +66,6 @@ server {
 }
 
 server {
-    listen 80;
-    server_name admin.shop.minseok91.cloud;
-
-    location /api/ {
-        proxy_pass http://127.0.0.1:38080/api/;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    location / {
-        proxy_pass http://127.0.0.1:3320;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-    }
-}
 ```
 
 Enable it:
@@ -106,14 +81,14 @@ systemctl reload nginx
 After DNS for both domains points at the server:
 
 ```bash
-certbot --nginx -d shop.minseok91.cloud -d admin.shop.minseok91.cloud
+certbot --nginx -d shop.minseok91.cloud
 ```
 
 ## 5. Health checks
 
 - API: `http://127.0.0.1:38080/actuator/health`
 - storefront: `https://shop.minseok91.cloud`
-- admin: `https://admin.shop.minseok91.cloud`
+- admin: `https://shop.minseok91.cloud/admin`
 
 ## 6. Rolling out updates
 

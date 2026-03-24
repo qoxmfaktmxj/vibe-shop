@@ -3,7 +3,6 @@ import path from "node:path";
 
 const LOCK_PATHS = [
   path.resolve("apps/storefront/.next/dev/lock"),
-  path.resolve("apps/admin/.next/dev/lock"),
 ];
 
 async function exists(targetPath) {

@@ -4,7 +4,8 @@ const path = require("node:path");
 const { expect, test } = require("playwright/test");
 
 const OUTPUT_DIR = path.join(process.cwd(), "output", "playwright");
-const adminUrl = process.env.E2E_ADMIN_URL ?? "http://127.0.0.1:4200";
+const storefrontUrl = process.env.E2E_STOREFRONT_URL ?? "http://127.0.0.1:4100";
+const adminUrl = `${storefrontUrl}/admin`;
 const apiBaseUrl = process.env.API_BASE_URL ?? "http://127.0.0.1:8180";
 
 test("member can create photo review, another member can mark it helpful, then admin can moderate it", async ({ page, browser }) => {
@@ -114,7 +115,7 @@ test("member can create photo review, another member can mark it helpful, then a
   await page.locator('input[type="email"]').fill("admin@vibeshop.local");
   await page.locator('input[type="password"]').fill("admin1234!");
   await page.locator('form button[type="submit"]').click();
-  await expect(page).toHaveURL(`${adminUrl}/`);
+  await expect(page).toHaveURL(adminUrl);
 
   await page.goto(`${adminUrl}/reviews`, { waitUntil: "networkidle" });
   const reviewCard = page.locator('[data-review-id]').filter({ hasText: reviewTitle });

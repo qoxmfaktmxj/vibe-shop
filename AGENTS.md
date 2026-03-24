@@ -23,8 +23,7 @@
 
 ## 권장 구조
 
-- `apps/storefront`: 사용자 프런트엔드
-- `apps/admin`: 관리자 프런트엔드
+- `apps/storefront`: 사용자 화면과 `/admin` 경로를 함께 제공하는 단일 프런트엔드
 - `apps/api`: 백엔드 API
 - `tests/e2e`: 브라우저 테스트와 핵심 E2E 시나리오
 - `docs`: 분석 문서, 설계 문서, 작업 메모

@@ -11,7 +11,7 @@ This document promotes the current token and UX rules out of scattered CSS files
 This is the active design source of truth for:
 
 - `apps/storefront/src/app/globals.css`
-- `apps/admin/src/app/globals.css`
+- `apps/storefront/src/app/admin/admin.css`
 - `docs/screen-inventory-and-ux-audit-2026-03-24.md`
 
 It does not replace a future component library, but it defines the rules the current apps should follow.
@@ -19,7 +19,7 @@ It does not replace a future component library, but it defines the rules the cur
 ## Product Direction
 
 - Storefront is a search-first commerce experience, not a pure editorial landing page.
-- Admin is an operations tool and should keep a distinct tone from the storefront.
+- Admin is an operations tool served under `/admin` and should keep a distinct tone without becoming a separate app.
 - Search, category browsing, recommendation, cart, checkout, account, and admin workflows must feel like one product family without sharing identical layouts.
 
 ## Brand Rules
@@ -44,18 +44,13 @@ Source: `apps/storefront/src/app/globals.css`
 - Editorial accents
   - `--accent-caramel`, `--accent-sienna`, `--accent-taupe`
 
-## Admin Tokens
+## Admin Surface Rules
 
-Source: `apps/admin/src/app/globals.css`
+Source: `apps/storefront/src/app/admin/admin.css`
 
-- Backgrounds
-  - `--background`, `--panel`, `--panel-strong`
-- Text
-  - `--ink`, `--ink-soft`
-- Borders and elevation
-  - `--line`, `--line-strong`, `--shadow`
-- Actions
-  - `--accent`, `--accent-strong`, `--teal`
+- Admin routes inherit the storefront token set and fonts from the shared app root.
+- Admin-only styling should stay in prefixed `admin-*` classes.
+- Do not redefine a second global token system for admin after the merge.
 
 ## Typography
 
