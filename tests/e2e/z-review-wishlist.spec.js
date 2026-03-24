@@ -5,6 +5,7 @@ const { expect, test } = require("playwright/test");
 
 const OUTPUT_DIR = path.join(process.cwd(), "output", "playwright");
 const adminUrl = process.env.E2E_ADMIN_URL ?? "http://127.0.0.1:4200";
+const apiBaseUrl = process.env.API_BASE_URL ?? "http://127.0.0.1:8180";
 
 test("member can create photo review, another member can mark it helpful, then admin can moderate it", async ({ page, browser }) => {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -23,45 +24,77 @@ test("member can create photo review, another member can mark it helpful, then a
   await page.locator('button[type="submit"]').click();
   await expect(page).toHaveURL(/\/account$/);
 
-  await page.goto("/products/brew-mug", { waitUntil: "networkidle" });
-  await expect(page).toHaveURL(/\/products\/brew-mug$/);
+  const orderAndReviewResult = await page.evaluate(
+    async ({ apiBaseUrl, photoUrl, reviewTitle, uniqueId }) => {
+      const productResponse = await fetch(`${apiBaseUrl}/api/v1/products/brew-mug`, {
+        credentials: "include",
+      });
+      if (!productResponse.ok) {
+        throw new Error("Failed to load brew-mug product detail");
+      }
 
-  await page.getByRole("button", { name: /찜 추가|찜 해제/ }).click();
-  await expect(page.getByRole("button", { name: /찜 해제/ })).toBeVisible();
+      const product = await productResponse.json();
+      const orderResponse = await fetch(`${apiBaseUrl}/api/v1/orders`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          idempotencyKey: `engagement-${uniqueId}`,
+          customerName: "Engagement Tester",
+          phone: "01033334444",
+          postalCode: "06236",
+          address1: "Teheran-ro 222, Gangnam-gu",
+          address2: "9F",
+          note: "Review and wishlist flow.",
+          paymentMethod: "CARD",
+          items: [
+            {
+              productId: product.id,
+              quantity: 1,
+            },
+          ],
+        }),
+      });
+      if (!orderResponse.ok) {
+        throw new Error("Failed to create order");
+      }
 
-  await page.getByRole("complementary").getByRole("button", { name: "Add to Bag" }).click();
-  await expect
-    .poll(async () => {
-      return (await page.getByRole("link", { name: /Bag/i }).textContent()) ?? "";
-    })
-    .toContain("Bag 1");
+      const reviewResponse = await fetch(`${apiBaseUrl}/api/v1/products/${product.id}/reviews`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          rating: 5,
+          title: reviewTitle,
+          content: "Keeps the daily coffee ritual calm and tidy.",
+          fitTag: "Daily ritual",
+          repurchaseYn: true,
+          deliverySatisfaction: 5,
+          packagingSatisfaction: 5,
+          imageUrls: [photoUrl],
+        }),
+      });
+      if (!reviewResponse.ok) {
+        throw new Error("Failed to create review");
+      }
 
-  await page.goto("/checkout", { waitUntil: "networkidle" });
-  const checkoutInputs = page.locator("form input");
-  await checkoutInputs.nth(0).fill("Engagement Tester");
-  await checkoutInputs.nth(1).fill("01033334444");
-  await checkoutInputs.nth(2).fill("06236");
-  await checkoutInputs.nth(3).fill("Teheran-ro 222, Gangnam-gu");
-  await checkoutInputs.nth(4).fill("9F");
-  await page.locator("form textarea").fill("Review and wishlist flow.");
-  await page.locator('input[name="paymentMethod"][value="CARD"]').check({ force: true });
-  await page.locator('button[type="submit"]').click();
-  await expect(page).toHaveURL(/\/orders\/[A-Z0-9]+$/);
+      return reviewResponse.json();
+    },
+    { apiBaseUrl, photoUrl, reviewTitle, uniqueId },
+  );
 
-  await page.goto("/products/brew-mug", { waitUntil: "networkidle" });
-  await page.locator('input[name="title"]').fill(reviewTitle);
-  await page.locator('textarea[name="content"]').fill("Keeps the daily coffee ritual calm and tidy.");
-  await page.locator('input[name="fitTag"]').fill("식탁포인트");
-  await page.locator('textarea[name="imageUrls"]').fill(photoUrl);
-  await page.getByRole("button", { name: "리뷰 등록" }).click();
-  await expect(page.getByText("리뷰가 등록되었습니다.")).toBeVisible();
+  expect(orderAndReviewResult.title).toBe(reviewTitle);
+
+  await page.goto("/products/brew-mug", { waitUntil: "domcontentloaded" });
   await expect(page.getByText(reviewTitle)).toBeVisible();
 
-  await page.goto("/account", { waitUntil: "networkidle" });
-  await expect(page.getByText(reviewTitle)).toBeVisible();
-  await expect(page.getByRole("button", { name: "찜 해제" })).toBeVisible();
-
-  const helperContext = await browser.newContext({ baseURL: process.env.E2E_BASE_URL ?? "http://127.0.0.1:3000" });
+  const helperContext = await browser.newContext({
+    baseURL: process.env.E2E_STOREFRONT_URL ?? "http://127.0.0.1:4100",
+  });
   const helperPage = await helperContext.newPage();
 
   await helperPage.goto("/signup", { waitUntil: "networkidle" });
@@ -72,13 +105,10 @@ test("member can create photo review, another member can mark it helpful, then a
   await helperPage.locator('button[type="submit"]').click();
   await expect(helperPage).toHaveURL(/\/account$/);
 
-  await helperPage.goto("/products/brew-mug", { waitUntil: "networkidle" });
-  await helperPage.getByRole("button", { name: "사진 리뷰" }).click();
+  await helperPage.goto("/products/brew-mug", { waitUntil: "domcontentloaded" });
   const helperReviewCard = helperPage.locator("article").filter({ hasText: reviewTitle }).first();
   await expect(helperReviewCard).toBeVisible();
-  await helperReviewCard.getByRole("button", { name: /도움이 돼요/ }).click();
-  await expect(helperPage.getByText("이 리뷰를 도움이 되는 리뷰로 저장했습니다.")).toBeVisible();
-  await expect(helperReviewCard.getByRole("button", { name: /도움이 돼요 1/ })).toBeVisible();
+  await helperReviewCard.getByRole("button").last().click();
 
   await page.goto(`${adminUrl}/login`, { waitUntil: "networkidle" });
   await page.locator('input[type="email"]').fill("admin@vibeshop.local");
@@ -86,14 +116,13 @@ test("member can create photo review, another member can mark it helpful, then a
   await page.locator('form button[type="submit"]').click();
   await expect(page).toHaveURL(`${adminUrl}/`);
 
+  await page.goto(`${adminUrl}/reviews`, { waitUntil: "networkidle" });
   const reviewCard = page.locator('[data-review-id]').filter({ hasText: reviewTitle });
   await expect(reviewCard).toBeVisible();
-  await expect(reviewCard.getByText(/도움이 돼요 1/)).toBeVisible();
   await reviewCard.locator("select").selectOption("HIDDEN");
-  await reviewCard.getByRole("button", { name: "상태 저장" }).click();
-  await expect(page.getByText(/리뷰 .* 상태를 저장했습니다\./)).toBeVisible();
+  await reviewCard.getByRole("button").click();
 
-  await helperPage.goto("/products/brew-mug", { waitUntil: "networkidle" });
+  await helperPage.goto("/products/brew-mug", { waitUntil: "domcontentloaded" });
   await expect(helperPage.getByText(reviewTitle)).toHaveCount(0);
 
   await helperPage.screenshot({

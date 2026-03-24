@@ -63,19 +63,43 @@ public class DemoDataSeeder implements ApplicationRunner {
     }
 
     private void seedAdminUser() {
+        String adminPassword = properties.adminPassword().isBlank()
+            ? generateAdminPassword()
+            : properties.adminPassword();
+        String encodedPassword = passwordEncoder.encode(adminPassword);
         Integer adminCount = jdbcTemplate.queryForObject(
             "SELECT COUNT(*) FROM users WHERE LOWER(email) = LOWER(?)",
             Integer.class,
             properties.adminEmail()
         );
+        OffsetDateTime now = OffsetDateTime.now(SEOUL);
         if (adminCount != null && adminCount > 0) {
+            jdbcTemplate.update(
+                """
+                    UPDATE users
+                    SET
+                        name = ?,
+                        password_hash = ?,
+                        role = 'OWNER',
+                        status = 'ACTIVE',
+                        last_login_at = ?,
+                        phone = ?,
+                        marketing_opt_in = false
+                    WHERE LOWER(email) = LOWER(?)
+                    """,
+                properties.adminName(),
+                encodedPassword,
+                now,
+                "01099990000",
+                properties.adminEmail()
+            );
+            log.info(
+                "Updated local demo admin account email={} with the configured bootstrap password.",
+                properties.adminEmail()
+            );
             return;
         }
 
-        String adminPassword = properties.adminPassword().isBlank()
-            ? generateAdminPassword()
-            : properties.adminPassword();
-        OffsetDateTime now = OffsetDateTime.now(SEOUL);
         jdbcTemplate.update(
             """
                 INSERT INTO users (
@@ -93,7 +117,7 @@ public class DemoDataSeeder implements ApplicationRunner {
                 """,
             properties.adminName(),
             properties.adminEmail(),
-            passwordEncoder.encode(adminPassword),
+            encodedPassword,
             "LOCAL",
             "OWNER",
             "ACTIVE",

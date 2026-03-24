@@ -64,7 +64,7 @@ module.exports = defineConfig({
       },
     },
     {
-      command: `node scripts/run-storefront-tool.mjs next start --hostname 127.0.0.1 --port ${storefrontPort}`,
+      command: `node scripts/run-storefront-tool.mjs next dev --webpack --hostname 127.0.0.1 --port ${storefrontPort}`,
       cwd: ".",
       url: storefrontUrl,
       reuseExistingServer,
@@ -82,7 +82,7 @@ module.exports = defineConfig({
       },
     },
     {
-      command: `node scripts/run-admin-tool.mjs next start --hostname 127.0.0.1 --port ${adminPort}`,
+      command: `node scripts/run-admin-tool.mjs next dev --webpack --hostname 127.0.0.1 --port ${adminPort}`,
       cwd: ".",
       url: adminUrl,
       reuseExistingServer,
