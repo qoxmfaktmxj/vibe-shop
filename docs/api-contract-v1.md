@@ -262,10 +262,46 @@ Response 예시
   "canWriteReview": false,
   "hasReviewed": false,
   "reviewSummary": {
-    "averageRating": 0,
-    "reviewCount": 0
+    "averageRating": 4.6,
+    "reviewCount": 128,
+    "photoReviewCount": 42,
+    "buyerReviewCount": 119,
+    "repurchaseRatio": 38.3,
+    "deliverySatisfactionAverage": 4.7,
+    "packagingSatisfactionAverage": 4.5,
+    "ratingDistribution": [
+      { "rating": 5, "count": 80, "percentage": 62.5 },
+      { "rating": 4, "count": 32, "percentage": 25.0 },
+      { "rating": 3, "count": 9, "percentage": 7.0 },
+      { "rating": 2, "count": 4, "percentage": 3.1 },
+      { "rating": 1, "count": 3, "percentage": 2.3 }
+    ]
   },
-  "reviews": []
+  "reviews": [
+    {
+      "id": 100,
+      "rating": 5,
+      "title": "Excellent texture",
+      "content": "Matches the room tone perfectly.",
+      "reviewerName": "홍길동",
+      "buyerReview": true,
+      "fitTag": "공간포인트",
+      "repurchaseYn": true,
+      "deliverySatisfaction": 5,
+      "packagingSatisfaction": 4,
+      "helpfulCount": 12,
+      "helpfulVoted": false,
+      "hasPhotos": true,
+      "images": [
+        {
+          "id": 900,
+          "imageUrl": "https://example.com/reviews/linen-1.jpg",
+          "displayOrder": 0
+        }
+      ],
+      "createdAt": "2026-03-24T10:00:00+09:00"
+    }
+  ]
 }
 ```
 
@@ -537,7 +573,15 @@ Request
 {
   "rating": 5,
   "title": "Excellent texture",
-  "content": "Matches the room tone perfectly."
+  "content": "Matches the room tone perfectly.",
+  "fitTag": "공간포인트",
+  "repurchaseYn": true,
+  "deliverySatisfaction": 5,
+  "packagingSatisfaction": 4,
+  "imageUrls": [
+    "https://example.com/reviews/linen-1.jpg",
+    "https://example.com/reviews/linen-2.jpg"
+  ]
 }
 ```
 
@@ -554,18 +598,129 @@ Response 예시
   "rating": 5,
   "title": "Excellent texture",
   "content": "Matches the room tone perfectly.",
+  "fitTag": "공간포인트",
+  "repurchaseYn": true,
+  "deliverySatisfaction": 5,
+  "packagingSatisfaction": 4,
+  "helpfulCount": 0,
+  "buyerReview": true,
+  "images": [
+    {
+      "id": 900,
+      "imageUrl": "https://example.com/reviews/linen-1.jpg",
+      "displayOrder": 0
+    }
+  ],
   "status": "PUBLISHED",
-  "createdAt": "2026-03-24T10:00:00+09:00"
+  "createdAt": "2026-03-24T10:00:00+09:00",
+  "updatedAt": "2026-03-24T10:00:00+09:00"
 }
 ```
 
 비고:
 - 구매 이력이 있는 회원만 리뷰를 작성할 수 있다.
 - 동일 상품에 대한 중복 리뷰는 허용하지 않는다.
+- 이미지 업로드 자체는 아직 포함하지 않고, URL 기반 포토 리뷰 레코드를 저장한다.
 
-### 8.2 내 리뷰 조회
+### 8.2 상품 리뷰 목록 / 통계 / 필터 조회
+
+`GET /api/v1/products/{productId}/reviews?sort=newest&rating=5&photoOnly=true`
+
+지원 파라미터:
+- `sort`: `newest` | `helpful` | `rating-high` | `rating-low`
+- `rating`: `1`~`5`
+- `photoOnly`: `true` | `false`
+
+Response 예시
+
+```json
+{
+  "summary": {
+    "averageRating": 4.6,
+    "reviewCount": 128,
+    "photoReviewCount": 42,
+    "buyerReviewCount": 119,
+    "repurchaseRatio": 38.3,
+    "deliverySatisfactionAverage": 4.7,
+    "packagingSatisfactionAverage": 4.5,
+    "ratingDistribution": [
+      { "rating": 5, "count": 80, "percentage": 62.5 },
+      { "rating": 4, "count": 32, "percentage": 25.0 },
+      { "rating": 3, "count": 9, "percentage": 7.0 },
+      { "rating": 2, "count": 4, "percentage": 3.1 },
+      { "rating": 1, "count": 3, "percentage": 2.3 }
+    ]
+  },
+  "reviews": [
+    {
+      "id": 100,
+      "rating": 5,
+      "title": "Excellent texture",
+      "content": "Matches the room tone perfectly.",
+      "reviewerName": "홍길동",
+      "buyerReview": true,
+      "fitTag": "공간포인트",
+      "repurchaseYn": true,
+      "deliverySatisfaction": 5,
+      "packagingSatisfaction": 4,
+      "helpfulCount": 12,
+      "helpfulVoted": true,
+      "hasPhotos": true,
+      "images": [
+        {
+          "id": 900,
+          "imageUrl": "https://example.com/reviews/linen-1.jpg",
+          "displayOrder": 0
+        }
+      ],
+      "createdAt": "2026-03-24T10:00:00+09:00"
+    }
+  ],
+  "canWriteReview": false,
+  "hasReviewed": true
+}
+```
+
+### 8.3 리뷰 도움이 돼요 등록 / 취소
+
+- `POST /api/v1/products/{productId}/reviews/{reviewId}/helpful`
+- `DELETE /api/v1/products/{productId}/reviews/{reviewId}/helpful`
+
+Response
+
+```json
+{
+  "reviewId": 100,
+  "helpfulCount": 12,
+  "helpfulVoted": true
+}
+```
+
+비고:
+- 동일 사용자 중복 helpful 투표는 카운트를 증가시키지 않는다.
+- 본인 리뷰에는 helpful 투표를 할 수 없다.
+
+### 8.4 내 리뷰 조회
 
 `GET /api/v1/account/reviews`
+
+### 8.5 내 리뷰 수정
+
+`PUT /api/v1/account/reviews/{reviewId}`
+
+Request body는 리뷰 작성과 동일하다.
+
+### 8.6 내 리뷰 삭제
+
+`DELETE /api/v1/account/reviews/{reviewId}`
+
+Response
+
+```json
+{
+  "reviewId": 100
+}
+```
 
 ---
 
@@ -680,6 +835,9 @@ Response
 ### 11.7 리뷰 관리
 - `GET /api/v1/admin/reviews`
 - `PUT /api/v1/admin/reviews/{reviewId}/status`
+
+비고:
+- 관리자 리뷰 목록은 `fitTag`, `buyerReview`, `helpfulCount`, `photoCount`, `deliverySatisfaction`, `packagingSatisfaction`, `updatedAt` 등을 함께 내려 운영 검수에 활용한다.
 
 ### 11.8 통계
 - `GET /api/v1/admin/statistics`

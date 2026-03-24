@@ -25,6 +25,21 @@ public interface CustomerOrderLineRepository extends JpaRepository<CustomerOrder
     );
 
     @Query("""
+        SELECT COUNT(DISTINCT customerOrder.id)
+        FROM CustomerOrderLine line
+        JOIN line.order customerOrder
+        WHERE customerOrder.userId = :userId
+          AND customerOrder.customerType = com.vibeshop.api.order.CustomerType.MEMBER
+          AND customerOrder.status IN :statuses
+          AND line.productId = :productId
+        """)
+    long countPurchasedOrdersForReview(
+        @Param("userId") Long userId,
+        @Param("productId") Long productId,
+        @Param("statuses") Collection<OrderStatus> statuses
+    );
+
+    @Query("""
         SELECT line.productId
         FROM CustomerOrderLine line
         JOIN line.order customerOrder

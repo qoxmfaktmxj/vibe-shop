@@ -296,6 +296,12 @@ Vibe Shop의 데이터 모델 개요 문서다.
 - `rating`
 - `title`
 - `content`
+- `fit_tag`
+- `repurchase_yn`
+- `delivery_satisfaction`
+- `packaging_satisfaction`
+- `helpful_count`
+- `is_buyer_review`
 - `status`
 - `created_at`
 - `updated_at`
@@ -303,10 +309,48 @@ Vibe Shop의 데이터 모델 개요 문서다.
 설명:
 - `product_reviews_unique_user_product` 제약으로 동일 사용자의 동일 상품 중복 리뷰를 방지한다.
 - `status` 를 통해 `PUBLISHED`, `HIDDEN` 등 운영 상태를 관리한다.
+- `helpful_count` 는 `review_helpful_votes` 집계를 캐시하는 운영 컬럼이다.
+- `is_buyer_review` 는 구매 이력 검증 또는 데모 시드 기준 구매 인증 여부를 표현한다.
 
 관계:
 - `users 1 : N product_reviews`
 - `products 1 : N product_reviews`
+
+### 7.2 `review_images`
+
+리뷰 포토 이미지를 저장하는 자식 테이블이다.
+
+주요 컬럼:
+- `id`
+- `review_id`
+- `image_url`
+- `display_order`
+- `created_at`
+
+설명:
+- 한 리뷰에 여러 장의 포토 리뷰 이미지를 연결할 수 있다.
+- 현재 MVP는 파일 업로드가 아니라 URL 기반 이미지를 저장한다.
+
+관계:
+- `product_reviews 1 : N review_images`
+
+### 7.3 `review_helpful_votes`
+
+리뷰 도움이 돼요 투표 이력 테이블이다.
+
+주요 컬럼:
+- `id`
+- `review_id`
+- `user_id`
+- `created_at`
+
+설명:
+- `review_helpful_votes_unique_user_review` 제약으로 한 사용자의 동일 리뷰 중복 helpful 투표를 방지한다.
+- helpful 수치는 운영/UI 성능을 위해 `product_reviews.helpful_count` 와 함께 사용한다.
+
+관계:
+- `users 1 : N review_helpful_votes`
+- `product_reviews 1 : N review_helpful_votes`
 
 ---
 
@@ -360,6 +404,7 @@ erDiagram
   users ||--o{ customer_orders : places
   users ||--o{ shipping_addresses : owns
   users ||--o{ product_reviews : writes
+  users ||--o{ review_helpful_votes : votes
   users ||--o{ wishlist_items : saves
 
   categories ||--o{ products : groups
@@ -368,6 +413,9 @@ erDiagram
   products ||--o{ customer_order_lines : ordered_as
   products ||--o{ product_reviews : reviewed_by
   products ||--o{ wishlist_items : wished_by
+
+  product_reviews ||--o{ review_images : contains
+  product_reviews ||--o{ review_helpful_votes : receives
 
   customer_orders ||--o{ customer_order_lines : contains
   customer_orders ||--|| order_payments : paid_by

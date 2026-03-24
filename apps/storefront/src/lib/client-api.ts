@@ -8,15 +8,19 @@ import type {
   CreateReviewPayload,
   CreateOrderPayload,
   CreateOrderResponse,
+  DeleteReviewResponse,
   DeleteShippingAddressResponse,
   GuestOrderLookupPayload,
   GuestOrderLookupResponse,
   LoginPayload,
   MyReview,
+  ProductReviewListResponse,
+  ReviewHelpfulState,
   ShippingAddress,
   ShippingAddressPayload,
   SignUpPayload,
   UpdateAccountProfilePayload,
+  UpdateReviewPayload,
   WishlistItem,
   WishlistStateResponse,
 } from "@/lib/contracts";
@@ -177,6 +181,31 @@ export async function listAccountReviews(): Promise<MyReview[]> {
   });
 }
 
+export async function listProductReviews(
+  productId: number,
+  query?: {
+    sort?: string;
+    rating?: number;
+    photoOnly?: boolean;
+  },
+): Promise<ProductReviewListResponse> {
+  const params = new URLSearchParams();
+  if (query?.sort) {
+    params.set("sort", query.sort);
+  }
+  if (typeof query?.rating === "number") {
+    params.set("rating", String(query.rating));
+  }
+  if (query?.photoOnly) {
+    params.set("photoOnly", "true");
+  }
+
+  const search = params.toString();
+  return fetchJson<ProductReviewListResponse>(`/api/v1/products/${productId}/reviews${search ? `?${search}` : ""}`, {
+    method: "GET",
+  });
+}
+
 export async function createProductReview(
   productId: number,
   payload: CreateReviewPayload,
@@ -184,6 +213,42 @@ export async function createProductReview(
   return fetchJson<MyReview>(`/api/v1/products/${productId}/reviews`, {
     method: "POST",
     body: JSON.stringify(payload),
+  });
+}
+
+export async function markReviewHelpful(
+  productId: number,
+  reviewId: number,
+): Promise<ReviewHelpfulState> {
+  return fetchJson<ReviewHelpfulState>(`/api/v1/products/${productId}/reviews/${reviewId}/helpful`, {
+    method: "POST",
+  });
+}
+
+export async function unmarkReviewHelpful(
+  productId: number,
+  reviewId: number,
+): Promise<ReviewHelpfulState> {
+  return fetchJson<ReviewHelpfulState>(`/api/v1/products/${productId}/reviews/${reviewId}/helpful`, {
+    method: "DELETE",
+  });
+}
+
+export async function updateAccountReview(
+  reviewId: number,
+  payload: UpdateReviewPayload,
+): Promise<MyReview> {
+  return fetchJson<MyReview>(`/api/v1/account/reviews/${reviewId}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteAccountReview(
+  reviewId: number,
+): Promise<DeleteReviewResponse> {
+  return fetchJson<DeleteReviewResponse>(`/api/v1/account/reviews/${reviewId}`, {
+    method: "DELETE",
   });
 }
 

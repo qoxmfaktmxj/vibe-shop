@@ -12,7 +12,15 @@ public record AdminReviewResponse(
     int rating,
     String title,
     String content,
+    String fitTag,
+    boolean repurchaseYn,
+    Integer deliverySatisfaction,
+    Integer packagingSatisfaction,
+    boolean buyerReview,
+    int helpfulCount,
+    int photoCount,
     String status,
-    OffsetDateTime createdAt
+    OffsetDateTime createdAt,
+    OffsetDateTime updatedAt
 ) {
 }

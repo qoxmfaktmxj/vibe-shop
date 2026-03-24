@@ -1,5 +1,6 @@
 package com.vibeshop.api.review;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -37,6 +38,8 @@ class ReviewWishlistControllerTest {
 
     @BeforeEach
     void setUp() {
+        jdbcClient.sql("DELETE FROM review_helpful_votes").update();
+        jdbcClient.sql("DELETE FROM review_images").update();
         jdbcClient.sql("DELETE FROM wishlist_items").update();
         jdbcClient.sql("DELETE FROM product_reviews").update();
         jdbcClient.sql("DELETE FROM shopping_cart_items").update();
@@ -149,52 +152,107 @@ class ReviewWishlistControllerTest {
     }
 
     @Test
-    void memberCanWishlistReviewAndAdminCanHideReview() throws Exception {
-        Cookie authCookie = signUpAndGetSessionCookie("reviewer@example.com", "Reviewer");
+    void memberCanCreateManageHelpfulFilterAndAdminCanHideReview() throws Exception {
+        Cookie reviewerCookie = signUpAndGetSessionCookie("reviewer@example.com", "Reviewer");
 
-        mockMvc.perform(post("/api/v1/account/wishlist/items/10").cookie(authCookie))
+        mockMvc.perform(post("/api/v1/account/wishlist/items/10").cookie(reviewerCookie))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.productId").value(10))
             .andExpect(jsonPath("$.wishlisted").value(true));
 
-        mockMvc.perform(get("/api/v1/account/wishlist").cookie(authCookie))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].productId").value(10))
-            .andExpect(jsonPath("$[0].slug").value("linen-bed-set"));
-
-        createPaidOrder(authCookie, "review-order-1");
+        createPaidOrder(reviewerCookie, "review-order-1");
 
         mockMvc.perform(post("/api/v1/products/10/reviews")
-                .cookie(authCookie)
+                .cookie(reviewerCookie)
                 .contentType("application/json")
                 .content("""
                     {
                       "rating": 5,
                       "title": "Excellent texture",
-                      "content": "Matches the room tone perfectly."
+                      "content": "Matches the room tone perfectly.",
+                      "fitTag": "공간포인트",
+                      "repurchaseYn": true,
+                      "deliverySatisfaction": 5,
+                      "packagingSatisfaction": 4,
+                      "imageUrls": [
+                        "https://example.com/reviews/linen-1.jpg",
+                        "https://example.com/reviews/linen-2.jpg"
+                      ]
                     }
                     """))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.productSlug").value("linen-bed-set"))
+            .andExpect(jsonPath("$.buyerReview").value(true))
+            .andExpect(jsonPath("$.images.length()").value(2))
             .andExpect(jsonPath("$.status").value("PUBLISHED"));
 
-        mockMvc.perform(get("/api/v1/products/linen-bed-set").cookie(authCookie))
+        mockMvc.perform(get("/api/v1/products/linen-bed-set").cookie(reviewerCookie))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.wishlisted").value(true))
             .andExpect(jsonPath("$.canWriteReview").value(false))
             .andExpect(jsonPath("$.hasReviewed").value(true))
             .andExpect(jsonPath("$.reviewSummary.reviewCount").value(1))
-            .andExpect(jsonPath("$.reviews[0].title").value("Excellent texture"));
+            .andExpect(jsonPath("$.reviewSummary.photoReviewCount").value(1))
+            .andExpect(jsonPath("$.reviewSummary.buyerReviewCount").value(1))
+            .andExpect(jsonPath("$.reviewSummary.ratingDistribution[0].rating").value(5))
+            .andExpect(jsonPath("$.reviews[0].title").value("Excellent texture"))
+            .andExpect(jsonPath("$.reviews[0].buyerReview").value(true))
+            .andExpect(jsonPath("$.reviews[0].images.length()").value(2));
 
-        Cookie adminCookie = loginAsAdmin();
         Long reviewId = jdbcClient.sql("SELECT id FROM product_reviews WHERE title = 'Excellent texture'")
             .query(Long.class)
             .single();
 
+        Cookie helperCookie = signUpAndGetSessionCookie("helper@example.com", "Helpful User");
+
+        mockMvc.perform(post("/api/v1/products/10/reviews/{reviewId}/helpful", reviewId).cookie(helperCookie))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.reviewId").value(reviewId))
+            .andExpect(jsonPath("$.helpfulCount").value(1))
+            .andExpect(jsonPath("$.helpfulVoted").value(true));
+
+        mockMvc.perform(get("/api/v1/products/10/reviews?sort=helpful&photoOnly=true&rating=5").cookie(helperCookie))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.summary.reviewCount").value(1))
+            .andExpect(jsonPath("$.reviews.length()").value(1))
+            .andExpect(jsonPath("$.reviews[0].helpfulCount").value(1))
+            .andExpect(jsonPath("$.reviews[0].helpfulVoted").value(true))
+            .andExpect(jsonPath("$.reviews[0].hasPhotos").value(true));
+
+        mockMvc.perform(put("/api/v1/account/reviews/{reviewId}", reviewId)
+                .cookie(reviewerCookie)
+                .contentType("application/json")
+                .content("""
+                    {
+                      "rating": 4,
+                      "title": "Updated texture",
+                      "content": "Still good after a week of use.",
+                      "fitTag": "차분한톤",
+                      "repurchaseYn": true,
+                      "deliverySatisfaction": 4,
+                      "packagingSatisfaction": 4,
+                      "imageUrls": [
+                        "https://example.com/reviews/linen-updated.jpg"
+                      ]
+                    }
+                    """))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.title").value("Updated texture"))
+            .andExpect(jsonPath("$.images.length()").value(1));
+
+        mockMvc.perform(get("/api/v1/account/reviews").cookie(reviewerCookie))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].title").value("Updated texture"))
+            .andExpect(jsonPath("$[0].fitTag").value("차분한톤"));
+
+        Cookie adminCookie = loginAsAdmin();
+
         mockMvc.perform(get("/api/v1/admin/reviews").cookie(adminCookie))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].title").value("Excellent texture"))
-            .andExpect(jsonPath("$[0].status").value("PUBLISHED"));
+            .andExpect(jsonPath("$[0].title").value("Updated texture"))
+            .andExpect(jsonPath("$[0].buyerReview").value(true))
+            .andExpect(jsonPath("$[0].helpfulCount").value(1))
+            .andExpect(jsonPath("$[0].photoCount").value(1));
 
         mockMvc.perform(put("/api/v1/admin/reviews/{reviewId}/status", reviewId)
                 .cookie(adminCookie)
@@ -214,11 +272,11 @@ class ReviewWishlistControllerTest {
     }
 
     @Test
-    void reviewRequiresPurchaseAndCannotBeCreatedTwice() throws Exception {
-        Cookie authCookie = signUpAndGetSessionCookie("duplicate-review@example.com", "Duplicate Reviewer");
+    void reviewRequiresPurchasePreventsDuplicateHelpfulDuplicatesAndSupportsDelete() throws Exception {
+        Cookie reviewerCookie = signUpAndGetSessionCookie("duplicate-review@example.com", "Duplicate Reviewer");
 
         mockMvc.perform(post("/api/v1/products/10/reviews")
-                .cookie(authCookie)
+                .cookie(reviewerCookie)
                 .contentType("application/json")
                 .content("""
                     {
@@ -230,23 +288,29 @@ class ReviewWishlistControllerTest {
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.code").value("bad_request"));
 
-        createPaidOrder(authCookie, "review-order-2");
+        createPaidOrder(reviewerCookie, "review-order-2");
 
         mockMvc.perform(post("/api/v1/products/10/reviews")
-                .cookie(authCookie)
+                .cookie(reviewerCookie)
                 .contentType("application/json")
                 .content("""
                     {
                       "rating": 4,
                       "title": "After purchase",
-                      "content": "This should work."
+                      "content": "This should work.",
+                      "deliverySatisfaction": 4,
+                      "packagingSatisfaction": 5
                     }
                     """))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("PUBLISHED"));
 
+        Long reviewId = jdbcClient.sql("SELECT id FROM product_reviews WHERE title = 'After purchase'")
+            .query(Long.class)
+            .single();
+
         mockMvc.perform(post("/api/v1/products/10/reviews")
-                .cookie(authCookie)
+                .cookie(reviewerCookie)
                 .contentType("application/json")
                 .content("""
                     {
@@ -257,6 +321,39 @@ class ReviewWishlistControllerTest {
                     """))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.code").value("bad_request"));
+
+        mockMvc.perform(post("/api/v1/products/10/reviews/{reviewId}/helpful", reviewId).cookie(reviewerCookie))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.code").value("bad_request"));
+
+        Cookie helperCookie = signUpAndGetSessionCookie("helper-2@example.com", "Helper Two");
+
+        mockMvc.perform(post("/api/v1/products/10/reviews/{reviewId}/helpful", reviewId).cookie(helperCookie))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.helpfulCount").value(1));
+
+        mockMvc.perform(post("/api/v1/products/10/reviews/{reviewId}/helpful", reviewId).cookie(helperCookie))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.helpfulCount").value(1))
+            .andExpect(jsonPath("$.helpfulVoted").value(true));
+
+        mockMvc.perform(delete("/api/v1/products/10/reviews/{reviewId}/helpful", reviewId).cookie(helperCookie))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.helpfulCount").value(0))
+            .andExpect(jsonPath("$.helpfulVoted").value(false));
+
+        mockMvc.perform(get("/api/v1/products/10/reviews?rating=9"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.code").value("bad_request"));
+
+        mockMvc.perform(delete("/api/v1/account/reviews/{reviewId}", reviewId).cookie(reviewerCookie))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.reviewId").value(reviewId));
+
+        mockMvc.perform(get("/api/v1/products/linen-bed-set"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.reviewSummary.reviewCount").value(0))
+            .andExpect(jsonPath("$.reviews.length()").value(0));
     }
 
     private Cookie signUpAndGetSessionCookie(String email, String name) throws Exception {

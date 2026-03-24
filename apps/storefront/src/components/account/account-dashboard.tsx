@@ -6,10 +6,12 @@ import { useState, useTransition } from "react";
 
 import {
   createShippingAddress,
+  deleteAccountReview,
   deleteShippingAddress,
   listShippingAddresses,
   removeWishlistItem,
   updateAccountProfile,
+  updateAccountReview,
   updateShippingAddress,
 } from "@/lib/client-api";
 import type {
@@ -18,6 +20,7 @@ import type {
   OrderSummaryResponse,
   ShippingAddress,
   ShippingAddressPayload,
+  UpdateReviewPayload,
   WishlistItem,
 } from "@/lib/contracts";
 import { formatPrice } from "@/lib/currency";
@@ -79,7 +82,20 @@ export function AccountDashboard({
   const [profileError, setProfileError] = useState("");
   const [addresses, setAddresses] = useState(sortAddresses(initialAddresses));
   const [wishlist, setWishlist] = useState(initialWishlist);
-  const [reviews] = useState(initialReviews);
+  const [reviews, setReviews] = useState(initialReviews);
+  const [editingReviewId, setEditingReviewId] = useState<number | null>(null);
+  const [reviewForm, setReviewForm] = useState<UpdateReviewPayload>({
+    rating: 5,
+    title: "",
+    content: "",
+    fitTag: "",
+    repurchaseYn: false,
+    deliverySatisfaction: 5,
+    packagingSatisfaction: 5,
+    imageUrls: [],
+  });
+  const [reviewMessage, setReviewMessage] = useState("");
+  const [reviewError, setReviewError] = useState("");
   const [wishlistMessage, setWishlistMessage] = useState("");
   const [wishlistError, setWishlistError] = useState("");
   const [addressForm, setAddressForm] = useState<ShippingAddressPayload>(EMPTY_ADDRESS_FORM);
@@ -88,6 +104,7 @@ export function AccountDashboard({
   const [addressError, setAddressError] = useState("");
   const [isSavingProfile, startSavingProfile] = useTransition();
   const [isSavingAddress, startSavingAddress] = useTransition();
+  const [isSavingReview, startSavingReview] = useTransition();
   const [isUpdatingWishlist, startUpdatingWishlist] = useTransition();
 
   const joinedDate = new Date(profile.createdAt).toLocaleDateString("ko-KR", {
@@ -123,6 +140,36 @@ export function AccountDashboard({
       address1: address.address1,
       address2: address.address2,
       isDefault: address.isDefault,
+    });
+  }
+
+  function resetReviewForm() {
+    setEditingReviewId(null);
+    setReviewForm({
+      rating: 5,
+      title: "",
+      content: "",
+      fitTag: "",
+      repurchaseYn: false,
+      deliverySatisfaction: 5,
+      packagingSatisfaction: 5,
+      imageUrls: [],
+    });
+  }
+
+  function handleEditReview(review: MyReview) {
+    setEditingReviewId(review.id);
+    setReviewMessage("");
+    setReviewError("");
+    setReviewForm({
+      rating: review.rating,
+      title: review.title,
+      content: review.content,
+      fitTag: review.fitTag ?? "",
+      repurchaseYn: review.repurchaseYn,
+      deliverySatisfaction: review.deliverySatisfaction ?? 5,
+      packagingSatisfaction: review.packagingSatisfaction ?? 5,
+      imageUrls: review.images.map((image) => image.imageUrl),
     });
   }
 
@@ -600,41 +647,300 @@ export function AccountDashboard({
               <p className="display-eyebrow">Reviews</p>
               <h2 className="display-heading mt-4 text-3xl font-semibold">내 리뷰</h2>
             </div>
-            <Link href="/search" className="button-secondary px-4 py-3">
-              리뷰 쓸 상품 찾기
-            </Link>
+            <div className="flex flex-wrap gap-3">
+              <Link href="/search" className="button-secondary px-4 py-3">
+                리뷰 쓸 상품 찾기
+              </Link>
+              <button type="button" onClick={resetReviewForm} className="button-secondary px-4 py-3">
+                편집 닫기
+              </button>
+            </div>
           </div>
 
           <div className="mt-8 space-y-4">
             {reviews.length > 0 ? (
-              reviews.map((review) => (
-                <article
-                  key={review.id}
-                  className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6"
-                >
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <Link href={`/products/${review.productSlug}`} className="text-lg font-semibold">
-                        {review.productName}
-                      </Link>
-                      <p className="mt-2 text-sm text-[var(--ink-soft)]">
-                        {review.rating} / 5 · {REVIEW_STATUS_LABELS[review.status] ?? review.status}
+              reviews.map((review) => {
+                const isEditing = editingReviewId === review.id;
+                return (
+                  <article
+                    key={review.id}
+                    className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6"
+                  >
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Link href={`/products/${review.productSlug}`} className="text-lg font-semibold">
+                            {review.productName}
+                          </Link>
+                          {review.buyerReview ? (
+                            <span className="rounded-full bg-[rgba(28,107,81,0.12)] px-3 py-1 text-xs font-semibold text-[var(--secondary)]">
+                              구매 인증
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className="mt-2 text-sm text-[var(--ink-soft)]">
+                          {review.rating} / 5 · {REVIEW_STATUS_LABELS[review.status] ?? review.status} · 도움이 돼요 {review.helpfulCount}
+                        </p>
+                      </div>
+                      <p className="text-sm text-[var(--ink-soft)]">
+                        {new Date(review.createdAt).toLocaleDateString("ko-KR")}
                       </p>
                     </div>
-                    <p className="text-sm text-[var(--ink-soft)]">
-                      {new Date(review.createdAt).toLocaleDateString("ko-KR")}
-                    </p>
-                  </div>
-                  <p className="mt-4 text-base font-semibold">{review.title}</p>
-                  <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">{review.content}</p>
-                </article>
-              ))
+                    <p className="mt-4 text-base font-semibold">{review.title}</p>
+                    <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">{review.content}</p>
+                    <div className="mt-4 grid gap-2 text-sm text-[var(--ink-soft)] sm:grid-cols-3">
+                      <p>핏 태그 {review.fitTag ?? "-"}</p>
+                      <p>배송 만족도 {review.deliverySatisfaction ?? "-"}/5</p>
+                      <p>포장 만족도 {review.packagingSatisfaction ?? "-"}/5</p>
+                    </div>
+                    {review.images.length > 0 ? (
+                      <div className="mt-4 grid grid-cols-3 gap-3">
+                        {review.images.map((image) => (
+                          <div key={image.id} className="aspect-square overflow-hidden rounded-[18px] border border-[var(--line)]">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={image.imageUrl}
+                              alt={`${review.title} 리뷰 이미지`}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+
+                    <div className="mt-5 flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={() => handleEditReview(review)}
+                        className="button-secondary px-4 py-3"
+                      >
+                        수정
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isSavingReview}
+                        onClick={() => {
+                          if (!window.confirm("이 리뷰를 삭제할까요?")) {
+                            return;
+                          }
+                          setReviewMessage("");
+                          setReviewError("");
+                          startSavingReview(() => {
+                            void (async () => {
+                              try {
+                                await deleteAccountReview(review.id);
+                                setReviews((current) => current.filter((item) => item.id !== review.id));
+                                setProfile((current) => ({
+                                  ...current,
+                                  reviewCount: Math.max(0, current.reviewCount - 1),
+                                }));
+                                if (editingReviewId === review.id) {
+                                  resetReviewForm();
+                                }
+                                setReviewMessage("리뷰를 삭제했습니다.");
+                              } catch (error) {
+                                setReviewError(getErrorMessage(error, "리뷰 삭제 중 문제가 발생했습니다."));
+                              }
+                            })();
+                          });
+                        }}
+                        className="button-secondary px-4 py-3 disabled:opacity-60"
+                      >
+                        삭제
+                      </button>
+                    </div>
+
+                    {isEditing ? (
+                      <form
+                        className="mt-6 grid gap-4 rounded-[24px] border border-[var(--line)] bg-white/80 p-5"
+                        onSubmit={(event) => {
+                          event.preventDefault();
+                          setReviewMessage("");
+                          setReviewError("");
+                          startSavingReview(() => {
+                            void (async () => {
+                              try {
+                                const updated = await updateAccountReview(review.id, {
+                                  ...reviewForm,
+                                  title: reviewForm.title.trim(),
+                                  content: reviewForm.content.trim(),
+                                  fitTag: reviewForm.fitTag?.trim() ?? "",
+                                  imageUrls: (reviewForm.imageUrls ?? []).map((value) => value.trim()).filter(Boolean),
+                                });
+                                setReviews((current) =>
+                                  current.map((item) => (item.id === updated.id ? updated : item)),
+                                );
+                                setReviewMessage("리뷰를 수정했습니다.");
+                                resetReviewForm();
+                              } catch (error) {
+                                setReviewError(getErrorMessage(error, "리뷰 수정 중 문제가 발생했습니다."));
+                              }
+                            })();
+                          });
+                        }}
+                      >
+                        <label className="grid gap-2">
+                          <span className="text-sm font-medium">평점</span>
+                          <select
+                            value={reviewForm.rating}
+                            onChange={(event) =>
+                              setReviewForm((current) => ({
+                                ...current,
+                                rating: Number(event.target.value),
+                              }))
+                            }
+                            className="soft-input px-4 py-3"
+                          >
+                            <option value={5}>5점</option>
+                            <option value={4}>4점</option>
+                            <option value={3}>3점</option>
+                            <option value={2}>2점</option>
+                            <option value={1}>1점</option>
+                          </select>
+                        </label>
+
+                        <label className="grid gap-2">
+                          <span className="text-sm font-medium">핏 태그</span>
+                          <input
+                            value={reviewForm.fitTag ?? ""}
+                            onChange={(event) =>
+                              setReviewForm((current) => ({
+                                ...current,
+                                fitTag: event.target.value,
+                              }))
+                            }
+                            className="soft-input px-4 py-3"
+                          />
+                        </label>
+
+                        <label className="grid gap-2">
+                          <span className="text-sm font-medium">제목</span>
+                          <input
+                            value={reviewForm.title}
+                            onChange={(event) =>
+                              setReviewForm((current) => ({
+                                ...current,
+                                title: event.target.value,
+                              }))
+                            }
+                            className="soft-input px-4 py-3"
+                          />
+                        </label>
+
+                        <label className="grid gap-2">
+                          <span className="text-sm font-medium">내용</span>
+                          <textarea
+                            rows={4}
+                            value={reviewForm.content}
+                            onChange={(event) =>
+                              setReviewForm((current) => ({
+                                ...current,
+                                content: event.target.value,
+                              }))
+                            }
+                            className="soft-input px-4 py-3"
+                          />
+                        </label>
+
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <label className="grid gap-2">
+                            <span className="text-sm font-medium">배송 만족도</span>
+                            <select
+                              value={reviewForm.deliverySatisfaction ?? 5}
+                              onChange={(event) =>
+                                setReviewForm((current) => ({
+                                  ...current,
+                                  deliverySatisfaction: Number(event.target.value),
+                                }))
+                              }
+                              className="soft-input px-4 py-3"
+                            >
+                              <option value={5}>5점</option>
+                              <option value={4}>4점</option>
+                              <option value={3}>3점</option>
+                              <option value={2}>2점</option>
+                              <option value={1}>1점</option>
+                            </select>
+                          </label>
+                          <label className="grid gap-2">
+                            <span className="text-sm font-medium">포장 만족도</span>
+                            <select
+                              value={reviewForm.packagingSatisfaction ?? 5}
+                              onChange={(event) =>
+                                setReviewForm((current) => ({
+                                  ...current,
+                                  packagingSatisfaction: Number(event.target.value),
+                                }))
+                              }
+                              className="soft-input px-4 py-3"
+                            >
+                              <option value={5}>5점</option>
+                              <option value={4}>4점</option>
+                              <option value={3}>3점</option>
+                              <option value={2}>2점</option>
+                              <option value={1}>1점</option>
+                            </select>
+                          </label>
+                        </div>
+
+                        <label className="flex items-center gap-3 rounded-[20px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] px-4 py-3 text-sm text-[var(--ink-soft)]">
+                          <input
+                            type="checkbox"
+                            checked={Boolean(reviewForm.repurchaseYn)}
+                            onChange={(event) =>
+                              setReviewForm((current) => ({
+                                ...current,
+                                repurchaseYn: event.target.checked,
+                              }))
+                            }
+                          />
+                          재구매 의사/경험 있음
+                        </label>
+
+                        <label className="grid gap-2">
+                          <span className="text-sm font-medium">포토 리뷰 URL</span>
+                          <textarea
+                            rows={3}
+                            value={(reviewForm.imageUrls ?? []).join("\n")}
+                            onChange={(event) =>
+                              setReviewForm((current) => ({
+                                ...current,
+                                imageUrls: event.target.value
+                                  .split(/\n|,/)
+                                  .map((value) => value.trim())
+                                  .filter(Boolean)
+                                  .slice(0, 4),
+                              }))
+                            }
+                            className="soft-input px-4 py-3"
+                          />
+                        </label>
+
+                        <div className="flex flex-col gap-3 sm:flex-row">
+                          <button
+                            type="submit"
+                            disabled={isSavingReview}
+                            className="button-primary flex-1 px-5 py-3 disabled:opacity-60"
+                          >
+                            {isSavingReview ? "저장 중..." : "리뷰 저장"}
+                          </button>
+                          <button type="button" onClick={resetReviewForm} className="button-secondary px-5 py-3">
+                            취소
+                          </button>
+                        </div>
+                      </form>
+                    ) : null}
+                  </article>
+                );
+              })
             ) : (
               <div className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
                 아직 작성한 리뷰가 없습니다. 구매 후 상품 상세에서 바로 작성할 수 있습니다.
               </div>
             )}
           </div>
+          {reviewMessage ? <p className="mt-4 text-sm text-[var(--secondary)]">{reviewMessage}</p> : null}
+          {reviewError ? <p className="mt-4 text-sm text-red-600">{reviewError}</p> : null}
         </article>
       </section>
 

@@ -21,8 +21,10 @@ import com.vibeshop.api.account.AccountDtos.ShippingAddressResponse;
 import com.vibeshop.api.account.AccountDtos.UpdateProfileRequest;
 import com.vibeshop.api.auth.AuthService;
 import com.vibeshop.api.common.UnauthorizedException;
+import com.vibeshop.api.review.DeleteMyReviewResponse;
 import com.vibeshop.api.review.MyReviewResponse;
 import com.vibeshop.api.review.ReviewService;
+import com.vibeshop.api.review.UpdateReviewRequest;
 import com.vibeshop.api.wishlist.WishlistDtos.WishlistProductResponse;
 import com.vibeshop.api.wishlist.WishlistDtos.WishlistStateResponse;
 import com.vibeshop.api.wishlist.WishlistService;
@@ -126,6 +128,25 @@ public class AccountController {
         @CookieValue(value = AUTH_SESSION_COOKIE, required = false) String authSessionToken
     ) {
         return reviewService.getMyReviews(requireAuthenticatedUserId(authSessionToken));
+    }
+
+    @PutMapping("/reviews/{reviewId}")
+    MyReviewResponse updateReview(
+        @CookieValue(value = AUTH_SESSION_COOKIE, required = false) String authSessionToken,
+        @PathVariable Long reviewId,
+        @Valid @RequestBody UpdateReviewRequest request
+    ) {
+        return reviewService.updateMyReview(requireAuthenticatedUserId(authSessionToken), reviewId, request);
+    }
+
+    @DeleteMapping("/reviews/{reviewId}")
+    DeleteMyReviewResponse deleteReview(
+        @CookieValue(value = AUTH_SESSION_COOKIE, required = false) String authSessionToken,
+        @PathVariable Long reviewId
+    ) {
+        Long userId = requireAuthenticatedUserId(authSessionToken);
+        reviewService.deleteMyReview(userId, reviewId);
+        return new DeleteMyReviewResponse(reviewId);
     }
 
     private Long requireAuthenticatedUserId(String authSessionToken) {

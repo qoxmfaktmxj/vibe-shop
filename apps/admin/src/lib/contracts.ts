@@ -220,8 +220,16 @@ export type AdminReview = {
   rating: number;
   title: string;
   content: string;
+  fitTag: string | null;
+  repurchaseYn: boolean;
+  deliverySatisfaction: number | null;
+  packagingSatisfaction: number | null;
+  buyerReview: boolean;
+  helpfulCount: number;
+  photoCount: number;
   status: string;
   createdAt: string;
+  updatedAt: string;
 };
 
 export type UpdateAdminReviewStatusPayload = {

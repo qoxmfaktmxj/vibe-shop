@@ -45,9 +45,27 @@ export type ProductSummary = {
   wishlisted: boolean;
 };
 
+export type ReviewImage = {
+  id: number;
+  imageUrl: string;
+  displayOrder: number;
+};
+
+export type ReviewRatingBreakdown = {
+  rating: number;
+  count: number;
+  percentage: number;
+};
+
 export type ReviewSummary = {
   averageRating: number;
   reviewCount: number;
+  photoReviewCount: number;
+  buyerReviewCount: number;
+  repurchaseRatio: number;
+  deliverySatisfactionAverage: number | null;
+  packagingSatisfactionAverage: number | null;
+  ratingDistribution: ReviewRatingBreakdown[];
 };
 
 export type ProductReview = {
@@ -56,7 +74,23 @@ export type ProductReview = {
   title: string;
   content: string;
   reviewerName: string;
+  buyerReview: boolean;
+  fitTag: string | null;
+  repurchaseYn: boolean;
+  deliverySatisfaction: number | null;
+  packagingSatisfaction: number | null;
+  helpfulCount: number;
+  helpfulVoted: boolean;
+  hasPhotos: boolean;
+  images: ReviewImage[];
   createdAt: string;
+};
+
+export type ProductReviewListResponse = {
+  summary: ReviewSummary;
+  reviews: ProductReview[];
+  canWriteReview: boolean;
+  hasReviewed: boolean;
 };
 
 export type ProductDetail = ProductSummary & {
@@ -162,6 +196,23 @@ export type CreateReviewPayload = {
   rating: number;
   title: string;
   content: string;
+  fitTag?: string;
+  repurchaseYn?: boolean;
+  deliverySatisfaction?: number | null;
+  packagingSatisfaction?: number | null;
+  imageUrls?: string[];
+};
+
+export type UpdateReviewPayload = CreateReviewPayload;
+
+export type ReviewHelpfulState = {
+  reviewId: number;
+  helpfulCount: number;
+  helpfulVoted: boolean;
+};
+
+export type DeleteReviewResponse = {
+  reviewId: number;
 };
 
 export type MyReview = {
@@ -174,8 +225,16 @@ export type MyReview = {
   rating: number;
   title: string;
   content: string;
+  fitTag: string | null;
+  repurchaseYn: boolean;
+  deliverySatisfaction: number | null;
+  packagingSatisfaction: number | null;
+  helpfulCount: number;
+  buyerReview: boolean;
+  images: ReviewImage[];
   status: string;
   createdAt: string;
+  updatedAt: string;
 };
 
 export type SignUpPayload = {

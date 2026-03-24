@@ -1,6 +1,7 @@
 package com.vibeshop.api.review;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 public record MyReviewResponse(
     Long id,
@@ -12,7 +13,15 @@ public record MyReviewResponse(
     int rating,
     String title,
     String content,
+    String fitTag,
+    boolean repurchaseYn,
+    Integer deliverySatisfaction,
+    Integer packagingSatisfaction,
+    int helpfulCount,
+    boolean buyerReview,
+    List<ReviewImageResponse> images,
     String status,
-    OffsetDateTime createdAt
+    OffsetDateTime createdAt,
+    OffsetDateTime updatedAt
 ) {
 }

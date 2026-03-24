@@ -6,12 +6,14 @@ const { expect, test } = require("playwright/test");
 const OUTPUT_DIR = path.join(process.cwd(), "output", "playwright");
 const adminUrl = process.env.E2E_ADMIN_URL ?? "http://127.0.0.1:3200";
 
-test("member can wishlist and review a product, then admin can moderate it", async ({ page }) => {
+test("member can create photo review, another member can mark it helpful, then admin can moderate it", async ({ page, browser }) => {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
   const uniqueId = Date.now();
   const email = `engagement-${uniqueId}@example.com`;
+  const helperEmail = `engagement-helper-${uniqueId}@example.com`;
   const reviewTitle = `Review ${uniqueId}`;
+  const photoUrl = `https://picsum.photos/seed/${uniqueId}/1200/1200`;
 
   await page.goto("/signup", { waitUntil: "networkidle" });
   const signupInputs = page.locator("form input");
@@ -49,6 +51,8 @@ test("member can wishlist and review a product, then admin can moderate it", asy
   await page.goto("/products/brew-mug", { waitUntil: "networkidle" });
   await page.locator('input[name="title"]').fill(reviewTitle);
   await page.locator('textarea[name="content"]').fill("Keeps the daily coffee ritual calm and tidy.");
+  await page.locator('input[name="fitTag"]').fill("식탁포인트");
+  await page.locator('textarea[name="imageUrls"]').fill(photoUrl);
   await page.getByRole("button", { name: "리뷰 등록" }).click();
   await expect(page.getByText("리뷰가 등록되었습니다.")).toBeVisible();
   await expect(page.getByText(reviewTitle)).toBeVisible();
@@ -56,6 +60,25 @@ test("member can wishlist and review a product, then admin can moderate it", asy
   await page.goto("/account", { waitUntil: "networkidle" });
   await expect(page.getByText(reviewTitle)).toBeVisible();
   await expect(page.getByRole("button", { name: "찜 해제" })).toBeVisible();
+
+  const helperContext = await browser.newContext({ baseURL: process.env.E2E_BASE_URL ?? "http://127.0.0.1:3000" });
+  const helperPage = await helperContext.newPage();
+
+  await helperPage.goto("/signup", { waitUntil: "networkidle" });
+  const helperInputs = helperPage.locator("form input");
+  await helperInputs.nth(0).fill("Helpful Tester");
+  await helperInputs.nth(1).fill(helperEmail);
+  await helperInputs.nth(2).fill("password123");
+  await helperPage.locator('button[type="submit"]').click();
+  await expect(helperPage).toHaveURL(/\/account$/);
+
+  await helperPage.goto("/products/brew-mug", { waitUntil: "networkidle" });
+  await helperPage.getByRole("button", { name: "사진 리뷰" }).click();
+  const helperReviewCard = helperPage.locator("article").filter({ hasText: reviewTitle }).first();
+  await expect(helperReviewCard).toBeVisible();
+  await helperReviewCard.getByRole("button", { name: /도움이 돼요/ }).click();
+  await expect(helperPage.getByText("이 리뷰를 도움이 되는 리뷰로 저장했습니다.")).toBeVisible();
+  await expect(helperReviewCard.getByRole("button", { name: /도움이 돼요 1/ })).toBeVisible();
 
   await page.goto(`${adminUrl}/login`, { waitUntil: "networkidle" });
   await page.locator('input[type="email"]').fill("admin@vibeshop.local");
@@ -65,15 +88,18 @@ test("member can wishlist and review a product, then admin can moderate it", asy
 
   const reviewCard = page.locator('[data-review-id]').filter({ hasText: reviewTitle });
   await expect(reviewCard).toBeVisible();
+  await expect(reviewCard.getByText(/도움이 돼요 1/)).toBeVisible();
   await reviewCard.locator("select").selectOption("HIDDEN");
   await reviewCard.getByRole("button", { name: "상태 저장" }).click();
   await expect(page.getByText(/리뷰 .* 상태를 저장했습니다\./)).toBeVisible();
 
-  await page.goto("/products/brew-mug", { waitUntil: "networkidle" });
-  await expect(page.getByText(reviewTitle)).toHaveCount(0);
+  await helperPage.goto("/products/brew-mug", { waitUntil: "networkidle" });
+  await expect(helperPage.getByText(reviewTitle)).toHaveCount(0);
 
-  await page.screenshot({
+  await helperPage.screenshot({
     path: path.join(OUTPUT_DIR, "15-review-wishlist-admin.png"),
     fullPage: true,
   });
+
+  await helperContext.close();
 });

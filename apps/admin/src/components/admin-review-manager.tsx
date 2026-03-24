@@ -37,9 +37,11 @@ export function AdminReviewManager({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="eyebrow text-[var(--ink-soft)]">Reviews</p>
-          <h2 className="display mt-4 text-3xl font-semibold">리뷰 검수</h2>
+          <h2 className="display mt-4 text-3xl font-semibold">리뷰 운영 관리</h2>
         </div>
-        <p className="text-sm text-[var(--ink-soft)]">공개/숨김 상태를 바로 전환할 수 있습니다.</p>
+        <p className="text-sm text-[var(--ink-soft)]">
+          구매 인증, 포토 리뷰, 도움 수치를 함께 보고 노출 상태를 운영 관점에서 검수합니다.
+        </p>
       </div>
 
       <div className="mt-8 space-y-4">
@@ -48,7 +50,7 @@ export function AdminReviewManager({
             <div
               key={review.id}
               data-review-id={review.id}
-              className="grid gap-4 rounded-[28px] border border-[var(--line)] bg-white/72 p-5 xl:grid-cols-[minmax(0,1fr)_220px]"
+              className="grid gap-4 rounded-[28px] border border-[var(--line)] bg-white/72 p-5 xl:grid-cols-[minmax(0,1fr)_240px]"
             >
               <div>
                 <div className="flex flex-wrap items-center gap-3">
@@ -56,6 +58,16 @@ export function AdminReviewManager({
                   <span className="rounded-full bg-[rgba(36,93,90,0.12)] px-3 py-1 text-xs font-semibold text-[var(--teal)]">
                     {formatReviewStatus(review.status)}
                   </span>
+                  {review.buyerReview ? (
+                    <span className="rounded-full bg-[rgba(28,107,81,0.12)] px-3 py-1 text-xs font-semibold text-[var(--teal)]">
+                      구매 인증
+                    </span>
+                  ) : null}
+                  {review.photoCount > 0 ? (
+                    <span className="rounded-full bg-[rgba(37,99,235,0.12)] px-3 py-1 text-xs font-semibold text-blue-700">
+                      포토 {review.photoCount}
+                    </span>
+                  ) : null}
                 </div>
                 <p className="mt-3 text-sm text-[var(--ink-soft)]">
                   {review.reviewerName} · {review.reviewerEmail}
@@ -63,8 +75,15 @@ export function AdminReviewManager({
                 <p className="mt-2 text-sm font-semibold text-[var(--primary)]">{renderStars(review.rating)}</p>
                 <p className="mt-3 text-base font-semibold">{review.title}</p>
                 <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">{review.content}</p>
+                <div className="mt-4 grid gap-2 text-sm text-[var(--ink-soft)] sm:grid-cols-2 xl:grid-cols-4">
+                  <p>핏 태그 {review.fitTag ?? "-"}</p>
+                  <p>재구매 {review.repurchaseYn ? "예" : "아니오"}</p>
+                  <p>배송 만족도 {review.deliverySatisfaction ?? "-"}/5</p>
+                  <p>포장 만족도 {review.packagingSatisfaction ?? "-"}/5</p>
+                </div>
+                <p className="mt-3 text-sm text-[var(--ink-soft)]">도움이 돼요 {review.helpfulCount}</p>
                 <p className="mt-3 text-xs uppercase tracking-[0.16em] text-[var(--ink-soft)]">
-                  {new Date(review.createdAt).toLocaleString("ko-KR")}
+                  생성 {new Date(review.createdAt).toLocaleString("ko-KR")} · 수정 {new Date(review.updatedAt).toLocaleString("ko-KR")}
                 </p>
               </div>
 

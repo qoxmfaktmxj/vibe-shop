@@ -3,8 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
+import { ProductReviewSection } from "@/components/engagement/product-review-section";
 import { RatingStars } from "@/components/engagement/rating-stars";
-import { ReviewComposer } from "@/components/engagement/review-composer";
 import { WishlistToggleButton } from "@/components/engagement/wishlist-toggle-button";
 import { formatPrice } from "@/lib/currency";
 import { productGradient } from "@/lib/gradient";
@@ -69,7 +69,7 @@ export default async function ProductPage({
                   {product.reviewSummary.averageRating.toFixed(1)}
                 </span>
                 <span className="text-sm text-[var(--ink-soft)]">
-                  리뷰 {product.reviewSummary.reviewCount}개
+                  리뷰 {product.reviewSummary.reviewCount}개 · 포토 {product.reviewSummary.photoReviewCount}개
                 </span>
               </div>
 
@@ -137,54 +137,13 @@ export default async function ProductPage({
         </aside>
       </div>
 
-      <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <article className="surface-card rounded-[32px] p-6 sm:p-8">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="display-eyebrow">Reviews</p>
-              <h2 className="display-heading mt-3 text-3xl font-semibold">고객 리뷰</h2>
-            </div>
-            <div className="text-sm text-[var(--ink-soft)]">
-              평균 {product.reviewSummary.averageRating.toFixed(1)} / 5
-            </div>
-          </div>
-
-          <div className="mt-8 space-y-4">
-            {product.reviews.length > 0 ? (
-              product.reviews.map((review) => (
-                <article
-                  key={review.id}
-                  className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6"
-                >
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <p className="text-lg font-semibold">{review.title}</p>
-                      <div className="mt-2 flex items-center gap-3">
-                        <RatingStars rating={review.rating} size="sm" />
-                        <span className="text-sm text-[var(--ink-soft)]">{review.reviewerName}</span>
-                      </div>
-                    </div>
-                    <p className="text-sm text-[var(--ink-soft)]">
-                      {new Date(review.createdAt).toLocaleDateString("ko-KR")}
-                    </p>
-                  </div>
-                  <p className="mt-4 text-sm leading-7 text-[var(--ink-soft)]">{review.content}</p>
-                </article>
-              ))
-            ) : (
-              <div className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
-                아직 공개된 리뷰가 없습니다. 첫 리뷰를 남겨 보세요.
-              </div>
-            )}
-          </div>
-        </article>
-
-        <ReviewComposer
-          productId={product.id}
-          canWriteReview={product.canWriteReview}
-          hasReviewed={product.hasReviewed}
-        />
-      </section>
+      <ProductReviewSection
+        productId={product.id}
+        initialSummary={product.reviewSummary}
+        initialReviews={product.reviews}
+        initialCanWriteReview={product.canWriteReview}
+        initialHasReviewed={product.hasReviewed}
+      />
     </div>
   );
 }
