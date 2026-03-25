@@ -110,7 +110,7 @@ export function CartScreen() {
                     <p className="text-lg font-semibold text-[var(--primary)]">{formatPrice(item.price)}원</p>
                   </div>
 
-                  <div className="mt-6 flex items-center justify-between gap-4 sm:mt-8">
+                  <div className="mt-6 flex flex-col items-start gap-3 sm:mt-8 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-2 rounded-xl bg-[var(--surface-card)] px-2 py-2 shadow-[var(--shadow-soft)]">
                       <button
                         type="button"
@@ -132,7 +132,7 @@ export function CartScreen() {
                     <button
                       type="button"
                       onClick={() => removeItem(item.productId)}
-                      className="text-[11px] font-semibold tracking-[0.18em] text-[var(--ink-soft)] transition hover:text-red-600"
+                      className="text-sm font-medium text-[var(--ink-soft)] transition hover:text-red-600"
                     >
                       삭제
                     </button>
@@ -197,12 +197,12 @@ export function CartScreen() {
 
       <div className="fixed inset-x-4 bottom-[max(16px,env(safe-area-inset-bottom))] z-40 lg:hidden">
         <div className="rounded-[22px] border border-[var(--line)] bg-[rgba(255,255,255,0.96)] p-4 shadow-[0_24px_60px_rgba(12,16,24,0.18)] backdrop-blur">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-[10px] font-semibold tracking-[0.18em] text-[var(--ink-soft)]">총 결제 금액</p>
               <p className="mt-1 text-xl font-semibold text-[var(--ink)]">{formatPrice(preview?.total ?? 0)}원</p>
             </div>
-            <Link href="/checkout" className="button-hot min-w-[10rem] px-5 py-4">
+            <Link href="/checkout" className="button-hot w-full min-w-0 px-5 py-4 sm:w-auto sm:min-w-[10rem]">
               주문서로 이동
             </Link>
           </div>

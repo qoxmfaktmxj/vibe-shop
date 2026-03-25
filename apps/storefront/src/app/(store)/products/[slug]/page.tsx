@@ -58,12 +58,12 @@ export default async function ProductPage({
             </div>
 
             <div>
-              <div className="flex items-start justify-between gap-4">
-                <div>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0">
                   <p className="display-eyebrow">{product.categoryName}</p>
-                  <h1 className="display-heading mt-4 text-[clamp(2.2rem,10vw,4rem)]">{product.name}</h1>
+                  <h1 className="display-heading mt-4 break-words text-[clamp(2.2rem,10vw,4rem)]">{product.name}</h1>
                 </div>
-                <span className="rounded-[999px] border border-[var(--line)] bg-[rgba(255,255,255,0.88)] px-3 py-1 text-xs font-semibold text-[var(--ink)]">
+                <span className="shrink-0 rounded-[999px] border border-[var(--line)] bg-[rgba(255,255,255,0.88)] px-3 py-1 text-xs font-semibold text-[var(--ink)]">
                   {product.badge}
                 </span>
               </div>
@@ -84,7 +84,7 @@ export default async function ProductPage({
 
               <div className="mt-8 rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.76)] p-5 sm:mt-10 sm:rounded-[28px] sm:p-6">
                 <p className="text-sm tracking-[0.18em] text-[var(--ink-soft)]">구매 요약</p>
-                <div className="mt-5 grid gap-4 text-sm text-[var(--ink-soft)] sm:grid-cols-3">
+                <div className="mt-5 grid gap-4 text-sm text-[var(--ink-soft)] sm:grid-cols-2 md:grid-cols-3">
                   <div>
                     <p className="font-semibold">가격</p>
                     <p className="mt-2 text-lg font-semibold text-[var(--ink)]">{formatPrice(product.price)}원</p>

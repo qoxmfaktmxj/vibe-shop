@@ -558,9 +558,9 @@ export function CheckoutForm() {
 
           <div className="mt-6 space-y-3 text-sm">
             {items.map((item) => (
-              <div key={item.productId} className="flex items-start justify-between gap-4 rounded-[20px] bg-white/72 px-4 py-3">
-                <div>
-                  <p className="font-semibold text-[var(--ink)]">{item.name}</p>
+              <div key={item.productId} className="flex flex-col gap-3 rounded-[20px] bg-white/72 px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0">
+                  <p className="break-words font-semibold text-[var(--ink)]">{item.name}</p>
                   <p className="mt-1 text-[var(--ink-soft)]">수량 {item.quantity}</p>
                 </div>
                 <span className="font-medium text-[var(--ink)]">
@@ -606,7 +606,7 @@ export function CheckoutForm() {
 
       <div className="fixed inset-x-4 bottom-[max(16px,env(safe-area-inset-bottom))] z-40 lg:hidden">
         <div className="rounded-[22px] border border-[var(--line)] bg-[rgba(255,255,255,0.96)] p-4 shadow-[0_24px_60px_rgba(12,16,24,0.18)] backdrop-blur">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ink-soft)]">
                 총 결제 금액
@@ -619,7 +619,7 @@ export function CheckoutForm() {
               type="submit"
               form={CHECKOUT_FORM_ID}
               disabled={isPending}
-              className="button-primary min-w-[10rem] px-5 py-4 disabled:opacity-60"
+              className="button-primary w-full min-w-0 px-5 py-4 disabled:opacity-60 sm:w-auto sm:flex-1"
             >
               {isPending ? "처리 중" : "바로 주문"}
             </button>

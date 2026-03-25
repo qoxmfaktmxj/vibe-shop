@@ -204,6 +204,11 @@ textarea::placeholder {
   outline-offset: 2px;
 }
 
+.text-wrap-safe {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .hero-gradient {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dim) 100%);
 }

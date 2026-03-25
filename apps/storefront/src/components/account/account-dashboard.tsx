@@ -455,7 +455,7 @@ export function AccountDashboard({
               <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-[var(--line)] bg-[rgba(255,255,255,0.82)] text-xl font-semibold text-[var(--ink)] sm:h-20 sm:w-20 sm:text-3xl">
                 {initials}
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="display-eyebrow">내 계정</p>
                 <h1 className="display-heading mt-4 text-4xl">내 계정</h1>
                 <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--ink-soft)] sm:text-base sm:leading-8">
@@ -511,8 +511,8 @@ export function AccountDashboard({
         </article>
 
         <article id="account-profile" className="surface-card rounded-[32px] p-6 sm:rounded-[36px] sm:p-8 lg:p-10">
-          <div className="flex items-end justify-between gap-4">
-            <div>
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="min-w-0">
               <p className="display-eyebrow">기본 정보</p>
               <h2 className="display-heading mt-4 text-3xl">기본 정보</h2>
             </div>
@@ -557,7 +557,7 @@ export function AccountDashboard({
             </div>
             <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-4 sm:p-5">
               <p className="display-eyebrow">이메일</p>
-              <p className="mt-3 text-sm text-[var(--ink-soft)]">{profile.email}</p>
+              <p className="mt-3 break-all text-sm text-[var(--ink-soft)]">{profile.email}</p>
             </div>
             <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-4 sm:p-5">
               <p className="display-eyebrow">가입 방식</p>
@@ -569,8 +569,8 @@ export function AccountDashboard({
 
       <section className="grid gap-6 xl:grid-cols-[1.02fr_0.98fr]">
         <article className="surface-card rounded-[32px] p-6 sm:rounded-[36px] sm:p-8 lg:p-10">
-          <div className="flex items-end justify-between gap-4">
-            <div>
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="min-w-0">
               <p className="display-eyebrow">최근 주문</p>
               <h2 className="display-heading mt-4 text-3xl">최근 주문</h2>
             </div>
@@ -585,8 +585,8 @@ export function AccountDashboard({
                   className="block rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 transition hover:-translate-y-[2px] hover:border-[var(--ink)]"
                 >
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <p className="text-base font-semibold sm:text-lg">{order.orderNumber}</p>
+                    <div className="min-w-0">
+                      <p className="break-all text-base font-semibold sm:text-lg">{order.orderNumber}</p>
                       <p className="mt-2 text-sm text-[var(--ink-soft)]">
                         {new Date(order.createdAt).toLocaleDateString("ko-KR")} · {order.customerName}
                       </p>
@@ -605,8 +605,8 @@ export function AccountDashboard({
         </article>
 
         <article id="account-addresses" className="surface-card rounded-[32px] p-6 sm:rounded-[36px] sm:p-8 lg:p-10">
-          <div className="flex items-end justify-between gap-4">
-            <div>
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="min-w-0">
               <p className="display-eyebrow">배송지</p>
               <h2 className="display-heading mt-4 text-3xl">기본 배송지</h2>
             </div>
@@ -633,7 +633,7 @@ export function AccountDashboard({
                 <p className="mt-2 text-sm text-[var(--ink-soft)]">
                   {defaultAddress.recipientName} · {defaultAddress.phone}
                 </p>
-                <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">
+                <p className="mt-2 break-words text-sm leading-7 text-[var(--ink-soft)]">
                   ({defaultAddress.postalCode}) {defaultAddress.address1}
                   {defaultAddress.address2 ? `, ${defaultAddress.address2}` : ""}
                 </p>
@@ -661,9 +661,9 @@ export function AccountDashboard({
                     key={address.id}
                     className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.62)] p-4 sm:p-5"
                   >
-                    <p className="text-base font-semibold">{address.label}</p>
+                    <p className="break-words text-base font-semibold">{address.label}</p>
                     <p className="mt-2 text-sm text-[var(--ink-soft)]">{address.recipientName}</p>
-                    <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">
+                    <p className="mt-2 break-words text-sm leading-7 text-[var(--ink-soft)]">
                       ({address.postalCode}) {address.address1}
                     </p>
                     <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -689,7 +689,7 @@ export function AccountDashboard({
           {addressManagerOpen ? (
             <div id="account-address-manager" className="mt-8 space-y-4 border-t border-[var(--line)] pt-8">
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-                <div>
+                <div className="min-w-0">
                   <p className="display-eyebrow">관리</p>
                   <h3 className="mt-3 text-xl font-semibold">배송지 관리</h3>
                 </div>
@@ -704,9 +704,9 @@ export function AccountDashboard({
                       className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-4 sm:p-5"
                     >
                       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                        <div>
+                        <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
-                            <p className="text-base font-semibold">{address.label}</p>
+                            <p className="break-words text-base font-semibold">{address.label}</p>
                             {address.isDefault ? (
                               <span className="rounded-full bg-[rgba(28,107,81,0.12)] px-3 py-1 text-xs font-semibold text-[var(--secondary)]">
                                 기본 배송지
@@ -716,7 +716,7 @@ export function AccountDashboard({
                           <p className="mt-2 text-sm text-[var(--ink-soft)]">
                             {address.recipientName} · {address.phone}
                           </p>
-                          <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">
+                          <p className="mt-2 break-words text-sm leading-7 text-[var(--ink-soft)]">
                             ({address.postalCode}) {address.address1}
                             {address.address2 ? `, ${address.address2}` : ""}
                           </p>
@@ -751,7 +751,7 @@ export function AccountDashboard({
 
               <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5 sm:p-6">
                 <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-                  <div>
+                  <div className="min-w-0">
                     <p className="display-eyebrow">입력 폼</p>
                     <h3 className="mt-3 text-xl font-semibold">
                       {editingAddressId ? "배송지 수정" : "새 배송지 추가"}
@@ -841,8 +841,8 @@ export function AccountDashboard({
 
       <section className="grid gap-6 lg:grid-cols-2">
         <article className="surface-card rounded-[32px] p-6 sm:rounded-[36px] sm:p-8 lg:p-10">
-          <div className="flex items-end justify-between gap-4">
-            <div>
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="min-w-0">
               <p className="display-eyebrow">찜한 상품</p>
               <h2 className="display-heading mt-4 text-3xl">찜한 상품</h2>
             </div>
@@ -858,12 +858,12 @@ export function AccountDashboard({
                   <Link href={`/products/${item.slug}`} className="relative min-h-[180px] overflow-hidden rounded-[24px] sm:min-h-[140px]">
                     <Image src={item.imageUrl} alt={item.imageAlt} fill sizes="120px" className="object-cover" />
                   </Link>
-                  <div>
+                  <div className="min-w-0">
                     <p className="display-eyebrow">{item.categoryName}</p>
-                    <Link href={`/products/${item.slug}`} className="mt-2 block text-xl font-semibold">
+                    <Link href={`/products/${item.slug}`} className="mt-2 block break-words text-xl font-semibold">
                       {item.name}
                     </Link>
-                    <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">{item.summary}</p>
+                    <p className="mt-2 break-words text-sm leading-7 text-[var(--ink-soft)]">{item.summary}</p>
                     <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                       <p className="text-base font-semibold sm:text-lg">{formatPrice(item.price)}원</p>
                       <div className="flex flex-col gap-3 sm:flex-row">
@@ -892,8 +892,8 @@ export function AccountDashboard({
         </article>
 
         <article className="surface-card rounded-[32px] p-6 sm:rounded-[36px] sm:p-8 lg:p-10">
-          <div className="flex items-end justify-between gap-4">
-            <div>
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="min-w-0">
               <p className="display-eyebrow">내 리뷰</p>
               <h2 className="display-heading mt-4 text-3xl">내 리뷰</h2>
             </div>
@@ -918,10 +918,10 @@ export function AccountDashboard({
                         />
                       </Link>
 
-                      <div>
+                      <div className="min-w-0">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                          <div>
-                            <Link href={`/products/${review.productSlug}`} className="text-base font-semibold sm:text-lg">
+                          <div className="min-w-0">
+                            <Link href={`/products/${review.productSlug}`} className="break-words text-base font-semibold sm:text-lg">
                               {review.productName}
                             </Link>
                             <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-[var(--ink-soft)]">
@@ -1011,8 +1011,8 @@ export function AccountDashboard({
                           </div>
                         ) : (
                           <>
-                            <p className="mt-4 text-base font-semibold">{review.title}</p>
-                            <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">{review.content}</p>
+                            <p className="mt-4 break-words text-base font-semibold">{review.title}</p>
+                            <p className="mt-2 break-words text-sm leading-7 text-[var(--ink-soft)]">{review.content}</p>
                             <div className="mt-4 flex flex-wrap gap-2 text-xs text-[var(--ink-soft)]">
                               {review.buyerReview ? (
                                 <span className="rounded-full border border-[var(--line)] px-3 py-1">실구매 리뷰</span>
