@@ -190,6 +190,10 @@ export function AccountDashboard({
     () => addresses.filter((address) => address.id !== defaultAddress?.id).slice(0, 2),
     [addresses, defaultAddress],
   );
+  const hiddenAddressCount = Math.max(
+    0,
+    addresses.length - (defaultAddress ? 1 : 0) - additionalAddresses.length,
+  );
   const wishlistPreview = wishlist.slice(0, 4);
   const reviewPreview = reviews.slice(0, 3);
   const initials = profile.name.trim().charAt(0) || "M";
@@ -206,7 +210,24 @@ export function AccountDashboard({
 
   const resetAddressEditor = () => {
     setEditingAddressId(null);
-    setAddressDraft(EMPTY_ADDRESS_FORM);
+    setAddressDraft({
+      ...EMPTY_ADDRESS_FORM,
+      isDefault: addresses.length === 0,
+    });
+  };
+
+  const beginAddressEdit = (address: ShippingAddress) => {
+    setEditingAddressId(address.id);
+    setAddressDraft({
+      label: address.label,
+      recipientName: address.recipientName,
+      phone: address.phone,
+      postalCode: address.postalCode,
+      address1: address.address1,
+      address2: address.address2,
+      isDefault: address.isDefault,
+    });
+    setAddressManagerOpen(true);
   };
 
   const handleProfileSave = () => {
@@ -316,7 +337,7 @@ export function AccountDashboard({
       postalCode: addressDraft.postalCode.trim(),
       address1: addressDraft.address1.trim(),
       address2: addressDraft.address2.trim(),
-      isDefault: addressDraft.isDefault,
+      isDefault: addresses.length === 0 ? true : addressDraft.isDefault,
     };
 
     if (!payload.label || !payload.recipientName || !payload.phone || !payload.postalCode || !payload.address1) {
@@ -367,6 +388,36 @@ export function AccountDashboard({
       } catch (error) {
         console.error(error);
         setFeedback("배송지 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+      } finally {
+        setAddressPendingId(null);
+      }
+    });
+  };
+
+
+  const handleAddressSetDefault = (address: ShippingAddress) => {
+    if (address.isDefault) {
+      return;
+    }
+
+    setFeedback(null);
+    setAddressPendingId(address.id);
+    startTransition(async () => {
+      try {
+        const saved = await updateShippingAddress(address.id, {
+          label: address.label,
+          recipientName: address.recipientName,
+          phone: address.phone,
+          postalCode: address.postalCode,
+          address1: address.address1,
+          address2: address.address2,
+          isDefault: true,
+        });
+        setAddresses((current) => upsertAddress(current, saved));
+        setFeedback("기본 배송지를 변경했습니다.");
+      } catch (error) {
+        console.error(error);
+        setFeedback("기본 배송지 변경에 실패했습니다. 잠시 후 다시 시도해 주세요.");
       } finally {
         setAddressPendingId(null);
       }
@@ -561,6 +612,12 @@ export function AccountDashboard({
                   ({defaultAddress.postalCode}) {defaultAddress.address1}
                   {defaultAddress.address2 ? `, ${defaultAddress.address2}` : ""}
                 </p>
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                  <QuickActionButton onClick={() => beginAddressEdit(defaultAddress)}>
+                    기본 배송지 수정
+                  </QuickActionButton>
+                  <QuickActionButton onClick={openAddressManager}>전체 배송지 보기</QuickActionButton>
+                </div>
               </article>
             ) : (
               <EmptyState>
@@ -580,8 +637,22 @@ export function AccountDashboard({
                     <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">
                       ({address.postalCode}) {address.address1}
                     </p>
+                    <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                      <QuickActionButton onClick={() => handleAddressSetDefault(address)}>
+                        기본으로 설정
+                      </QuickActionButton>
+                      <QuickActionButton onClick={() => beginAddressEdit(address)}>
+                        수정
+                      </QuickActionButton>
+                    </div>
                   </article>
                 ))}
+              </div>
+            ) : null}
+
+            {hiddenAddressCount > 0 ? (
+              <div className="rounded-[20px] border border-dashed border-[var(--line-strong)] bg-[rgba(255,255,255,0.5)] px-4 py-4 text-sm text-[var(--ink-soft)]">
+                추가 배송지 {hiddenAddressCount}개가 더 있습니다. 배송지 관리에서 전체 목록을 확인하고 기본 배송지를 바로 바꿀 수 있습니다.
               </div>
             ) : null}
           </div>
@@ -629,21 +700,17 @@ export function AccountDashboard({
                           </p>
                         </div>
                         <div className="flex flex-wrap gap-3">
+                          {!address.isDefault ? (
+                            <QuickActionButton
+                              disabled={addressPendingId === address.id}
+                              onClick={() => handleAddressSetDefault(address)}
+                            >
+                              기본으로 설정
+                            </QuickActionButton>
+                          ) : null}
                           <QuickActionButton
                             disabled={addressPendingId === address.id}
-                            onClick={() => {
-                              setEditingAddressId(address.id);
-                              setAddressDraft({
-                                label: address.label,
-                                recipientName: address.recipientName,
-                                phone: address.phone,
-                                postalCode: address.postalCode,
-                                address1: address.address1,
-                                address2: address.address2,
-                                isDefault: address.isDefault,
-                              });
-                              setAddressManagerOpen(true);
-                            }}
+                            onClick={() => beginAddressEdit(address)}
                           >
                             수정
                           </QuickActionButton>
@@ -716,7 +783,13 @@ export function AccountDashboard({
                   />
                 </div>
 
-                <label className="mt-5 flex items-center gap-3 text-sm text-[var(--ink-soft)]">
+                <p className="mt-5 text-sm leading-7 text-[var(--ink-soft)]">
+                  {addresses.length === 0
+                    ? "첫 배송지는 자동으로 기본 배송지로 저장됩니다."
+                    : "기본 배송지로 저장하면 다음 주문서에서 가장 먼저 불러옵니다."}
+                </p>
+
+                <label className="mt-4 flex items-center gap-3 text-sm text-[var(--ink-soft)]">
                   <input
                     type="checkbox"
                     checked={addressDraft.isDefault}
