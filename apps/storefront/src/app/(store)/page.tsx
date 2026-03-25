@@ -66,9 +66,19 @@ export default async function HomePage() {
     items: [],
   };
   const emptyRecentlyViewed: Awaited<ReturnType<typeof getRecentlyViewed>> = { items: [] };
+  const emptyHome = {
+    heroTitle: "",
+    heroSubtitle: "",
+    heroCtaLabel: "",
+    displaySections: [],
+    featuredCategories: [],
+    curatedPicks: [],
+    newArrivals: [],
+    bestSellers: [],
+  } as Awaited<ReturnType<typeof getHomeData>>;
   const [home, recentlyViewed, recentlyViewedRecommendations, homeRecommendations] =
     await Promise.all([
-      getHomeData(),
+      getHomeData().catch(() => emptyHome),
       getRecentlyViewed().catch(() => emptyRecentlyViewed),
       getRecentlyViewedRecommendations().catch(() => emptyCollection),
       getHomeRecommendations().catch(() => emptyCollection),
