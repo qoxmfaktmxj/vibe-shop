@@ -1,9 +1,21 @@
 import { ProductCard } from "@/components/catalog/product-card";
 import type { RecommendationCollection } from "@/lib/contracts";
 
+function normalizeBadge(reasonLabel: string, fallbackBadge: string) {
+  if (!reasonLabel) {
+    return fallbackBadge;
+  }
+
+  if (reasonLabel.includes("BEST")) {
+    return "실시간 인기";
+  }
+
+  return reasonLabel;
+}
+
 export function RecommendationShelf({
   collection,
-  eyebrow = "Recommendations",
+  eyebrow = "추천 상품",
 }: {
   collection: RecommendationCollection;
   eyebrow?: string;
@@ -18,7 +30,7 @@ export function RecommendationShelf({
         <div>
           <p className="display-eyebrow">{eyebrow}</p>
           <h2 className="display-heading mt-3 text-3xl text-[var(--ink)] sm:text-4xl">
-            {collection.title}
+            {collection.title || "추천 상품"}
           </h2>
         </div>
         <p className="max-w-2xl text-sm leading-7 text-[var(--ink-soft)]">{collection.subtitle}</p>
@@ -26,15 +38,13 @@ export function RecommendationShelf({
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {collection.items.map((product) => (
-          <div key={product.id} className="space-y-3">
-            <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.76)] px-4 py-3">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">
-                {product.reasonLabel}
-              </p>
-              <p className="mt-2 text-sm leading-6 text-[var(--ink-soft)]">{product.reasonDetail}</p>
-            </div>
-            <ProductCard product={product} />
-          </div>
+          <ProductCard
+            key={product.id}
+            product={{
+              ...product,
+              badge: normalizeBadge(product.reasonLabel, product.badge),
+            }}
+          />
         ))}
       </div>
     </section>

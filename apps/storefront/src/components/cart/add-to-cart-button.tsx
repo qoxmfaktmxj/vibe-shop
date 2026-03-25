@@ -30,9 +30,9 @@ export function AddToCartButton({ product }: { product: CartProduct }) {
         setAdded(true);
         window.setTimeout(() => setAdded(false), 1400);
       }}
-      className={`${added ? "button-secondary" : "button-hot"} px-4 py-3 text-[11px] disabled:cursor-not-allowed disabled:opacity-70`}
+      className={`${added ? "button-secondary" : "button-hot"} min-w-[7.75rem] px-4 py-3 text-[11px] disabled:cursor-not-allowed disabled:opacity-70`}
     >
-      {added ? "담기 완료" : isPending ? "담는 중..." : "Add to Bag"}
+      {added ? "담기 완료" : isPending ? "담는 중..." : "장바구니 담기"}
     </button>
   );
 }

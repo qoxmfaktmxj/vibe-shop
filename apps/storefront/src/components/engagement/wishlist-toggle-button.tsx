@@ -41,13 +41,13 @@ export function WishlistToggleButton({
   const classes =
     size === "detail"
       ? "button-secondary inline-flex items-center gap-2 px-4 py-3"
-      : "inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-[rgba(255,255,255,0.84)] text-[var(--ink)] shadow-[var(--shadow-soft)] backdrop-blur-sm";
+      : "inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-[rgba(255,255,255,0.94)] text-[var(--ink)] shadow-[var(--shadow-soft)] backdrop-blur-sm";
 
   return (
     <div className="grid gap-2">
       <button
         type="button"
-        aria-label={wishlisted ? "찜 해제" : "찜 추가"}
+        aria-label={wishlisted ? "찜 취소" : "찜하기"}
         disabled={isPending}
         onClick={() => {
           if (!session.authenticated) {
@@ -56,17 +56,29 @@ export function WishlistToggleButton({
             return;
           }
 
+          const nextWishlisted = !wishlisted;
           setError("");
+          setWishlisted(nextWishlisted);
+          onChange?.(nextWishlisted);
+
           startTransition(() => {
             void (async () => {
               try {
-                const nextState = wishlisted
-                  ? await removeWishlistItem(productId)
-                  : await addWishlistItem(productId);
-                setWishlisted(nextState.wishlisted);
-                onChange?.(nextState.wishlisted);
+                const nextState = nextWishlisted
+                  ? await addWishlistItem(productId)
+                  : await removeWishlistItem(productId);
+                const nextValue =
+                  typeof nextState.wishlisted === "boolean" ? nextState.wishlisted : nextWishlisted;
+                setWishlisted(nextValue);
+                onChange?.(nextValue);
               } catch (nextError) {
-                setError(nextError instanceof Error ? nextError.message : "찜 처리 중 문제가 발생했습니다.");
+                setWishlisted(!nextWishlisted);
+                onChange?.(!nextWishlisted);
+                setError(
+                  nextError instanceof Error
+                    ? nextError.message
+                    : "요청 처리에 실패했습니다.",
+                );
               }
             })();
           });
@@ -74,7 +86,7 @@ export function WishlistToggleButton({
         className={`${classes} ${wishlisted ? "text-[var(--primary)]" : ""} disabled:opacity-60`}
       >
         <HeartIcon active={wishlisted} />
-        {size === "detail" ? <span>{wishlisted ? "찜한 상품" : "찜하기"}</span> : null}
+        {size === "detail" ? <span>{wishlisted ? "찜 취소" : "찜하기"}</span> : null}
       </button>
       {error ? <p className="text-xs text-red-600">{error}</p> : null}
     </div>
