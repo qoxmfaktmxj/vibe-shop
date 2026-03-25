@@ -46,6 +46,9 @@ export function GuestOrderLookupForm({ initialOrderNumber = "" }: { initialOrder
           }
           className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,255,0.9)] px-4 py-3"
         />
+        <span className="text-xs leading-5 text-[var(--ink-soft)]">
+          주문 완료 화면 상단과 주문 확인 메일에서 확인할 수 있습니다.
+        </span>
       </label>
 
       <label className="grid gap-2">
