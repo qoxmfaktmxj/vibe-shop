@@ -13,11 +13,11 @@ function getBadgeLabel(badge: string) {
   }
 
   if (badge === "BEST") {
-    return "실시간 인기";
+    return "베스트";
   }
 
   if (badge === "DAILY") {
-    return "데일리 PICK";
+    return "데일리 픽";
   }
 
   return badge;

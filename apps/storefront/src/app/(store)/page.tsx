@@ -16,8 +16,8 @@ import {
 
 const SEARCH_CHIPS = ["여름", "리빙", "키친", "웰니스", "신상품", "베스트"];
 
-const MAIN_DISPLAY_TITLE = "나만의 디자인을 완성하세요";
-const MAIN_DISPLAY_SUBTITLE = "취향에 맞는 오브제로 시작하는 쇼핑, 지금 바로 둘러보세요.";
+const MAIN_DISPLAY_TITLE = "지금 머무는 공간에 어울리는 셀렉션";
+const MAIN_DISPLAY_SUBTITLE = "취향에 맞는 오브제로 시작하는 쇼핑, 한 번에 둘러보세요.";
 
 const MAIN_BAD_COPY_PATTERNS = [
   "운영자가 직접 수정한 메인 카피입니다.",
@@ -26,7 +26,7 @@ const MAIN_BAD_COPY_PATTERNS = [
 ];
 
 const FEATURED_CATEGORY_TITLE = "카테고리 셀렉션";
-const FEATURED_CATEGORY_SUBTITLE = "운영 중인 주요 카테고리를 전면에서 소개합니다.";
+const FEATURED_CATEGORY_SUBTITLE = "운영 중인 주요 카테고리를 편하게 살펴볼 수 있도록 구성했습니다.";
 
 const DEFAULT_EYEBROW_BAD_COPY = ["추천 상품", "실시간 인기"];
 
@@ -93,10 +93,10 @@ export default async function HomePage() {
         <div className="surface-card editorial-shadow rounded-[40px] border border-[var(--line)] p-8 sm:p-10 lg:p-12">
           <div className="flex flex-wrap items-center gap-3">
             <span className="rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ink-soft)]">
-              Curated Home
+              큐레이션 홈
             </span>
             <span className="rounded-full bg-[var(--secondary-soft)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--secondary)]">
-              Living Atelier
+              리빙 아틀리에
             </span>
           </div>
 
@@ -166,15 +166,13 @@ export default async function HomePage() {
             <div className="relative flex h-full min-h-[40rem] flex-col justify-between p-8 sm:p-10 lg:p-12">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="display-eyebrow text-white/70">
-                    {heroBanner ? "기획전" : "큐레이션"}
-                  </p>
+                  <p className="display-eyebrow text-white/70">{heroBanner ? "기획전" : "큐레이션"}</p>
                   <p className="mt-3 max-w-xs text-sm leading-7 text-white/72">
-                    오늘의 하이라이트를 한눈에 확인해보세요.
+                    오늘의 하이라이트를 한눈에 살펴보세요.
                   </p>
                 </div>
                 <div className="rounded-full border border-white/16 bg-white/8 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-white backdrop-blur-sm">
-                  MARU Select
+                  마루 셀렉트
                 </div>
               </div>
 
@@ -183,12 +181,12 @@ export default async function HomePage() {
                   {sectionValue(heroSection, "title", heroBanner ? "기획전" : "큐레이션")}
                 </p>
                 <h2 className="mt-4 text-[clamp(2.5rem,5vw,4rem)] font-light leading-[0.94]">
-                  {normalizeCopy(heroBanner?.title || heroProduct?.name || "", "추천 상품")}
+                  {normalizeCopy(heroBanner?.title || heroProduct?.name || "", "오늘의 추천")}
                 </h2>
                 <p className="mt-4 text-sm leading-8 text-white/78">
                   {normalizeCopy(
                     heroBanner?.subtitle || heroProduct?.summary || "",
-                    "매일 사용하는 장소에서 오늘의 스타일을 완성해보세요.",
+                    "매일 사용하는 공간에 자연스럽게 어울리는 구성을 제안합니다.",
                   )}
                 </p>
                 <div className="mt-8 flex flex-wrap items-center gap-4">
@@ -196,7 +194,7 @@ export default async function HomePage() {
                     href={heroBanner?.href ?? `/products/${heroProduct?.slug ?? ""}`}
                     className="inline-flex items-center justify-center rounded-full bg-white px-6 py-4 text-sm font-semibold text-black transition hover:-translate-y-[1px]"
                   >
-                    {normalizeCopy(heroBanner?.ctaLabel || home.heroCtaLabel, "상품 보기")}
+                    {normalizeCopy(heroBanner?.ctaLabel || home.heroCtaLabel, "둘러보기")}
                   </Link>
                   {heroProduct ? (
                     <p className="text-base font-semibold text-white/88">
@@ -214,7 +212,7 @@ export default async function HomePage() {
         <section className="space-y-6">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="display-eyebrow">카테고리 셀렉션</p>
+              <p className="display-eyebrow">카테고리</p>
               <h2 className="display-heading mt-3 text-4xl">
                 {sectionValue(featuredCategorySection, "title", FEATURED_CATEGORY_TITLE)}
               </h2>
@@ -249,7 +247,7 @@ export default async function HomePage() {
                       {category.heroSubtitle || category.description}
                     </p>
                     <span className="mt-5 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/84">
-                      카테고리 보기
+                      자세히 보기
                       <span aria-hidden>+</span>
                     </span>
                   </div>
@@ -264,7 +262,7 @@ export default async function HomePage() {
         <section className="space-y-6">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="display-eyebrow">엄선 상품</p>
+              <p className="display-eyebrow">추천 상품</p>
               <h2 className="display-heading mt-3 text-4xl">
                 {sectionValue(curatedSection, "title", "추천 상품")}
               </h2>
@@ -281,14 +279,14 @@ export default async function HomePage() {
       <RecentlyViewedShelf recentlyViewed={recentlyViewed} />
       <RecommendationShelf
         collection={recentlyViewed.items.length > 0 ? recentlyViewedRecommendations : homeRecommendations}
-        eyebrow={recentlyViewed.items.length > 0 ? "이어보기" : "추천 상품"}
+        eyebrow={recentlyViewed.items.length > 0 ? "다시 보기" : "추천 상품"}
       />
 
       {promotionSection?.visible && promotionSection.items.length > 0 ? (
         <section className="space-y-6">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="display-eyebrow">추천 이벤트</p>
+              <p className="display-eyebrow">기획전</p>
               <h2 className="display-heading mt-3 text-4xl">
                 {sectionValue(promotionSection, "title", "진행 중인 기획전")}
               </h2>
@@ -332,13 +330,13 @@ export default async function HomePage() {
         <section className="space-y-6">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="display-eyebrow">신상품</p>
+              <p className="display-eyebrow">새로 들어온 상품</p>
               <h2 className="display-heading mt-3 text-4xl">
                 {sectionValue(newestSection, "title", "신상품")}
               </h2>
             </div>
             <p className="max-w-xl text-sm leading-7 text-[var(--ink-soft)]">
-              {sectionValue(newestSection, "subtitle", "지금 막 입고된 상품들을 만나보세요.")}
+              {sectionValue(newestSection, "subtitle", "지금 막 들어온 상품들을 편하게 둘러보세요.")}
             </p>
           </div>
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">

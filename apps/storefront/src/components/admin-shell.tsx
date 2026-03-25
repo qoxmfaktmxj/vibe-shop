@@ -56,8 +56,7 @@ export function AdminShell({
                 startLoggingOut(() => {
                   void (async () => {
                     await signOut();
-                    router.push("/admin/login");
-                    router.refresh();
+                    router.replace("/admin/login");
                   })();
                 })
               }

@@ -7,7 +7,7 @@ function normalizeBadge(reasonLabel: string, fallbackBadge: string) {
   }
 
   if (reasonLabel.includes("BEST")) {
-    return "?ㅼ떆媛??멸린";
+    return "베스트";
   }
 
   return reasonLabel;
@@ -15,7 +15,7 @@ function normalizeBadge(reasonLabel: string, fallbackBadge: string) {
 
 export function RecommendationShelf({
   collection,
-  eyebrow = "異붿쿇 ?곹뭹",
+  eyebrow = "추천 상품",
 }: {
   collection: RecommendationCollection;
   eyebrow?: string;
@@ -30,7 +30,7 @@ export function RecommendationShelf({
         <div>
           <p className="display-eyebrow">{eyebrow}</p>
           <h2 className="display-heading mt-3 text-3xl text-[var(--ink)] sm:text-4xl">
-            {collection.title || "異붿쿇 ?곹뭹"}
+            {collection.title || "추천 상품"}
           </h2>
         </div>
       </div>

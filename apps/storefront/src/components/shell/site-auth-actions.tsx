@@ -28,8 +28,7 @@ export function SiteAuthActions() {
         onClick={() => {
           startTransition(async () => {
             await signOut();
-            router.push("/");
-            router.refresh();
+            router.replace("/");
           });
         }}
         aria-label="Logout"
