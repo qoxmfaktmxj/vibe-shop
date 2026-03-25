@@ -195,12 +195,12 @@ public class CatalogService {
 
         OffsetDateTime current = now();
         return displaySectionRepository.saveAll(List.of(
-            new DisplaySection(DisplaySectionCode.HERO, "메인 배너", "메인 비주얼과 CTA를 함께 보여주는 영역입니다.", 10, true, current),
+            new DisplaySection(DisplaySectionCode.HERO, "메인 배너", "메인 비주얼과 CTA를 함께 보여줍니다.", 10, true, current),
             new DisplaySection(DisplaySectionCode.FEATURED_CATEGORY, "카테고리 셀렉션", "운영 중인 주요 카테고리를 전면에서 소개합니다.", 20, true, current),
-            new DisplaySection(DisplaySectionCode.CURATED_PICK, "큐레이션 픽", "지금 보여주기 좋은 추천 상품을 모아둔 영역입니다.", 30, true, current),
+            new DisplaySection(DisplaySectionCode.CURATED_PICK, "추천 상품", "지금 보여주기 좋은 상품을 모아 보여줍니다.", 30, true, current),
             new DisplaySection(DisplaySectionCode.NEW_ARRIVALS, "신상품", "최근 등록된 상품을 먼저 보여줍니다.", 40, true, current),
-            new DisplaySection(DisplaySectionCode.BEST_SELLERS, "베스트셀러", "인기와 수요가 높은 상품을 중심으로 구성합니다.", 50, true, current),
-            new DisplaySection(DisplaySectionCode.PROMOTION, "프로모션", "기획전과 프로모션 링크를 노출합니다.", 60, true, current)
+            new DisplaySection(DisplaySectionCode.BEST_SELLERS, "인기 상품", "인기와 반응이 좋은 상품을 중심으로 구성합니다.", 50, true, current),
+            new DisplaySection(DisplaySectionCode.PROMOTION, "기획전", "기획전과 프로모션 링크를 함께 보여줍니다.", 60, true, current)
         ));
     }
 

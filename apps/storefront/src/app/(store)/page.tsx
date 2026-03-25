@@ -70,6 +70,7 @@ export default async function HomePage() {
     heroTitle: "",
     heroSubtitle: "",
     heroCtaLabel: "",
+    heroCtaHref: "",
     displaySections: [],
     featuredCategories: [],
     curatedPicks: [],

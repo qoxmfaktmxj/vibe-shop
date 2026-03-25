@@ -13,6 +13,18 @@ function normalizeBadge(reasonLabel: string, fallbackBadge: string) {
   return reasonLabel;
 }
 
+function normalizeTitle(title: string) {
+  if (!title) {
+    return "추천 상품";
+  }
+
+  if (title.includes("반응") || title.includes("실시간 인기")) {
+    return "추천 상품";
+  }
+
+  return title;
+}
+
 export function RecommendationShelf({
   collection,
   eyebrow = "추천 상품",
@@ -30,7 +42,7 @@ export function RecommendationShelf({
         <div>
           <p className="display-eyebrow">{eyebrow}</p>
           <h2 className="display-heading mt-3 text-3xl text-[var(--ink)] sm:text-4xl">
-            {collection.title || "추천 상품"}
+            {normalizeTitle(collection.title)}
           </h2>
         </div>
       </div>
