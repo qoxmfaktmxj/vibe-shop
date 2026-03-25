@@ -258,7 +258,7 @@ export function CheckoutForm() {
 
   if (hydrated && items.length === 0) {
     return (
-      <div className="surface-card rounded-none p-8 text-center">
+      <div className="surface-card rounded-[24px] p-8 text-center">
         <p className="display-heading text-3xl">주문할 상품이 없습니다.</p>
         <p className="mt-3 text-sm text-[var(--ink-soft)]">
           장바구니에 상품을 담은 뒤 주문서를 작성해 주세요.
@@ -268,10 +268,10 @@ export function CheckoutForm() {
   }
 
   return (
-    <div className="pb-28 lg:pb-0">
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-start">
+    <div className="pb-[calc(7.5rem+env(safe-area-inset-bottom))] lg:pb-0">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-start lg:gap-6">
         <section className="space-y-6">
-          <article className="surface-card rounded-none p-6 sm:p-8">
+          <article className="surface-card rounded-[24px] p-5 sm:rounded-[28px] sm:p-8">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <p className="display-eyebrow">주문서</p>
@@ -292,18 +292,18 @@ export function CheckoutForm() {
               </div>
             </div>
 
-            <div className="mt-6 grid gap-3 md:grid-cols-3">
-              <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.76)] px-4 py-4">
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+              <div className="rounded-[20px] border border-[var(--line)] bg-[rgba(255,255,255,0.76)] px-4 py-4 sm:rounded-[24px]">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ink-soft)]">
-                  Customer
+                  주문 유형
                 </p>
                 <p className="mt-2 text-sm font-semibold text-[var(--ink)]">
                   {session.authenticated ? session.user?.email : "비회원 빠른 주문"}
                 </p>
               </div>
-              <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.76)] px-4 py-4">
+              <div className="rounded-[20px] border border-[var(--line)] bg-[rgba(255,255,255,0.76)] px-4 py-4 sm:rounded-[24px]">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ink-soft)]">
-                  Delivery
+                  배송지
                 </p>
                 <p className="mt-2 text-sm font-semibold text-[var(--ink)]">
                   {savedAddresses.length > 0
@@ -311,9 +311,9 @@ export function CheckoutForm() {
                     : "직접 입력 배송지"}
                 </p>
               </div>
-              <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.76)] px-4 py-4">
+              <div className="rounded-[20px] border border-[var(--line)] bg-[rgba(255,255,255,0.76)] px-4 py-4 sm:rounded-[24px]">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ink-soft)]">
-                  Payment
+                  결제 수단
                 </p>
                 <p className="mt-2 text-sm font-semibold text-[var(--ink)]">
                   {formatPaymentMethod(form.paymentMethod)}
@@ -324,7 +324,7 @@ export function CheckoutForm() {
 
           <form
             id={CHECKOUT_FORM_ID}
-            className="grid gap-6"
+            className="grid gap-5 sm:gap-6"
             onSubmit={(event) => {
               event.preventDefault();
               startTransition(async () => {
@@ -362,7 +362,7 @@ export function CheckoutForm() {
               });
             }}
           >
-            <article className="surface-card rounded-none p-6 sm:p-8">
+            <article className="surface-card rounded-[24px] p-5 sm:rounded-[28px] sm:p-8">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="display-eyebrow">연락처</p>
@@ -384,7 +384,7 @@ export function CheckoutForm() {
                     onChange={(event) =>
                       setForm((current) => ({ ...current, customerName: event.target.value }))
                     }
-                    className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,255,0.92)] px-4 py-3"
+                    className="rounded-[18px] border border-[var(--line)] bg-[rgba(255,255,255,0.92)] px-4 py-3 sm:rounded-2xl"
                   />
                 </label>
 
@@ -397,7 +397,7 @@ export function CheckoutForm() {
                     onChange={(event) =>
                       setForm((current) => ({ ...current, phone: event.target.value }))
                     }
-                    className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,255,0.92)] px-4 py-3"
+                    className="rounded-[18px] border border-[var(--line)] bg-[rgba(255,255,255,0.92)] px-4 py-3 sm:rounded-2xl"
                   />
                 </label>
               </div>
@@ -414,7 +414,7 @@ export function CheckoutForm() {
               )}
             </article>
 
-            <article className="surface-card rounded-none p-6 sm:p-8">
+            <article className="surface-card rounded-[24px] p-5 sm:rounded-[28px] sm:p-8">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="display-eyebrow">배송</p>
@@ -466,7 +466,7 @@ export function CheckoutForm() {
                     onChange={(event) =>
                       setForm((current) => ({ ...current, postalCode: event.target.value }))
                     }
-                    className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,255,0.92)] px-4 py-3"
+                    className="rounded-[18px] border border-[var(--line)] bg-[rgba(255,255,255,0.92)] px-4 py-3 sm:rounded-2xl"
                   />
                 </label>
                 <label className="grid gap-2">
@@ -477,7 +477,7 @@ export function CheckoutForm() {
                     onChange={(event) =>
                       setForm((current) => ({ ...current, address1: event.target.value }))
                     }
-                    className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,255,0.92)] px-4 py-3"
+                    className="rounded-[18px] border border-[var(--line)] bg-[rgba(255,255,255,0.92)] px-4 py-3 sm:rounded-2xl"
                   />
                 </label>
               </div>
@@ -489,7 +489,7 @@ export function CheckoutForm() {
                   onChange={(event) =>
                     setForm((current) => ({ ...current, address2: event.target.value }))
                   }
-                  className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,255,0.92)] px-4 py-3"
+                  className="rounded-[18px] border border-[var(--line)] bg-[rgba(255,255,255,0.92)] px-4 py-3 sm:rounded-2xl"
                 />
               </label>
 
@@ -501,12 +501,12 @@ export function CheckoutForm() {
                   onChange={(event) =>
                     setForm((current) => ({ ...current, note: event.target.value }))
                   }
-                  className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,255,0.92)] px-4 py-3"
+                  className="rounded-[18px] border border-[var(--line)] bg-[rgba(255,255,255,0.92)] px-4 py-3 sm:rounded-2xl"
                 />
               </label>
             </article>
 
-            <article className="surface-card rounded-none p-6 sm:p-8">
+            <article className="surface-card rounded-[24px] p-5 sm:rounded-[28px] sm:p-8">
               <div>
                 <p className="display-eyebrow">결제</p>
                 <h2 className="display-heading mt-3 text-2xl">결제 수단 선택</h2>
@@ -549,7 +549,7 @@ export function CheckoutForm() {
           </form>
         </section>
 
-        <aside className="surface-card rounded-none bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(241,239,233,0.86))] p-6 sm:p-8 lg:sticky lg:top-28">
+        <aside className="surface-card rounded-[24px] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(241,239,233,0.86))] p-5 sm:rounded-[28px] sm:p-8 lg:sticky lg:top-28">
           <p className="display-eyebrow">주문 확인</p>
           <h2 className="display-heading mt-3 text-2xl">최종 확인</h2>
           <p className="mt-3 text-sm leading-7 text-[var(--ink-soft)]">
@@ -604,12 +604,12 @@ export function CheckoutForm() {
         </aside>
       </div>
 
-      <div className="fixed inset-x-4 bottom-4 z-40 lg:hidden">
-        <div className="rounded-none border border-[var(--line)] bg-[rgba(255,255,255,0.96)] p-4 shadow-[0_24px_60px_rgba(12,16,24,0.18)] backdrop-blur">
+      <div className="fixed inset-x-4 bottom-[max(16px,env(safe-area-inset-bottom))] z-40 lg:hidden">
+        <div className="rounded-[22px] border border-[var(--line)] bg-[rgba(255,255,255,0.96)] p-4 shadow-[0_24px_60px_rgba(12,16,24,0.18)] backdrop-blur">
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ink-soft)]">
-                Total
+                총 결제 금액
               </p>
               <p className="mt-1 text-xl font-semibold text-[var(--ink)]">
                 {formatPrice(preview?.total ?? 0)}원

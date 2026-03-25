@@ -18,7 +18,7 @@ export function ProductSortTabs({
   currentSort: string;
 }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="no-scrollbar -mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1">
       {SORT_OPTIONS.map((option) => {
         const nextParams = new URLSearchParams();
         for (const [key, value] of Object.entries(searchParams)) {
@@ -33,18 +33,16 @@ export function ProductSortTabs({
           nextParams.delete("sort");
         }
 
-        const href = nextParams.toString()
-          ? `${pathname}?${nextParams.toString()}`
-          : pathname;
+        const href = nextParams.toString() ? `${pathname}?${nextParams.toString()}` : pathname;
 
         return (
           <Link
             key={option.value}
             href={href}
-            className={`rounded-2xl px-4 py-2 text-sm font-medium transition ${
+            className={`shrink-0 snap-start rounded-full px-4 py-2 text-sm font-medium transition ${
               currentSort === option.value
                 ? "border border-[var(--line-strong)] bg-[var(--ink)] !text-white shadow-[0_10px_24px_rgba(24,23,21,0.12)]"
-                : "border border-[var(--line)] bg-[rgba(255,255,255,0.84)] text-[var(--ink-soft)] hover:bg-[var(--surface-strong)]"
+                : "border border-[var(--line)] bg-[rgba(255,255,255,0.84)] text-[var(--ink-soft)] hover:bg-[var(--surface-high)]"
             }`}
           >
             {option.label}

@@ -2,8 +2,8 @@ import Link from "next/link";
 
 export function SiteFooter() {
   return (
-    <footer className="mt-24 bg-[var(--ink)]">
-      <div className="mx-auto grid w-full max-w-[1440px] gap-10 px-8 py-16 text-sm text-white lg:grid-cols-[1.4fr_0.8fr_0.8fr] lg:px-20">
+    <footer className="mt-20 bg-[var(--ink)] sm:mt-24">
+      <div className="page-container grid gap-10 py-14 text-sm text-white lg:grid-cols-[1.4fr_0.8fr_0.8fr] lg:py-16">
         <div className="space-y-5">
           <p
             className="text-base font-light tracking-[0.2em] uppercase text-white"
@@ -45,7 +45,7 @@ export function SiteFooter() {
             className="text-[10px] tracking-[0.3em] uppercase text-white"
             style={{ fontFamily: "var(--font-display), monospace" }}
           >
-            검색
+            바로가기
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -66,7 +66,7 @@ export function SiteFooter() {
         </div>
 
         <div className="text-xs text-white lg:col-span-3">
-          © 2026 MARU Digital Atelier. All rights reserved.
+          © 2026 MARU 디지털 아틀리에. 모든 권리 보유.
         </div>
       </div>
     </footer>

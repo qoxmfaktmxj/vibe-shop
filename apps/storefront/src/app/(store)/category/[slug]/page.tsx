@@ -58,7 +58,7 @@ export default async function CategoryPage({
 
       <section className="surface-card rounded-[36px] p-6 sm:p-8">
         <div className="max-w-3xl">
-          <p className="display-eyebrow">Search Studio</p>
+          <p className="display-eyebrow">카테고리 검색</p>
           <h2 className="display-heading mt-3 text-3xl">원하는 상품을 카테고리 안에서도 바로 찾아보세요.</h2>
           <p className="mt-4 text-sm leading-7 text-[var(--ink-soft)]">
             현재 카테고리를 유지한 채로 검색어를 바꾸면 다른 상품도 함께 확인할 수 있습니다.

@@ -19,18 +19,24 @@ export function SiteHeader({ categories = [] }: SiteHeaderProps) {
 
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-white/92 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-4 px-5 py-4 sm:px-8 lg:flex-row lg:items-center lg:justify-between lg:px-10">
-        <div className="flex flex-wrap items-center gap-4">
+      <div className="page-container flex flex-col gap-4 py-4">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <Link href="/" className="flex flex-col leading-none text-[var(--ink)]">
             <span className="text-xl font-semibold tracking-tight">Maru</span>
             <span className="mt-1 text-[10px] uppercase tracking-[0.28em] text-[var(--ink-soft)]">
-              Digital Atelier
+              디지털 아틀리에
             </span>
           </Link>
+
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 lg:justify-end">
+            <AccountHeaderButton />
+            <CartHeaderButton />
+            <SiteAuthActions />
+          </div>
         </div>
 
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6">
-          <nav aria-label="Primary" className="hidden md:flex md:items-center md:gap-5">
+        {links.length > 0 ? (
+          <nav aria-label="카테고리" className="hidden items-center gap-5 md:flex">
             {links.map((category) => (
               <a
                 key={category.id}
@@ -41,13 +47,7 @@ export function SiteHeader({ categories = [] }: SiteHeaderProps) {
               </a>
             ))}
           </nav>
-
-          <div className="flex items-center gap-3">
-            <AccountHeaderButton />
-            <CartHeaderButton />
-            <SiteAuthActions />
-          </div>
-        </div>
+        ) : null}
       </div>
     </header>
   );

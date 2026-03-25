@@ -99,9 +99,9 @@ export default async function HomePage() {
   const heroSubtitle = normalizeCopy(home.heroSubtitle, MAIN_DISPLAY_SUBTITLE);
 
   return (
-    <div className="grid-shell pb-10">
-      <section className="grid gap-6 pt-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)]">
-        <div className="surface-card editorial-shadow rounded-[40px] border border-[var(--line)] p-8 sm:p-10 lg:p-12">
+    <div className="grid-shell pb-8 sm:pb-10">
+      <section className="grid gap-5 pt-2 sm:pt-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)]">
+        <div className="surface-card editorial-shadow rounded-[28px] border border-[var(--line)] p-6 sm:rounded-[34px] sm:p-8 lg:rounded-[40px] lg:p-12">
           <div className="flex flex-wrap items-center gap-3">
             <span className="rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ink-soft)]">
               큐레이션 홈
@@ -114,19 +114,19 @@ export default async function HomePage() {
           <h1 className="display-heading mt-8 max-w-4xl text-[clamp(3.2rem,8vw,6rem)] text-[var(--ink)]">
             {heroTitle}
           </h1>
-          <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--ink-soft)]">
+          <p className="mt-5 max-w-2xl text-sm leading-7 text-[var(--ink-soft)] sm:text-base sm:leading-8">
             {heroSubtitle}
           </p>
 
-          <form action="/search" method="GET" className="mt-8 max-w-2xl">
-            <div className="flex flex-col gap-3 rounded-[28px] border border-[var(--line)] bg-white px-5 py-5 shadow-[var(--shadow-soft)] sm:flex-row sm:items-center">
+          <form action="/search" method="GET" className="mt-7 max-w-2xl">
+            <div className="flex flex-col gap-3 rounded-[24px] border border-[var(--line)] bg-white px-4 py-4 shadow-[var(--shadow-soft)] sm:rounded-[28px] sm:px-5 sm:py-5 sm:flex-row sm:items-center">
               <input
                 name="q"
                 type="text"
                 placeholder="상품명, 카테고리, 키워드로 검색"
-                className="min-w-0 flex-1 bg-transparent text-base text-[var(--ink)] outline-none placeholder:text-[var(--ink-muted)]"
+                className="min-w-0 flex-1 bg-transparent text-[15px] text-[var(--ink)] outline-none placeholder:text-[var(--ink-muted)] sm:text-base"
               />
-              <button type="submit" className="button-primary px-6 py-4">
+              <button type="submit" className="button-primary w-full px-6 py-4 sm:w-auto">
                 검색
               </button>
             </div>
@@ -147,10 +147,10 @@ export default async function HomePage() {
 
         {(heroBanner || heroProduct) ? (
           <div
-            className="relative overflow-hidden rounded-[40px] border border-[var(--line)] text-white editorial-shadow"
+            className="relative overflow-hidden rounded-[28px] border border-[var(--line)] text-white editorial-shadow sm:rounded-[34px] lg:rounded-[40px]"
             style={{
               background: productGradient(heroBanner?.accentColor ?? heroProduct?.accentColor ?? "#C2956A"),
-              minHeight: "40rem",
+              minHeight: "30rem",
             }}
           >
             <div className="absolute inset-0">
@@ -174,7 +174,7 @@ export default async function HomePage() {
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(12,16,20,0.08),rgba(12,16,20,0.74))]" />
             </div>
 
-            <div className="relative flex h-full min-h-[40rem] flex-col justify-between p-8 sm:p-10 lg:p-12">
+            <div className="relative flex h-full min-h-[30rem] flex-col justify-between p-6 sm:min-h-[36rem] sm:p-8 lg:min-h-[40rem] lg:p-12">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="display-eyebrow text-white/70">{heroBanner ? "기획전" : "큐레이션"}</p>
@@ -191,19 +191,19 @@ export default async function HomePage() {
                 <p className="display-eyebrow text-white/60">
                   {sectionValue(heroSection, "title", heroBanner ? "기획전" : "큐레이션")}
                 </p>
-                <h2 className="mt-4 text-[clamp(2.5rem,5vw,4rem)] font-light leading-[0.94]">
+                <h2 className="mt-4 text-[clamp(2rem,9vw,4rem)] font-light leading-[0.96]">
                   {normalizeCopy(heroBanner?.title || heroProduct?.name || "", "오늘의 추천")}
                 </h2>
-                <p className="mt-4 text-sm leading-8 text-white/78">
+                <p className="mt-4 text-sm leading-7 text-white/78">
                   {normalizeCopy(
                     heroBanner?.subtitle || heroProduct?.summary || "",
                     "매일 사용하는 공간에 자연스럽게 어울리는 구성을 제안합니다.",
                   )}
                 </p>
-                <div className="mt-8 flex flex-wrap items-center gap-4">
+                <div className="mt-7 flex flex-wrap items-center gap-3 sm:mt-8 sm:gap-4">
                   <Link
                     href={heroBanner?.href ?? `/products/${heroProduct?.slug ?? ""}`}
-                    className="inline-flex items-center justify-center rounded-full bg-white px-6 py-4 text-sm font-semibold !text-black transition hover:-translate-y-[1px] hover:!text-black"
+                    className="inline-flex w-full items-center justify-center rounded-full bg-white px-6 py-4 text-sm font-semibold !text-black transition hover:-translate-y-[1px] hover:!text-black sm:w-auto"
                   >
                     {normalizeCopy((heroBanner?.ctaLabel || home.heroCtaLabel || "").trim(), "둘러보기")}
                   </Link>
@@ -233,12 +233,12 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <div className="grid gap-5 lg:grid-cols-3">
+          <div className="grid gap-4 sm:gap-5 lg:grid-cols-3">
             {categoryCards.map((category) => (
               <Link
                 key={category.id}
                 href={`/category/${category.slug}`}
-                className="group relative overflow-hidden rounded-[32px] border border-[var(--line)]"
+                className="group relative overflow-hidden rounded-[26px] border border-[var(--line)] sm:rounded-[32px]"
               >
                 <div className="relative aspect-[4/5]">
                   <Image
@@ -249,9 +249,9 @@ export default async function HomePage() {
                     className="object-cover transition duration-700 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,12,18,0.1),rgba(8,12,18,0.72))]" />
-                  <div className="absolute inset-x-0 bottom-0 p-8 text-white">
+                  <div className="absolute inset-x-0 bottom-0 p-6 text-white sm:p-8">
                     <p className="display-eyebrow text-white/68">카테고리</p>
-                    <h3 className="mt-3 text-3xl font-light leading-tight">
+                    <h3 className="mt-3 text-[1.75rem] font-light leading-tight sm:text-3xl">
                       {category.heroTitle || category.name}
                     </h3>
                     <p className="mt-3 text-sm leading-7 text-white/78">
@@ -279,7 +279,7 @@ export default async function HomePage() {
               </h2>
             </div>
           </div>
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-4">
             {home.curatedPicks.slice(0, 4).map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -304,14 +304,14 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="grid gap-5 lg:grid-cols-2">
+          <div className="grid gap-4 sm:gap-5 lg:grid-cols-2">
             {promotionSection.items.map((item) => (
               <Link
                 key={item.id}
                 href={item.href}
-                className="group relative overflow-hidden rounded-[32px] border border-[var(--line)]"
+                className="group relative overflow-hidden rounded-[26px] border border-[var(--line)] sm:rounded-[32px]"
               >
-                <div className="relative min-h-[320px]">
+                <div className="relative min-h-[260px] sm:min-h-[320px]">
                   <Image
                     src={item.imageUrl}
                     alt={item.imageAlt}
@@ -320,11 +320,11 @@ export default async function HomePage() {
                     className="object-cover transition duration-700 group-hover:scale-[1.03]"
                   />
                   <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(12,16,20,0.06),rgba(12,16,20,0.76))]" />
-                  <div className="absolute inset-x-0 bottom-0 p-8 text-white">
+                  <div className="absolute inset-x-0 bottom-0 p-6 text-white sm:p-8">
                     <p className="display-eyebrow text-white/68">
                       {sectionValue(promotionSection, "title", "기획전")}
                     </p>
-                    <h3 className="mt-3 text-3xl font-light leading-tight">{item.title}</h3>
+                    <h3 className="mt-3 text-[1.75rem] font-light leading-tight sm:text-3xl">{item.title}</h3>
                     <p className="mt-3 max-w-xl text-sm leading-7 text-white/76">{item.subtitle}</p>
                     <span className="mt-6 inline-flex rounded-full bg-white px-5 py-3 text-sm font-semibold text-black">
                       {item.ctaLabel}
@@ -350,7 +350,7 @@ export default async function HomePage() {
               {sectionValue(newestSection, "subtitle", "지금 막 들어온 상품들을 편하게 둘러보세요.")}
             </p>
           </div>
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-4">
             {home.newArrivals.slice(0, 4).map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -368,7 +368,7 @@ export default async function HomePage() {
               </h2>
             </div>
           </div>
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-4">
             {home.bestSellers.slice(0, 4).map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

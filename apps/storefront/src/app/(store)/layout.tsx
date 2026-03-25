@@ -19,7 +19,7 @@ export default async function StoreLayout({
       <CartProvider>
         <div className="min-h-screen bg-[var(--surface)] text-[var(--ink)]">
           <SiteHeader categories={categories} />
-          <main className="mx-auto flex w-full max-w-[1280px] flex-col px-5 pb-24 pt-8 sm:px-8 lg:px-10">
+          <main className="page-container flex w-full flex-col pb-24 pt-6 sm:pb-24 sm:pt-8 lg:pb-28">
             {children}
           </main>
           <SiteFooter />

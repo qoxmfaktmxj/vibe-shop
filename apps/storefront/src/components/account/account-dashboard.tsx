@@ -456,7 +456,7 @@ export function AccountDashboard({
                 {initials}
               </div>
               <div>
-                <p className="display-eyebrow">My Account</p>
+                <p className="display-eyebrow">내 계정</p>
                 <h1 className="display-heading mt-4 text-4xl">내 계정</h1>
                 <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--ink-soft)] sm:text-base sm:leading-8">
                   주문, 배송지, 찜, 리뷰를 한곳에서 빠르게 확인하고 바로 관리할 수 있도록 정리했습니다.
@@ -513,7 +513,7 @@ export function AccountDashboard({
         <article id="account-profile" className="surface-card rounded-[32px] p-6 sm:rounded-[36px] sm:p-8 lg:p-10">
           <div className="flex items-end justify-between gap-4">
             <div>
-              <p className="display-eyebrow">Profile</p>
+              <p className="display-eyebrow">기본 정보</p>
               <h2 className="display-heading mt-4 text-3xl">기본 정보</h2>
             </div>
             <QuickActionButton onClick={() => setProfileEditing((current) => !current)}>
@@ -571,7 +571,7 @@ export function AccountDashboard({
         <article className="surface-card rounded-[32px] p-6 sm:rounded-[36px] sm:p-8 lg:p-10">
           <div className="flex items-end justify-between gap-4">
             <div>
-              <p className="display-eyebrow">Orders</p>
+              <p className="display-eyebrow">최근 주문</p>
               <h2 className="display-heading mt-4 text-3xl">최근 주문</h2>
             </div>
             <QuickActionLink href="/orders">전체 주문 보기</QuickActionLink>
@@ -607,7 +607,7 @@ export function AccountDashboard({
         <article id="account-addresses" className="surface-card rounded-[32px] p-6 sm:rounded-[36px] sm:p-8 lg:p-10">
           <div className="flex items-end justify-between gap-4">
             <div>
-              <p className="display-eyebrow">Address Book</p>
+              <p className="display-eyebrow">배송지</p>
               <h2 className="display-heading mt-4 text-3xl">기본 배송지</h2>
             </div>
             <div className="flex w-full flex-col gap-3 text-sm text-[var(--ink-soft)] sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
@@ -690,7 +690,7 @@ export function AccountDashboard({
             <div id="account-address-manager" className="mt-8 space-y-4 border-t border-[var(--line)] pt-8">
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                 <div>
-                  <p className="display-eyebrow">Manage</p>
+                  <p className="display-eyebrow">관리</p>
                   <h3 className="mt-3 text-xl font-semibold">배송지 관리</h3>
                 </div>
                 <QuickActionButton onClick={beginNewAddress}>새 배송지 추가</QuickActionButton>
@@ -752,7 +752,7 @@ export function AccountDashboard({
               <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5 sm:p-6">
                 <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                   <div>
-                    <p className="display-eyebrow">Editor</p>
+                    <p className="display-eyebrow">입력 폼</p>
                     <h3 className="mt-3 text-xl font-semibold">
                       {editingAddressId ? "배송지 수정" : "새 배송지 추가"}
                     </h3>
@@ -843,7 +843,7 @@ export function AccountDashboard({
         <article className="surface-card rounded-[32px] p-6 sm:rounded-[36px] sm:p-8 lg:p-10">
           <div className="flex items-end justify-between gap-4">
             <div>
-              <p className="display-eyebrow">Wishlist</p>
+              <p className="display-eyebrow">찜한 상품</p>
               <h2 className="display-heading mt-4 text-3xl">찜한 상품</h2>
             </div>
             <QuickActionLink href="/search">상품 더 보기</QuickActionLink>
@@ -894,7 +894,7 @@ export function AccountDashboard({
         <article className="surface-card rounded-[32px] p-6 sm:rounded-[36px] sm:p-8 lg:p-10">
           <div className="flex items-end justify-between gap-4">
             <div>
-              <p className="display-eyebrow">Reviews</p>
+              <p className="display-eyebrow">내 리뷰</p>
               <h2 className="display-heading mt-4 text-3xl">내 리뷰</h2>
             </div>
             <span className="text-sm text-[var(--ink-soft)]">최근 {reviewPreview.length}개 미리보기</span>

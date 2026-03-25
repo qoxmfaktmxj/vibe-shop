@@ -20,7 +20,7 @@ export function SearchForm({
 
   return (
     <form
-      className="section-frame grid gap-4 rounded-[32px] p-4 sm:grid-cols-[220px_1fr_auto] sm:items-center sm:p-5"
+      className="section-frame grid gap-4 rounded-[24px] p-4 sm:rounded-[28px] sm:p-5 lg:grid-cols-[220px_minmax(0,1fr)_auto] lg:items-end"
       onSubmit={(event) => {
         event.preventDefault();
         const trimmedKeyword = keyword.trim();
@@ -40,7 +40,7 @@ export function SearchForm({
         <select
           value={category}
           onChange={(event) => setCategory(event.target.value)}
-          className="soft-input min-h-16 rounded-[20px] px-4 text-[15px] font-medium sm:text-base"
+          className="soft-input min-h-13 rounded-[18px] px-4 text-[15px] font-medium sm:min-h-14 sm:rounded-[20px] sm:text-base"
         >
           <option value="">전체 카테고리</option>
           {categories.map((item) => (
@@ -57,14 +57,14 @@ export function SearchForm({
           value={keyword}
           onChange={(event) => setKeyword(event.target.value)}
           placeholder="머그컵, 린넨 커튼, 10만원 이하"
-          className="soft-input min-h-16 rounded-[20px] px-5 text-[15px] font-medium sm:text-base"
+          className="soft-input min-h-13 rounded-[18px] px-4 text-[15px] font-medium sm:min-h-14 sm:rounded-[20px] sm:px-5 sm:text-base"
         />
       </label>
 
       <button
         type="submit"
         disabled={isPending}
-        className="button-primary min-h-16 rounded-[20px] px-7 text-sm sm:text-[15px] disabled:opacity-60"
+        className="button-primary min-h-13 rounded-[18px] px-7 text-sm disabled:opacity-60 sm:min-h-14 sm:rounded-[20px] sm:text-[15px]"
       >
         {isPending ? "검색 중" : "검색"}
       </button>

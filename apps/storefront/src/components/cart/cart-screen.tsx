@@ -51,16 +51,14 @@ export function CartScreen() {
   }, [hydrated, items]);
 
   if (!hydrated) {
-    return <div className="surface-card rounded-xl p-8">장바구니를 불러오는 중입니다.</div>;
+    return <div className="surface-card rounded-[24px] p-8">장바구니를 불러오는 중입니다.</div>;
   }
 
   if (items.length === 0) {
     return (
-      <div className="surface-card rounded-xl p-10 text-center">
+      <div className="surface-card rounded-[24px] p-8 text-center sm:p-10">
         <p className="display-eyebrow">장바구니</p>
-        <h1 className="display-heading mt-4 text-4xl text-[var(--ink)]">
-          아직 담긴 상품이 없습니다.
-        </h1>
+        <h1 className="display-heading mt-4 text-4xl text-[var(--ink)]">아직 담긴 상품이 없습니다.</h1>
         <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-[var(--ink-soft)]">
           홈과 카테고리에서 분위기에 맞는 상품을 둘러보고, 마음에 드는 상품을 천천히 담아보세요.
         </p>
@@ -72,37 +70,31 @@ export function CartScreen() {
   }
 
   return (
-    <div className="space-y-12">
-      <div className="grid gap-14 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start">
+    <div className="space-y-10 pb-28 sm:space-y-12 lg:pb-0">
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start lg:gap-14">
         <section className="min-w-0">
-          <header className="mb-10">
+          <header className="mb-8 sm:mb-10">
             <p className="display-eyebrow">장바구니</p>
             <h1 className="display-heading mt-4 text-4xl font-light tracking-tight text-[var(--ink)]">
               이어 담은 상품
             </h1>
-            <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--ink-soft)]">
-              {items.length} items in your atelier
+            <p className="mt-2 text-[11px] font-semibold tracking-[0.2em] text-[var(--ink-soft)]">
+              총 {items.length}개 상품을 확인하고 바로 주문으로 이어갈 수 있습니다.
             </p>
           </header>
 
-          <div className="space-y-10">
+          <div className="space-y-8 sm:space-y-10">
             {items.map((item) => (
               <article
                 key={item.productId}
-                className="grid gap-6 border-b border-black/6 pb-10 sm:grid-cols-[10rem_minmax(0,1fr)]"
+                className="grid gap-5 border-b border-black/6 pb-8 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-6 sm:pb-10"
               >
-                <div className="relative aspect-[4/5] overflow-hidden rounded-xl">
-                  <Image
-                    src={item.imageUrl}
-                    alt={item.imageAlt}
-                    fill
-                    sizes="10rem"
-                    className="object-cover"
-                  />
+                <div className="relative aspect-[4/5] overflow-hidden rounded-[20px] sm:rounded-xl">
+                  <Image src={item.imageUrl} alt={item.imageAlt} fill sizes="10rem" className="object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[rgba(11,14,22,0.35)] to-transparent" />
-                  <div className="absolute inset-x-0 top-0 p-4">
-                    <span className="rounded-lg bg-white/82 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--ink-soft)]">
-                      Curated Item
+                  <div className="absolute inset-x-0 top-0 p-3 sm:p-4">
+                    <span className="rounded-lg bg-white/82 px-3 py-1 text-[10px] font-semibold tracking-[0.18em] text-[var(--ink-soft)]">
+                      선택 상품
                     </span>
                   </div>
                 </div>
@@ -118,12 +110,12 @@ export function CartScreen() {
                     <p className="text-lg font-semibold text-[var(--primary)]">{formatPrice(item.price)}원</p>
                   </div>
 
-                  <div className="mt-8 flex items-center justify-between">
-                    <div className="flex items-center gap-2 rounded-lg bg-[var(--surface-card)] px-2 py-2 shadow-[var(--shadow-soft)]">
+                  <div className="mt-6 flex items-center justify-between gap-4 sm:mt-8">
+                    <div className="flex items-center gap-2 rounded-xl bg-[var(--surface-card)] px-2 py-2 shadow-[var(--shadow-soft)]">
                       <button
                         type="button"
                         onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[var(--ink-soft)] transition hover:bg-[var(--surface-low)] hover:text-[var(--ink)]"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[var(--ink-soft)] transition hover:bg-[var(--surface-low)] hover:text-[var(--ink)]"
                       >
                         -
                       </button>
@@ -131,7 +123,7 @@ export function CartScreen() {
                       <button
                         type="button"
                         onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[var(--ink-soft)] transition hover:bg-[var(--surface-low)] hover:text-[var(--ink)]"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[var(--ink-soft)] transition hover:bg-[var(--surface-low)] hover:text-[var(--ink)]"
                       >
                         +
                       </button>
@@ -140,7 +132,7 @@ export function CartScreen() {
                     <button
                       type="button"
                       onClick={() => removeItem(item.productId)}
-                      className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ink-soft)] transition hover:text-red-600"
+                      className="text-[11px] font-semibold tracking-[0.18em] text-[var(--ink-soft)] transition hover:text-red-600"
                     >
                       삭제
                     </button>
@@ -150,7 +142,7 @@ export function CartScreen() {
             ))}
           </div>
 
-          <div className="mt-10">
+          <div className="mt-8 sm:mt-10">
             <Link
               href="/"
               className="inline-flex items-center gap-3 text-sm font-medium text-[var(--primary)] transition hover:gap-4"
@@ -161,7 +153,7 @@ export function CartScreen() {
           </div>
         </section>
 
-        <aside className="surface-card editorial-shadow rounded-none p-8 lg:sticky lg:top-32">
+        <aside className="surface-card rounded-[24px] p-6 lg:sticky lg:top-28">
           <p className="display-eyebrow">결제 요약</p>
           <h2 className="display-heading mt-4 text-3xl font-light text-[var(--ink)]">주문 요약</h2>
           <div className="mt-8 space-y-4 text-sm">
@@ -183,8 +175,8 @@ export function CartScreen() {
                 <p className="text-3xl font-bold tracking-tight text-[var(--primary)]">
                   {formatPrice(preview?.total ?? 0)}원
                 </p>
-                <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ink-soft)]">
-                  VAT incl.
+                <p className="mt-1 text-[10px] font-semibold tracking-[0.18em] text-[var(--ink-soft)]">
+                  부가세 포함
                 </p>
               </div>
             </div>
@@ -197,10 +189,24 @@ export function CartScreen() {
             주문서로 이동
           </Link>
 
-          <div className="mt-4 rounded-lg bg-[var(--surface-low)] p-4 text-[11px] leading-6 text-[var(--ink-soft)]">
+          <div className="mt-4 rounded-[20px] bg-[var(--surface-low)] p-4 text-[11px] leading-6 text-[var(--ink-soft)]">
             배송비는 총액과 현재 장바구니 기준으로 즉시 다시 계산됩니다.
           </div>
         </aside>
+      </div>
+
+      <div className="fixed inset-x-4 bottom-[max(16px,env(safe-area-inset-bottom))] z-40 lg:hidden">
+        <div className="rounded-[22px] border border-[var(--line)] bg-[rgba(255,255,255,0.96)] p-4 shadow-[0_24px_60px_rgba(12,16,24,0.18)] backdrop-blur">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-[10px] font-semibold tracking-[0.18em] text-[var(--ink-soft)]">총 결제 금액</p>
+              <p className="mt-1 text-xl font-semibold text-[var(--ink)]">{formatPrice(preview?.total ?? 0)}원</p>
+            </div>
+            <Link href="/checkout" className="button-hot min-w-[10rem] px-5 py-4">
+              주문서로 이동
+            </Link>
+          </div>
+        </div>
       </div>
 
       {recommendations ? <RecommendationShelf collection={recommendations} eyebrow="장바구니 기반 추천" /> : null}
