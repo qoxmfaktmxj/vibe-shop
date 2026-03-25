@@ -210,14 +210,24 @@ export function AccountDashboard({
   const reviewPreview = reviews.slice(0, 3);
   const initials = profile.name.trim().charAt(0) || "M";
 
-  const openAddressManager = () => {
-    setAddressManagerOpen(true);
+  const scrollAddressManagerIntoView = () => {
     setTimeout(() => {
       document.getElementById("account-address-manager")?.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
     }, 0);
+  };
+
+  const openAddressManager = () => {
+    setAddressManagerOpen(true);
+    scrollAddressManagerIntoView();
+  };
+
+  const beginNewAddress = () => {
+    resetAddressEditor();
+    setAddressManagerOpen(true);
+    scrollAddressManagerIntoView();
   };
 
   const resetAddressEditor = () => {
@@ -600,11 +610,14 @@ export function AccountDashboard({
               <p className="display-eyebrow">Address Book</p>
               <h2 className="display-heading mt-4 text-3xl">기본 배송지</h2>
             </div>
-            <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--ink-soft)]">
+            <div className="flex w-full flex-col gap-3 text-sm text-[var(--ink-soft)] sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
               <span>총 {addresses.length}개 등록됨</span>
-              <QuickActionButton onClick={() => setAddressManagerOpen((current) => !current)}>
-                {addressManagerOpen ? "관리 닫기" : "배송지 관리"}
-              </QuickActionButton>
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <QuickActionButton onClick={beginNewAddress}>배송지 추가</QuickActionButton>
+                <QuickActionButton onClick={() => setAddressManagerOpen((current) => !current)}>
+                  {addressManagerOpen ? "관리 닫기" : "배송지 관리"}
+                </QuickActionButton>
+              </div>
             </div>
           </div>
 
@@ -628,12 +641,16 @@ export function AccountDashboard({
                   <QuickActionButton onClick={() => beginAddressEdit(defaultAddress)}>
                     기본 배송지 수정
                   </QuickActionButton>
+                  <QuickActionButton onClick={beginNewAddress}>배송지 추가</QuickActionButton>
                   <QuickActionButton onClick={openAddressManager}>전체 배송지 보기</QuickActionButton>
                 </div>
               </article>
             ) : (
               <EmptyState>
-                첫 배송지를 등록하면 주문서 입력이 더 빨라집니다. 다음 주문부터는 기본 배송지를 바로 불러올 수 있습니다.
+                <div className="space-y-4">
+                  <p>첫 배송지를 등록하면 주문서 입력이 더 빨라집니다. 다음 주문부터는 기본 배송지를 바로 불러올 수 있습니다.</p>
+                  <QuickActionButton onClick={beginNewAddress}>첫 배송지 추가</QuickActionButton>
+                </div>
               </EmptyState>
             )}
 
@@ -676,14 +693,7 @@ export function AccountDashboard({
                   <p className="display-eyebrow">Manage</p>
                   <h3 className="mt-3 text-xl font-semibold">배송지 관리</h3>
                 </div>
-                <QuickActionButton
-                  onClick={() => {
-                    resetAddressEditor();
-                    setAddressManagerOpen(true);
-                  }}
-                >
-                  새 배송지 추가
-                </QuickActionButton>
+                <QuickActionButton onClick={beginNewAddress}>새 배송지 추가</QuickActionButton>
               </div>
 
               {addresses.length > 0 ? (
