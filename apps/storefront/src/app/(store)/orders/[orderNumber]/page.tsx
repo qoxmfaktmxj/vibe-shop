@@ -82,6 +82,18 @@ export default async function OrderPage({
         <h1 className="display-heading mt-4 text-4xl">{heading.title}</h1>
         <p className="mt-4 text-base leading-8 text-[var(--ink-soft)]">{heading.description}</p>
 
+        <div className="mt-6 rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.78)] px-5 py-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--ink-soft)]">
+            Order Number
+          </p>
+          <p className="mt-2 font-display text-2xl font-semibold text-[var(--ink)]">
+            {order.orderNumber}
+          </p>
+          <p className="mt-2 text-sm leading-6 text-[var(--ink-soft)]">
+            주문번호와 연락처로 비회원 주문조회와 취소를 이어서 확인할 수 있습니다.
+          </p>
+        </div>
+
         <div className="mt-8 rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.76)] p-6">
           <dl className="grid gap-4 text-sm sm:grid-cols-2">
             <div>

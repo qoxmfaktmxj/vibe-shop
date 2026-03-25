@@ -205,7 +205,7 @@ export default async function HomePage() {
                     href={heroBanner?.href ?? `/products/${heroProduct?.slug ?? ""}`}
                     className="inline-flex items-center justify-center rounded-full bg-white px-6 py-4 text-sm font-semibold text-black transition hover:-translate-y-[1px]"
                   >
-                    {normalizeCopy(heroBanner?.ctaLabel || home.heroCtaLabel, "둘러보기")}
+                    {normalizeCopy((heroBanner?.ctaLabel || home.heroCtaLabel || "").trim(), "둘러보기")}
                   </Link>
                   {heroProduct ? (
                     <p className="text-base font-semibold text-white/88">
