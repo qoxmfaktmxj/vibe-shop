@@ -4,9 +4,7 @@ export default function Loading() {
       <div className="grid gap-4">
         <p className="display-eyebrow">로딩 중</p>
         <h1 className="display-heading text-4xl sm:text-5xl">다음 화면을 준비하고 있습니다.</h1>
-        <p className="mx-auto max-w-xl text-sm leading-7 text-[var(--ink-soft)]">
-          카탈로그, 계정, 주문 정보를 불러오는 중입니다. 빈 화면 대신 안정적인 탐색 상태를 유지합니다.
-        </p>
+        <p className="mx-auto max-w-xl text-sm leading-7 text-[var(--ink-soft)]">카탈로그, 계정, 주문 정보를 불러오는 중입니다.</p>
       </div>
     </section>
   );
