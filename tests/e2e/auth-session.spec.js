@@ -12,13 +12,14 @@ test("member auth flow keeps session and scopes orders to the account", async ({
   const email = `auth-${uniqueId}@example.com`;
 
   await page.goto("/", { waitUntil: "networkidle" });
-  await expect(page.locator('a[href^="/login"]')).toBeVisible();
-  await expect(page.locator('a[href^="/signup"]')).toBeVisible();
+  await expect(page.getByRole("link", { name: /로그인 후 내 정보 보기|내 정보 보기/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /^Log in$/ })).toBeVisible();
 
   await page.goto("/products/brew-mug", { waitUntil: "networkidle" });
   await page.locator("button.button-hot").first().click();
+  await expect(page.getByRole("link", { name: /^Cart/ })).toContainText("1");
 
-  await page.goto("/signup", { waitUntil: "networkidle" });
+  await page.goto("/auth?tab=signup", { waitUntil: "networkidle" });
   const signupInputs = page.locator("form input");
   await signupInputs.nth(0).fill("Auth Tester");
   await signupInputs.nth(1).fill(email);
@@ -26,8 +27,10 @@ test("member auth flow keeps session and scopes orders to the account", async ({
   await page.locator('button[type="submit"]').click();
 
   await expect(page).toHaveURL(/\/account$/);
-  await expect(page.getByRole("banner").locator("button")).toHaveCount(1);
-  await expect(page.getByText(email)).toBeVisible();
+  await expect(page.getByRole("link", { name: "내 정보 보기" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Logout$/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^로그아웃$/ })).toBeVisible();
+  await expect(page.getByText(email).first()).toBeVisible();
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "07-account.png"),
     fullPage: true,
@@ -59,7 +62,7 @@ test("member auth flow keeps session and scopes orders to the account", async ({
   await page.goto("/orders", { waitUntil: "networkidle" });
   await expect(page.getByText(memberOrderNumber)).toBeVisible();
 
-  await page.getByRole("banner").locator("button").click();
+  await page.getByRole("button", { name: /Logout|로그아웃/ }).click();
   await page.goto(`/orders/${memberOrderNumber}`, { waitUntil: "networkidle" });
   await expect(page).toHaveURL(
     new RegExp(`/lookup-order\\?orderNumber=${memberOrderNumber}$`),
@@ -67,6 +70,5 @@ test("member auth flow keeps session and scopes orders to the account", async ({
   await expect(page.locator("input").first()).toHaveValue(memberOrderNumber);
 
   await page.goto("/", { waitUntil: "networkidle" });
-  await expect(page.locator('a[href^="/login"]')).toBeVisible();
-  await expect(page.locator('a[href^="/signup"]')).toBeVisible();
+  await expect(page.getByRole("link", { name: /^Log in$/ })).toBeVisible();
 });

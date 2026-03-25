@@ -58,7 +58,7 @@ export default async function OrderPage({
     redirect(`/lookup-order?orderNumber=${encodeURIComponent(orderNumber)}`);
   }
 
-  let order;
+  let order: Awaited<ReturnType<typeof getOrder>>;
 
   try {
     order = await getOrder(orderNumber, session.authenticated ? undefined : guestPhone);
@@ -152,7 +152,7 @@ export default async function OrderPage({
       <aside className="surface-card rounded-[36px] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(241,239,233,0.76))] p-8 sm:p-10">
         <p className="display-eyebrow">주문 상품</p>
         <div className="mt-6 space-y-4 text-sm">
-          {order.lines.map((line) => (
+          {order.lines.map((line: { productId: number; productName: string; quantity: number; lineTotal: number }) => (
             <div key={`${line.productId}-${line.productName}`} className="flex justify-between gap-4">
               <span className="text-[var(--ink-soft)]">
                 {line.productName} x {line.quantity}

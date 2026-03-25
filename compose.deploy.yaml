@@ -41,8 +41,8 @@ services:
 
   storefront:
     build:
-      context: ./apps/storefront
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/storefront/Dockerfile
       args:
         NEXT_PUBLIC_API_BASE_URL: https://${DOMAIN}
     container_name: vibe-shop-storefront

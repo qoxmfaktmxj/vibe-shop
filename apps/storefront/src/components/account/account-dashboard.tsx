@@ -2,41 +2,145 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useMemo, useState, useTransition, type ReactNode } from "react";
 
+import {
+  createShippingAddress,
+  deleteAccountReview,
+  deleteShippingAddress,
+  removeWishlistItem,
+  updateAccountProfile,
+  updateAccountReview,
+  updateShippingAddress,
+} from "@/lib/client-api";
+import { useAuth } from "@/lib/auth-store";
 import type {
   AccountProfile,
   MyReview,
   OrderSummaryResponse,
   ShippingAddress,
+  ShippingAddressPayload,
+  UpdateReviewPayload,
   WishlistItem,
 } from "@/lib/contracts";
 import { formatPrice } from "@/lib/currency";
 import { formatOrderStatus } from "@/lib/order-status";
 
 const PROVIDER_LABELS: Record<string, string> = {
-  LOCAL: "\uC77C\uBC18 \uD68C\uC6D0",
-  KAKAO: "\uCE74\uCE74\uC624 \uB85C\uADF8\uC778",
-  NAVER: "\uB124\uC774\uBC84 \uB85C\uADF8\uC778",
-  GOOGLE: "\uAD6C\uAE00 \uB85C\uADF8\uC778",
+  LOCAL: "일반 회원",
+  KAKAO: "카카오 로그인",
+  NAVER: "네이버 로그인",
+  GOOGLE: "구글 로그인",
 };
 
 const REVIEW_STATUS_LABELS: Record<string, string> = {
-  PUBLISHED: "\uACF5\uAC1C",
-  HIDDEN: "\uC228\uAE40",
+  PUBLISHED: "공개",
+  HIDDEN: "숨김",
+};
+
+const EMPTY_ADDRESS_FORM: ShippingAddressPayload = {
+  label: "",
+  recipientName: "",
+  phone: "",
+  postalCode: "",
+  address1: "",
+  address2: "",
+  isDefault: false,
 };
 
 function renderStars(rating: number) {
   return `${"★".repeat(rating)}${"☆".repeat(Math.max(0, 5 - rating))}`;
 }
 
-function StatCard({ label, value }: { label: string; value: React.ReactNode }) {
+function SummaryStat({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
       <p className="display-eyebrow">{label}</p>
-      <p className="mt-3 text-3xl font-semibold">{value}</p>
+      <p className="mt-3 text-2xl font-semibold text-[var(--ink)]">{value}</p>
     </div>
   );
 }
+
+function QuickActionLink({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <Link href={href} className="button-secondary px-4 py-3 text-center">
+      {children}
+    </Link>
+  );
+}
+
+function QuickActionButton({
+  type = "button",
+  onClick,
+  disabled,
+  children,
+}: {
+  type?: "button" | "submit";
+  onClick?: () => void;
+  disabled?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className="button-secondary px-4 py-3 text-center disabled:cursor-wait disabled:opacity-60"
+    >
+      {children}
+    </button>
+  );
+}
+
+function EmptyState({ children }: { children: ReactNode }) {
+  return (
+    <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
+      {children}
+    </div>
+  );
+}
+
+function buildReviewPayload(review: MyReview, draft: ReviewDraft): UpdateReviewPayload {
+  return {
+    rating: draft.rating,
+    title: draft.title.trim(),
+    content: draft.content.trim(),
+    fitTag: review.fitTag ?? undefined,
+    repurchaseYn: review.repurchaseYn,
+    deliverySatisfaction: review.deliverySatisfaction,
+    packagingSatisfaction: review.packagingSatisfaction,
+    imageUrls: review.images.map((image) => image.imageUrl),
+  };
+}
+
+function createReviewDraft(review: MyReview): ReviewDraft {
+  return {
+    rating: review.rating,
+    title: review.title,
+    content: review.content,
+  };
+}
+
+function upsertAddress(current: ShippingAddress[], saved: ShippingAddress) {
+  const merged = current.some((address) => address.id === saved.id)
+    ? current.map((address) => (address.id === saved.id ? saved : address))
+    : [saved, ...current];
+
+  if (!saved.isDefault) {
+    return merged;
+  }
+
+  return merged.map((address) =>
+    address.id === saved.id ? saved : { ...address, isDefault: false },
+  );
+}
+
+type ReviewDraft = {
+  rating: number;
+  title: string;
+  content: string;
+};
 
 export function AccountDashboard({
   initialProfile,
@@ -51,46 +155,340 @@ export function AccountDashboard({
   initialWishlist: WishlistItem[];
   initialReviews: MyReview[];
 }) {
-  const joinedDate = new Date(initialProfile.createdAt).toLocaleDateString("ko-KR", {
+  const router = useRouter();
+  const { signOut } = useAuth();
+
+  const [profile, setProfile] = useState(initialProfile);
+  const [nameDraft, setNameDraft] = useState(initialProfile.name);
+  const [addresses, setAddresses] = useState(initialAddresses);
+  const [wishlist, setWishlist] = useState(initialWishlist);
+  const [reviews, setReviews] = useState(initialReviews);
+  const [profileEditing, setProfileEditing] = useState(false);
+  const [addressManagerOpen, setAddressManagerOpen] = useState(initialAddresses.length === 0);
+  const [editingAddressId, setEditingAddressId] = useState<number | null>(null);
+  const [addressDraft, setAddressDraft] = useState<ShippingAddressPayload>(EMPTY_ADDRESS_FORM);
+  const [reviewEditorId, setReviewEditorId] = useState<number | null>(null);
+  const [reviewDraft, setReviewDraft] = useState<ReviewDraft | null>(null);
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [wishlistPendingId, setWishlistPendingId] = useState<number | null>(null);
+  const [reviewPendingId, setReviewPendingId] = useState<number | null>(null);
+  const [addressPendingId, setAddressPendingId] = useState<number | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  const joinedDate = new Date(profile.createdAt).toLocaleDateString("ko-KR", {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
 
+  const providerLabel = PROVIDER_LABELS[profile.provider] ?? profile.provider;
+  const defaultAddress = useMemo(
+    () => addresses.find((address) => address.isDefault) ?? addresses[0] ?? null,
+    [addresses],
+  );
+  const additionalAddresses = useMemo(
+    () => addresses.filter((address) => address.id !== defaultAddress?.id).slice(0, 2),
+    [addresses, defaultAddress],
+  );
+  const wishlistPreview = wishlist.slice(0, 4);
+  const reviewPreview = reviews.slice(0, 3);
+  const initials = profile.name.trim().charAt(0) || "M";
+
+  const openAddressManager = () => {
+    setAddressManagerOpen(true);
+    setTimeout(() => {
+      document.getElementById("account-address-manager")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 0);
+  };
+
+  const resetAddressEditor = () => {
+    setEditingAddressId(null);
+    setAddressDraft(EMPTY_ADDRESS_FORM);
+  };
+
+  const handleProfileSave = () => {
+    const nextName = nameDraft.trim();
+
+    if (!nextName || nextName === profile.name) {
+      setProfileEditing(false);
+      setNameDraft(profile.name);
+      return;
+    }
+
+    setFeedback(null);
+    startTransition(async () => {
+      try {
+        const nextProfile = await updateAccountProfile({ name: nextName });
+        setProfile(nextProfile);
+        setNameDraft(nextProfile.name);
+        setProfileEditing(false);
+        setFeedback("회원정보를 업데이트했습니다.");
+      } catch (error) {
+        console.error(error);
+        setFeedback("회원정보 수정에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+      }
+    });
+  };
+
+  const handleWishlistRemove = (productId: number) => {
+    setFeedback(null);
+    setWishlistPendingId(productId);
+    startTransition(async () => {
+      try {
+        await removeWishlistItem(productId);
+        setWishlist((current) => current.filter((item) => item.productId !== productId));
+        setProfile((current) => ({
+          ...current,
+          wishlistCount: Math.max(0, current.wishlistCount - 1),
+        }));
+        setFeedback("찜한 상품에서 제거했습니다.");
+      } catch (error) {
+        console.error(error);
+        setFeedback("찜 해제에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+      } finally {
+        setWishlistPendingId(null);
+      }
+    });
+  };
+
+  const handleReviewDelete = (reviewId: number) => {
+    setFeedback(null);
+    setReviewPendingId(reviewId);
+    startTransition(async () => {
+      try {
+        await deleteAccountReview(reviewId);
+        setReviews((current) => current.filter((review) => review.id !== reviewId));
+        setProfile((current) => ({
+          ...current,
+          reviewCount: Math.max(0, current.reviewCount - 1),
+        }));
+        if (reviewEditorId === reviewId) {
+          setReviewEditorId(null);
+          setReviewDraft(null);
+        }
+        setFeedback("리뷰를 삭제했습니다.");
+      } catch (error) {
+        console.error(error);
+        setFeedback("리뷰 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+      } finally {
+        setReviewPendingId(null);
+      }
+    });
+  };
+
+  const handleReviewSave = (review: MyReview) => {
+    if (!reviewDraft) {
+      return;
+    }
+
+    const payload = buildReviewPayload(review, reviewDraft);
+    if (!payload.title || !payload.content) {
+      setFeedback("리뷰 제목과 내용을 입력해 주세요.");
+      return;
+    }
+
+    setFeedback(null);
+    setReviewPendingId(review.id);
+    startTransition(async () => {
+      try {
+        const updated = await updateAccountReview(review.id, payload);
+        setReviews((current) => current.map((item) => (item.id === review.id ? updated : item)));
+        setReviewEditorId(null);
+        setReviewDraft(null);
+        setFeedback("리뷰를 수정했습니다.");
+      } catch (error) {
+        console.error(error);
+        setFeedback("리뷰 수정에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+      } finally {
+        setReviewPendingId(null);
+      }
+    });
+  };
+
+  const handleAddressSave = () => {
+    const payload: ShippingAddressPayload = {
+      label: addressDraft.label.trim(),
+      recipientName: addressDraft.recipientName.trim(),
+      phone: addressDraft.phone.trim(),
+      postalCode: addressDraft.postalCode.trim(),
+      address1: addressDraft.address1.trim(),
+      address2: addressDraft.address2.trim(),
+      isDefault: addressDraft.isDefault,
+    };
+
+    if (!payload.label || !payload.recipientName || !payload.phone || !payload.postalCode || !payload.address1) {
+      setFeedback("배송지 이름, 받는 분, 연락처, 우편번호, 주소를 모두 입력해 주세요.");
+      return;
+    }
+
+    setFeedback(null);
+    setAddressPendingId(editingAddressId ?? 0);
+    startTransition(async () => {
+      try {
+        const saved = editingAddressId
+          ? await updateShippingAddress(editingAddressId, payload)
+          : await createShippingAddress(payload);
+
+        setAddresses((current) => upsertAddress(current, saved));
+        setProfile((current) => ({
+          ...current,
+          addressCount: editingAddressId ? current.addressCount : current.addressCount + 1,
+        }));
+        resetAddressEditor();
+        setAddressManagerOpen(true);
+        setFeedback(editingAddressId ? "배송지를 수정했습니다." : "배송지를 추가했습니다.");
+      } catch (error) {
+        console.error(error);
+        setFeedback("배송지 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+      } finally {
+        setAddressPendingId(null);
+      }
+    });
+  };
+
+  const handleAddressDelete = (addressId: number) => {
+    setFeedback(null);
+    setAddressPendingId(addressId);
+    startTransition(async () => {
+      try {
+        await deleteShippingAddress(addressId);
+        setAddresses((current) => current.filter((address) => address.id !== addressId));
+        setProfile((current) => ({
+          ...current,
+          addressCount: Math.max(0, current.addressCount - 1),
+        }));
+        if (editingAddressId === addressId) {
+          resetAddressEditor();
+        }
+        setFeedback("배송지를 삭제했습니다.");
+      } catch (error) {
+        console.error(error);
+        setFeedback("배송지 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+      } finally {
+        setAddressPendingId(null);
+      }
+    });
+  };
+
   return (
     <div className="grid-shell space-y-6">
-      <section className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
+      <section className="grid gap-6 xl:grid-cols-[1.12fr_0.88fr]">
         <article className="surface-card rounded-[36px] p-8 sm:p-10">
-          <p className="display-eyebrow">My Account</p>
-          <h1 className="display-heading mt-4 text-4xl">\uB0B4 \uACC4\uC815</h1>
-          <p className="mt-4 max-w-2xl text-base leading-8 text-[var(--ink-soft)]">
-            \uC8FC\uBB38, \uBC30\uC1A1\uC9C0, \uCC1C, \uB9AC\uBDF0 \uD604\uD669\uC744 \uD55C \uB208\uC5D0 \uBCF4\uACE0 \uBE60\uB978 \uB3D9\uC120\uC73C\uB85C \uC774\uB3D9\uD560 \uC218 \uC788\uB3C4\uB85D \uC815\uB9AC\uD588\uC2B5\uB2C8\uB2E4.
-          </p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-4">
-            <StatCard label="\uAC00\uC785\uC77C" value={<span className="text-lg">{joinedDate}</span>} />
-            <StatCard label="\uC8FC\uBB38" value={initialProfile.orderCount} />
-            <StatCard label="\uCC1C" value={initialProfile.wishlistCount} />
-            <StatCard label="\uB9AC\uBDF0" value={initialProfile.reviewCount} />
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+            <div className="flex gap-5">
+              <div className="flex h-18 w-18 shrink-0 items-center justify-center rounded-full border border-[var(--line)] bg-[rgba(255,255,255,0.82)] text-2xl font-semibold text-[var(--ink)] sm:h-20 sm:w-20 sm:text-3xl">
+                {initials}
+              </div>
+              <div>
+                <p className="display-eyebrow">My Account</p>
+                <h1 className="display-heading mt-4 text-4xl">내 계정</h1>
+                <p className="mt-4 max-w-2xl text-base leading-8 text-[var(--ink-soft)]">
+                  주문, 배송지, 찜, 리뷰를 한곳에서 빠르게 확인하고 바로 관리할 수 있도록 정리했습니다.
+                </p>
+                <div className="mt-5 space-y-2 text-sm text-[var(--ink-soft)]">
+                  <p className="font-semibold text-[var(--ink)]">{profile.name}</p>
+                  <p>{profile.email}</p>
+                  <p>
+                    {providerLabel} · 가입일 {joinedDate}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 lg:w-[340px]">
+              <QuickActionButton onClick={() => setProfileEditing((current) => !current)}>
+                회원정보 수정
+              </QuickActionButton>
+              <QuickActionButton onClick={openAddressManager}>배송지 관리</QuickActionButton>
+              <QuickActionLink href="/orders">전체 주문 보기</QuickActionLink>
+              <button
+                type="button"
+                disabled={isPending}
+                onClick={() => {
+                  setFeedback(null);
+                  startTransition(async () => {
+                    await signOut();
+                    router.replace("/");
+                    router.refresh();
+                  });
+                }}
+                className="button-primary px-4 py-3 disabled:cursor-wait disabled:opacity-60"
+              >
+                로그아웃
+              </button>
+            </div>
           </div>
+
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+            <SummaryStat label="주문" value={profile.orderCount} />
+            <SummaryStat label="배송지" value={profile.addressCount} />
+            <SummaryStat label="찜" value={profile.wishlistCount} />
+            <SummaryStat label="리뷰" value={profile.reviewCount} />
+            <SummaryStat label="가입일" value={<span className="text-base">{joinedDate}</span>} />
+          </div>
+
+          {feedback ? (
+            <div className="mt-6 rounded-[20px] border border-[rgba(28,107,81,0.18)] bg-[rgba(166,242,209,0.2)] px-4 py-3 text-sm text-[var(--secondary)]">
+              {feedback}
+            </div>
+          ) : null}
         </article>
 
-        <article className="surface-card rounded-[36px] p-8 sm:p-10">
-          <p className="display-eyebrow">Profile</p>
-          <h2 className="display-heading mt-4 text-3xl">\uAE30\uBCF8 \uC815\uBCF4</h2>
+        <article id="account-profile" className="surface-card rounded-[36px] p-8 sm:p-10">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <p className="display-eyebrow">Profile</p>
+              <h2 className="display-heading mt-4 text-3xl">기본 정보</h2>
+            </div>
+            <QuickActionButton onClick={() => setProfileEditing((current) => !current)}>
+              {profileEditing ? "닫기" : "회원정보 수정"}
+            </QuickActionButton>
+          </div>
+
           <div className="mt-8 grid gap-4">
             <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
-              <p className="display-eyebrow">\uC774\uB984</p>
-              <p className="mt-3 text-xl font-semibold">{initialProfile.name}</p>
+              <p className="display-eyebrow">이름</p>
+              {profileEditing ? (
+                <div className="mt-4 space-y-3">
+                  <input
+                    value={nameDraft}
+                    onChange={(event) => setNameDraft(event.target.value)}
+                    className="soft-input w-full rounded-[20px] px-4 py-3"
+                    placeholder="이름을 입력하세요"
+                  />
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      disabled={isPending}
+                      onClick={handleProfileSave}
+                      className="button-primary px-4 py-3 disabled:cursor-wait disabled:opacity-60"
+                    >
+                      저장
+                    </button>
+                    <QuickActionButton
+                      onClick={() => {
+                        setNameDraft(profile.name);
+                        setProfileEditing(false);
+                      }}
+                    >
+                      취소
+                    </QuickActionButton>
+                  </div>
+                </div>
+              ) : (
+                <p className="mt-3 text-xl font-semibold">{profile.name}</p>
+              )}
             </div>
             <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
-              <p className="display-eyebrow">\uC774\uBA54\uC77C</p>
-              <p className="mt-3 text-sm text-[var(--ink-soft)]">{initialProfile.email}</p>
+              <p className="display-eyebrow">이메일</p>
+              <p className="mt-3 text-sm text-[var(--ink-soft)]">{profile.email}</p>
             </div>
             <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
-              <p className="display-eyebrow">\uAC00\uC785 \uBC29\uC2DD</p>
-              <p className="mt-3 text-sm text-[var(--ink-soft)]">
-                {PROVIDER_LABELS[initialProfile.provider] ?? initialProfile.provider}
-              </p>
+              <p className="display-eyebrow">가입 방식</p>
+              <p className="mt-3 text-sm text-[var(--ink-soft)]">{providerLabel}</p>
             </div>
           </div>
         </article>
@@ -100,72 +498,249 @@ export function AccountDashboard({
         <article className="surface-card rounded-[36px] p-8 sm:p-10">
           <div className="flex items-end justify-between gap-4">
             <div>
-              <p className="display-eyebrow">Address Book</p>
-              <h2 className="display-heading mt-4 text-3xl">\uBC30\uC1A1\uC9C0</h2>
-            </div>
-            <p className="text-sm text-[var(--ink-soft)]">{initialAddresses.length}\uAC1C \uB4F1\uB85D</p>
-          </div>
-          <div className="mt-8 space-y-4">
-            {initialAddresses.length > 0 ? (
-              initialAddresses.map((address) => (
-                <article key={address.id} className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-lg font-semibold">{address.label}</p>
-                    {address.isDefault ? (
-                      <span className="rounded-full bg-[rgba(28,107,81,0.12)] px-3 py-1 text-xs font-semibold text-[var(--secondary)]">
-                        \uAE30\uBCF8 \uBC30\uC1A1\uC9C0
-                      </span>
-                    ) : null}
-                  </div>
-                  <p className="mt-2 text-sm text-[var(--ink-soft)]">
-                    {address.recipientName} \u00B7 {address.phone}
-                  </p>
-                  <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">
-                    ({address.postalCode}) {address.address1}
-                    {address.address2 ? `, ${address.address2}` : ""}
-                  </p>
-                </article>
-              ))
-            ) : (
-              <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
-                \uB4F1\uB85D\uB41C \uBC30\uC1A1\uC9C0\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.
-              </div>
-            )}
-          </div>
-        </article>
-
-        <article className="surface-card rounded-[36px] p-8 sm:p-10">
-          <div className="flex items-end justify-between gap-4">
-            <div>
               <p className="display-eyebrow">Orders</p>
-              <h2 className="display-heading mt-4 text-3xl">\uCD5C\uADFC \uC8FC\uBB38</h2>
+              <h2 className="display-heading mt-4 text-3xl">최근 주문</h2>
             </div>
-            <Link href="/orders" className="button-secondary px-4 py-3">
-              \uC804\uCCB4 \uC8FC\uBB38 \uBCF4\uAE30
-            </Link>
+            <QuickActionLink href="/orders">전체 주문 보기</QuickActionLink>
           </div>
           <div className="mt-8 space-y-4">
             {recentOrders.length > 0 ? (
               recentOrders.map((order) => (
-                <Link key={order.orderNumber} href={`/orders/${order.orderNumber}`} className="block rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 transition hover:translate-y-[-2px]">
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <Link
+                  key={order.orderNumber}
+                  href={`/orders/${order.orderNumber}`}
+                  className="block rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 transition hover:-translate-y-[2px] hover:border-[var(--ink)]"
+                >
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                      <p className="text-xl font-semibold">{order.orderNumber}</p>
-                      <p className="mt-2 text-sm text-[var(--ink-soft)]">{order.customerName}</p>
+                      <p className="text-lg font-semibold">{order.orderNumber}</p>
+                      <p className="mt-2 text-sm text-[var(--ink-soft)]">
+                        {new Date(order.createdAt).toLocaleDateString("ko-KR")} · {order.customerName}
+                      </p>
                     </div>
                     <div className="space-y-1 text-sm sm:text-right">
                       <p className="font-semibold">{formatOrderStatus(order.status)}</p>
-                      <p>{formatPrice(order.total)}\uC6D0</p>
+                      <p>{formatPrice(order.total)}원</p>
                     </div>
                   </div>
                 </Link>
               ))
             ) : (
-              <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
-                \uC544\uC9C1 \uC8FC\uBB38 \uB0B4\uC5ED\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.
-              </div>
+              <EmptyState>아직 주문 내역이 없습니다. 첫 주문을 완료하면 여기에서 바로 확인할 수 있습니다.</EmptyState>
             )}
           </div>
+        </article>
+
+        <article id="account-addresses" className="surface-card rounded-[36px] p-8 sm:p-10">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <p className="display-eyebrow">Address Book</p>
+              <h2 className="display-heading mt-4 text-3xl">기본 배송지</h2>
+            </div>
+            <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--ink-soft)]">
+              <span>총 {addresses.length}개 등록됨</span>
+              <QuickActionButton onClick={() => setAddressManagerOpen((current) => !current)}>
+                {addressManagerOpen ? "관리 닫기" : "배송지 관리"}
+              </QuickActionButton>
+            </div>
+          </div>
+
+          <div className="mt-8 space-y-4">
+            {defaultAddress ? (
+              <article className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-lg font-semibold">{defaultAddress.label}</p>
+                  <span className="rounded-full bg-[rgba(28,107,81,0.12)] px-3 py-1 text-xs font-semibold text-[var(--secondary)]">
+                    기본 배송지
+                  </span>
+                </div>
+                <p className="mt-2 text-sm text-[var(--ink-soft)]">
+                  {defaultAddress.recipientName} · {defaultAddress.phone}
+                </p>
+                <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">
+                  ({defaultAddress.postalCode}) {defaultAddress.address1}
+                  {defaultAddress.address2 ? `, ${defaultAddress.address2}` : ""}
+                </p>
+              </article>
+            ) : (
+              <EmptyState>
+                첫 배송지를 등록하면 주문서 입력이 더 빨라집니다. 다음 주문부터는 기본 배송지를 바로 불러올 수 있습니다.
+              </EmptyState>
+            )}
+
+            {additionalAddresses.length > 0 ? (
+              <div className="grid gap-4 md:grid-cols-2">
+                {additionalAddresses.map((address) => (
+                  <article
+                    key={address.id}
+                    className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.62)] p-5"
+                  >
+                    <p className="text-base font-semibold">{address.label}</p>
+                    <p className="mt-2 text-sm text-[var(--ink-soft)]">{address.recipientName}</p>
+                    <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">
+                      ({address.postalCode}) {address.address1}
+                    </p>
+                  </article>
+                ))}
+              </div>
+            ) : null}
+          </div>
+
+          {addressManagerOpen ? (
+            <div id="account-address-manager" className="mt-8 space-y-4 border-t border-[var(--line)] pt-8">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="display-eyebrow">Manage</p>
+                  <h3 className="mt-3 text-xl font-semibold">배송지 관리</h3>
+                </div>
+                <QuickActionButton
+                  onClick={() => {
+                    resetAddressEditor();
+                    setAddressManagerOpen(true);
+                  }}
+                >
+                  새 배송지 추가
+                </QuickActionButton>
+              </div>
+
+              {addresses.length > 0 ? (
+                <div className="grid gap-4">
+                  {addresses.map((address) => (
+                    <article
+                      key={address.id}
+                      className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5"
+                    >
+                      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="text-base font-semibold">{address.label}</p>
+                            {address.isDefault ? (
+                              <span className="rounded-full bg-[rgba(28,107,81,0.12)] px-3 py-1 text-xs font-semibold text-[var(--secondary)]">
+                                기본 배송지
+                              </span>
+                            ) : null}
+                          </div>
+                          <p className="mt-2 text-sm text-[var(--ink-soft)]">
+                            {address.recipientName} · {address.phone}
+                          </p>
+                          <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">
+                            ({address.postalCode}) {address.address1}
+                            {address.address2 ? `, ${address.address2}` : ""}
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap gap-3">
+                          <QuickActionButton
+                            disabled={addressPendingId === address.id}
+                            onClick={() => {
+                              setEditingAddressId(address.id);
+                              setAddressDraft({
+                                label: address.label,
+                                recipientName: address.recipientName,
+                                phone: address.phone,
+                                postalCode: address.postalCode,
+                                address1: address.address1,
+                                address2: address.address2,
+                                isDefault: address.isDefault,
+                              });
+                              setAddressManagerOpen(true);
+                            }}
+                          >
+                            수정
+                          </QuickActionButton>
+                          <QuickActionButton
+                            disabled={addressPendingId === address.id}
+                            onClick={() => handleAddressDelete(address.id)}
+                          >
+                            삭제
+                          </QuickActionButton>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              ) : null}
+
+              <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="display-eyebrow">Editor</p>
+                    <h3 className="mt-3 text-xl font-semibold">
+                      {editingAddressId ? "배송지 수정" : "새 배송지 추가"}
+                    </h3>
+                  </div>
+                  {editingAddressId ? (
+                    <QuickActionButton onClick={resetAddressEditor}>새로 입력</QuickActionButton>
+                  ) : null}
+                </div>
+
+                <div className="mt-6 grid gap-4 md:grid-cols-2">
+                  <input
+                    value={addressDraft.label}
+                    onChange={(event) => setAddressDraft((current) => ({ ...current, label: event.target.value }))}
+                    className="soft-input rounded-[20px] px-4 py-3"
+                    placeholder="배송지 이름"
+                  />
+                  <input
+                    value={addressDraft.recipientName}
+                    onChange={(event) =>
+                      setAddressDraft((current) => ({ ...current, recipientName: event.target.value }))
+                    }
+                    className="soft-input rounded-[20px] px-4 py-3"
+                    placeholder="받는 분"
+                  />
+                  <input
+                    value={addressDraft.phone}
+                    onChange={(event) => setAddressDraft((current) => ({ ...current, phone: event.target.value }))}
+                    className="soft-input rounded-[20px] px-4 py-3"
+                    placeholder="연락처"
+                  />
+                  <input
+                    value={addressDraft.postalCode}
+                    onChange={(event) =>
+                      setAddressDraft((current) => ({ ...current, postalCode: event.target.value }))
+                    }
+                    className="soft-input rounded-[20px] px-4 py-3"
+                    placeholder="우편번호"
+                  />
+                  <input
+                    value={addressDraft.address1}
+                    onChange={(event) => setAddressDraft((current) => ({ ...current, address1: event.target.value }))}
+                    className="soft-input rounded-[20px] px-4 py-3 md:col-span-2"
+                    placeholder="기본 주소"
+                  />
+                  <input
+                    value={addressDraft.address2}
+                    onChange={(event) => setAddressDraft((current) => ({ ...current, address2: event.target.value }))}
+                    className="soft-input rounded-[20px] px-4 py-3 md:col-span-2"
+                    placeholder="상세 주소"
+                  />
+                </div>
+
+                <label className="mt-5 flex items-center gap-3 text-sm text-[var(--ink-soft)]">
+                  <input
+                    type="checkbox"
+                    checked={addressDraft.isDefault}
+                    onChange={(event) =>
+                      setAddressDraft((current) => ({ ...current, isDefault: event.target.checked }))
+                    }
+                  />
+                  기본 배송지로 저장
+                </label>
+
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    disabled={addressPendingId !== null}
+                    onClick={handleAddressSave}
+                    className="button-primary px-4 py-3 disabled:cursor-wait disabled:opacity-60"
+                  >
+                    {editingAddressId ? "배송지 수정 저장" : "배송지 추가"}
+                  </button>
+                  <QuickActionButton onClick={resetAddressEditor}>초기화</QuickActionButton>
+                </div>
+              </div>
+            </div>
+          ) : null}
         </article>
       </section>
 
@@ -174,16 +749,17 @@ export function AccountDashboard({
           <div className="flex items-end justify-between gap-4">
             <div>
               <p className="display-eyebrow">Wishlist</p>
-              <h2 className="display-heading mt-4 text-3xl">\uCC1C\uD55C \uC0C1\uD488</h2>
+              <h2 className="display-heading mt-4 text-3xl">찜한 상품</h2>
             </div>
-            <Link href="/search" className="button-secondary px-4 py-3">
-              \uC0C1\uD488 \uB354 \uBCF4\uAE30
-            </Link>
+            <QuickActionLink href="/search">상품 더 보기</QuickActionLink>
           </div>
           <div className="mt-8 space-y-4">
-            {initialWishlist.length > 0 ? (
-              initialWishlist.map((item) => (
-                <article key={item.productId} className="grid gap-4 rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5 sm:grid-cols-[120px_minmax(0,1fr)]">
+            {wishlistPreview.length > 0 ? (
+              wishlistPreview.map((item) => (
+                <article
+                  key={item.productId}
+                  className="grid gap-4 rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5 sm:grid-cols-[120px_minmax(0,1fr)]"
+                >
                   <Link href={`/products/${item.slug}`} className="relative min-h-[140px] overflow-hidden rounded-[24px]">
                     <Image src={item.imageUrl} alt={item.imageAlt} fill sizes="120px" className="object-cover" />
                   </Link>
@@ -193,46 +769,156 @@ export function AccountDashboard({
                       {item.name}
                     </Link>
                     <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">{item.summary}</p>
-                    <p className="mt-4 text-lg font-semibold">{formatPrice(item.price)}\uC6D0</p>
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                      <p className="text-lg font-semibold">{formatPrice(item.price)}원</p>
+                      <div className="flex gap-3">
+                        <Link href={`/products/${item.slug}`} className="button-secondary px-4 py-3">
+                          상품 보기
+                        </Link>
+                        <button
+                          type="button"
+                          disabled={wishlistPendingId === item.productId}
+                          onClick={() => handleWishlistRemove(item.productId)}
+                          className="button-secondary px-4 py-3 disabled:cursor-wait disabled:opacity-60"
+                        >
+                          찜 해제
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </article>
               ))
             ) : (
-              <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
-                \uC544\uC9C1 \uCC1C\uD55C \uC0C1\uD488\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.
-              </div>
+              <EmptyState>
+                마음에 드는 상품을 찜하면 여기에서 다시 볼 수 있습니다. 상품 탐색 중 놓친 아이템을 쉽게 이어서 확인해 보세요.
+              </EmptyState>
             )}
           </div>
         </article>
 
         <article className="surface-card rounded-[36px] p-8 sm:p-10">
-          <p className="display-eyebrow">Reviews</p>
-          <h2 className="display-heading mt-4 text-3xl">\uB0B4 \uB9AC\uBDF0</h2>
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <p className="display-eyebrow">Reviews</p>
+              <h2 className="display-heading mt-4 text-3xl">내 리뷰</h2>
+            </div>
+            <span className="text-sm text-[var(--ink-soft)]">최근 {reviewPreview.length}개 미리보기</span>
+          </div>
           <div className="mt-8 space-y-4">
-            {initialReviews.length > 0 ? (
-              initialReviews.map((review) => (
-                <article key={review.id} className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <Link href={`/products/${review.productSlug}`} className="text-lg font-semibold">
-                        {review.productName}
-                      </Link>
-                      <p className="mt-2 text-sm text-[var(--ink-soft)]">
-                        {renderStars(review.rating)} \u00B7 {REVIEW_STATUS_LABELS[review.status] ?? review.status}
+            {reviewPreview.length > 0 ? (
+              reviewPreview.map((review) => {
+                const isEditing = reviewEditorId === review.id && reviewDraft;
+
+                return (
+                  <article key={review.id} className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <Link href={`/products/${review.productSlug}`} className="text-lg font-semibold">
+                          {review.productName}
+                        </Link>
+                        <p className="mt-2 text-sm text-[var(--ink-soft)]">
+                          {renderStars(review.rating)} · {REVIEW_STATUS_LABELS[review.status] ?? review.status}
+                        </p>
+                      </div>
+                      <p className="text-sm text-[var(--ink-soft)]">
+                        {new Date(review.createdAt).toLocaleDateString("ko-KR")}
                       </p>
                     </div>
-                    <p className="text-sm text-[var(--ink-soft)]">
-                      {new Date(review.createdAt).toLocaleDateString("ko-KR")}
-                    </p>
-                  </div>
-                  <p className="mt-4 text-base font-semibold">{review.title}</p>
-                  <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">{review.content}</p>
-                </article>
-              ))
+
+                    {isEditing ? (
+                      <div className="mt-5 space-y-4">
+                        <div className="grid gap-4 sm:grid-cols-[160px_minmax(0,1fr)]">
+                          <select
+                            value={reviewDraft.rating}
+                            onChange={(event) =>
+                              setReviewDraft((current) =>
+                                current
+                                  ? { ...current, rating: Number(event.target.value) }
+                                  : current,
+                              )
+                            }
+                            className="soft-input rounded-[20px] px-4 py-3"
+                          >
+                            {[5, 4, 3, 2, 1].map((value) => (
+                              <option key={value} value={value}>
+                                평점 {value}점
+                              </option>
+                            ))}
+                          </select>
+                          <input
+                            value={reviewDraft.title}
+                            onChange={(event) =>
+                              setReviewDraft((current) =>
+                                current ? { ...current, title: event.target.value } : current,
+                              )
+                            }
+                            className="soft-input rounded-[20px] px-4 py-3"
+                            placeholder="리뷰 제목"
+                          />
+                        </div>
+                        <textarea
+                          value={reviewDraft.content}
+                          onChange={(event) =>
+                            setReviewDraft((current) =>
+                              current ? { ...current, content: event.target.value } : current,
+                            )
+                          }
+                          className="soft-input min-h-[132px] w-full rounded-[24px] px-4 py-4"
+                          placeholder="리뷰 내용을 입력해 주세요"
+                        />
+                        <div className="flex flex-wrap gap-3">
+                          <button
+                            type="button"
+                            disabled={reviewPendingId === review.id}
+                            onClick={() => handleReviewSave(review)}
+                            className="button-primary px-4 py-3 disabled:cursor-wait disabled:opacity-60"
+                          >
+                            리뷰 저장
+                          </button>
+                          <QuickActionButton
+                            onClick={() => {
+                              setReviewEditorId(null);
+                              setReviewDraft(null);
+                            }}
+                          >
+                            취소
+                          </QuickActionButton>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="mt-4 text-base font-semibold">{review.title}</p>
+                        <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">{review.content}</p>
+                        <div className="mt-5 flex flex-wrap gap-3">
+                          <Link href={`/products/${review.productSlug}`} className="button-secondary px-4 py-3">
+                            상품 보기
+                          </Link>
+                          <QuickActionButton
+                            onClick={() => {
+                              setReviewEditorId(review.id);
+                              setReviewDraft(createReviewDraft(review));
+                            }}
+                          >
+                            리뷰 수정
+                          </QuickActionButton>
+                          <button
+                            type="button"
+                            disabled={reviewPendingId === review.id}
+                            onClick={() => handleReviewDelete(review.id)}
+                            className="button-secondary px-4 py-3 disabled:cursor-wait disabled:opacity-60"
+                          >
+                            리뷰 삭제
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </article>
+                );
+              })
             ) : (
-              <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
-                \uC544\uC9C1 \uC791\uC131\uD55C \uB9AC\uBDF0\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.
-              </div>
+              <EmptyState>
+                구매한 상품에 리뷰를 남기면 여기에 모아 볼 수 있습니다. 다음 주문 후 첫 리뷰를 남겨 보세요.
+              </EmptyState>
             )}
           </div>
         </article>
