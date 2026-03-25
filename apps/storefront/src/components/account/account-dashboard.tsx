@@ -122,6 +122,18 @@ function createReviewDraft(review: MyReview): ReviewDraft {
   };
 }
 
+function hasReviewDraftChanged(review: MyReview, draft: ReviewDraft | null) {
+  if (!draft) {
+    return false;
+  }
+
+  return (
+    review.rating !== draft.rating ||
+    review.title !== draft.title ||
+    review.content !== draft.content
+  );
+}
+
 function upsertAddress(current: ShippingAddress[], saved: ShippingAddress) {
   const merged = current.some((address) => address.id === saved.id)
     ? current.map((address) => (address.id === saved.id ? saved : address))
@@ -881,110 +893,152 @@ export function AccountDashboard({
             {reviewPreview.length > 0 ? (
               reviewPreview.map((review) => {
                 const isEditing = reviewEditorId === review.id && reviewDraft;
+                const reviewChanged = hasReviewDraftChanged(review, reviewDraft);
 
                 return (
                   <article key={review.id} className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5 sm:p-6">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <Link href={`/products/${review.productSlug}`} className="text-base font-semibold sm:text-lg">
-                          {review.productName}
-                        </Link>
-                        <p className="mt-2 text-sm text-[var(--ink-soft)]">
-                          {renderStars(review.rating)} · {REVIEW_STATUS_LABELS[review.status] ?? review.status}
-                        </p>
-                      </div>
-                      <p className="text-sm text-[var(--ink-soft)]">
-                        {new Date(review.createdAt).toLocaleDateString("ko-KR")}
-                      </p>
-                    </div>
-
-                    {isEditing ? (
-                      <div className="mt-5 space-y-4">
-                        <div className="grid gap-4 lg:grid-cols-[160px_minmax(0,1fr)]">
-                          <select
-                            value={reviewDraft.rating}
-                            onChange={(event) =>
-                              setReviewDraft((current) =>
-                                current
-                                  ? { ...current, rating: Number(event.target.value) }
-                                  : current,
-                              )
-                            }
-                            className="soft-input min-h-11 rounded-[20px] px-4 py-3"
-                          >
-                            {[5, 4, 3, 2, 1].map((value) => (
-                              <option key={value} value={value}>
-                                평점 {value}점
-                              </option>
-                            ))}
-                          </select>
-                          <input
-                            value={reviewDraft.title}
-                            onChange={(event) =>
-                              setReviewDraft((current) =>
-                                current ? { ...current, title: event.target.value } : current,
-                              )
-                            }
-                            className="soft-input min-h-11 rounded-[20px] px-4 py-3"
-                            placeholder="리뷰 제목"
-                          />
-                        </div>
-                        <textarea
-                          value={reviewDraft.content}
-                          onChange={(event) =>
-                            setReviewDraft((current) =>
-                              current ? { ...current, content: event.target.value } : current,
-                            )
-                          }
-                          className="soft-input min-h-[148px] w-full rounded-[24px] px-4 py-4"
-                          placeholder="리뷰 내용을 입력해 주세요"
+                    <div className="grid gap-4 sm:grid-cols-[112px_minmax(0,1fr)]">
+                      <Link href={`/products/${review.productSlug}`} className="relative min-h-[112px] overflow-hidden rounded-[24px] border border-[var(--line)] bg-white">
+                        <Image
+                          src={review.productImageUrl}
+                          alt={review.productImageAlt}
+                          fill
+                          sizes="112px"
+                          className="object-cover"
                         />
-                        <div className="flex flex-wrap gap-3">
-                          <button
-                            type="button"
-                            disabled={reviewPendingId === review.id}
-                            onClick={() => handleReviewSave(review)}
-                            className="button-primary min-h-11 w-full px-4 py-3 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
-                          >
-                            리뷰 저장
-                          </button>
-                          <QuickActionButton
-                            onClick={() => {
-                              setReviewEditorId(null);
-                              setReviewDraft(null);
-                            }}
-                          >
-                            취소
-                          </QuickActionButton>
+                      </Link>
+
+                      <div>
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div>
+                            <Link href={`/products/${review.productSlug}`} className="text-base font-semibold sm:text-lg">
+                              {review.productName}
+                            </Link>
+                            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-[var(--ink-soft)]">
+                              <span>{renderStars(review.rating)}</span>
+                              <span>·</span>
+                              <span>{REVIEW_STATUS_LABELS[review.status] ?? review.status}</span>
+                              {review.fitTag ? (
+                                <>
+                                  <span>·</span>
+                                  <span>{review.fitTag}</span>
+                                </>
+                              ) : null}
+                            </div>
+                          </div>
+                          <div className="space-y-1 text-sm text-[var(--ink-soft)] sm:text-right">
+                            <p>{new Date(review.createdAt).toLocaleDateString("ko-KR")}</p>
+                            <p>도움돼요 {review.helpfulCount}회</p>
+                          </div>
                         </div>
+
+                        {isEditing ? (
+                          <div className="mt-5 space-y-4">
+                            <div className="rounded-[20px] border border-[var(--line)] bg-[rgba(255,255,255,0.6)] px-4 py-3 text-sm leading-6 text-[var(--ink-soft)]">
+                              평점, 제목, 내용을 다듬어 더 읽기 쉽게 정리할 수 있습니다. 저장 전에는 현재 공개 상태가 유지됩니다.
+                            </div>
+                            <div className="grid gap-4 lg:grid-cols-[160px_minmax(0,1fr)]">
+                              <select
+                                value={reviewDraft.rating}
+                                onChange={(event) =>
+                                  setReviewDraft((current) =>
+                                    current
+                                      ? { ...current, rating: Number(event.target.value) }
+                                      : current,
+                                  )
+                                }
+                                className="soft-input min-h-11 rounded-[20px] px-4 py-3"
+                              >
+                                {[5, 4, 3, 2, 1].map((value) => (
+                                  <option key={value} value={value}>
+                                    평점 {value}점
+                                  </option>
+                                ))}
+                              </select>
+                              <input
+                                value={reviewDraft.title}
+                                onChange={(event) =>
+                                  setReviewDraft((current) =>
+                                    current ? { ...current, title: event.target.value } : current,
+                                  )
+                                }
+                                className="soft-input min-h-11 rounded-[20px] px-4 py-3"
+                                placeholder="리뷰 제목"
+                              />
+                            </div>
+                            <textarea
+                              value={reviewDraft.content}
+                              onChange={(event) =>
+                                setReviewDraft((current) =>
+                                  current ? { ...current, content: event.target.value } : current,
+                                )
+                              }
+                              className="soft-input min-h-[148px] w-full rounded-[24px] px-4 py-4"
+                              placeholder="리뷰 내용을 입력해 주세요"
+                            />
+                            <div className="flex flex-col gap-2 text-sm text-[var(--ink-soft)] sm:flex-row sm:items-center sm:justify-between">
+                              <p>제목 {reviewDraft.title.trim().length}자 · 본문 {reviewDraft.content.trim().length}자</p>
+                              <p>{reviewChanged ? '수정 내용이 있습니다.' : '변경된 내용이 없습니다.'}</p>
+                            </div>
+                            <div className="flex flex-wrap gap-3">
+                              <button
+                                type="button"
+                                disabled={reviewPendingId === review.id || !reviewChanged}
+                                onClick={() => handleReviewSave(review)}
+                                className="button-primary min-h-11 w-full px-4 py-3 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                              >
+                                리뷰 저장
+                              </button>
+                              <QuickActionButton
+                                onClick={() => {
+                                  setReviewEditorId(null);
+                                  setReviewDraft(null);
+                                }}
+                              >
+                                취소
+                              </QuickActionButton>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <p className="mt-4 text-base font-semibold">{review.title}</p>
+                            <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">{review.content}</p>
+                            <div className="mt-4 flex flex-wrap gap-2 text-xs text-[var(--ink-soft)]">
+                              {review.buyerReview ? (
+                                <span className="rounded-full border border-[var(--line)] px-3 py-1">실구매 리뷰</span>
+                              ) : null}
+                              {review.deliverySatisfaction ? (
+                                <span className="rounded-full border border-[var(--line)] px-3 py-1">배송 만족 {review.deliverySatisfaction}/5</span>
+                              ) : null}
+                              {review.packagingSatisfaction ? (
+                                <span className="rounded-full border border-[var(--line)] px-3 py-1">포장 만족 {review.packagingSatisfaction}/5</span>
+                              ) : null}
+                            </div>
+                            <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                              <Link href={`/products/${review.productSlug}`} className="button-secondary min-h-11 w-full px-4 py-3 sm:w-auto">
+                                상품 보기
+                              </Link>
+                              <QuickActionButton
+                                onClick={() => {
+                                  setReviewEditorId(review.id);
+                                  setReviewDraft(createReviewDraft(review));
+                                }}
+                              >
+                                리뷰 수정
+                              </QuickActionButton>
+                              <button
+                                type="button"
+                                disabled={reviewPendingId === review.id}
+                                onClick={() => handleReviewDelete(review.id)}
+                                className="button-secondary min-h-11 w-full px-4 py-3 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
+                              >
+                                리뷰 삭제
+                              </button>
+                            </div>
+                          </>
+                        )}
                       </div>
-                    ) : (
-                      <>
-                        <p className="mt-4 text-base font-semibold">{review.title}</p>
-                        <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">{review.content}</p>
-                        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                          <Link href={`/products/${review.productSlug}`} className="button-secondary min-h-11 w-full px-4 py-3 sm:w-auto">
-                            상품 보기
-                          </Link>
-                          <QuickActionButton
-                            onClick={() => {
-                              setReviewEditorId(review.id);
-                              setReviewDraft(createReviewDraft(review));
-                            }}
-                          >
-                            리뷰 수정
-                          </QuickActionButton>
-                          <button
-                            type="button"
-                            disabled={reviewPendingId === review.id}
-                            onClick={() => handleReviewDelete(review.id)}
-                            className="button-secondary min-h-11 w-full px-4 py-3 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
-                          >
-                            리뷰 삭제
-                          </button>
-                        </div>
-                      </>
-                    )}
+                    </div>
                   </article>
                 );
               })
