@@ -203,7 +203,7 @@ export default async function HomePage() {
                 <div className="mt-8 flex flex-wrap items-center gap-4">
                   <Link
                     href={heroBanner?.href ?? `/products/${heroProduct?.slug ?? ""}`}
-                    className="inline-flex items-center justify-center rounded-full bg-white px-6 py-4 text-sm font-semibold text-black transition hover:-translate-y-[1px]"
+                    className="inline-flex items-center justify-center rounded-full bg-white px-6 py-4 text-sm font-semibold !text-black transition hover:-translate-y-[1px] hover:!text-black"
                   >
                     {normalizeCopy((heroBanner?.ctaLabel || home.heroCtaLabel || "").trim(), "둘러보기")}
                   </Link>

@@ -84,7 +84,7 @@ export default async function OrderPage({
 
         <div className="mt-6 rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.78)] px-5 py-4">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--ink-soft)]">
-            Order Number
+            주문번호
           </p>
           <p className="mt-2 font-display text-2xl font-semibold text-[var(--ink)]">
             {order.orderNumber}
