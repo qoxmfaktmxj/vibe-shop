@@ -1,4 +1,5 @@
 import Image from "next/image";
+
 import { SOCIAL_PROVIDERS } from "@/lib/social-auth";
 
 export function SocialLoginButtons({ nextPath }: { nextPath: string }) {
@@ -6,7 +7,7 @@ export function SocialLoginButtons({ nextPath }: { nextPath: string }) {
     <div className="grid gap-3">
       <div className="flex items-center gap-3 text-xs uppercase tracking-[0.18em] text-[var(--ink-soft)]">
         <span className="h-px flex-1 bg-[var(--line)]" />
-        <span>Social Login</span>
+        <span>소셜 로그인</span>
         <span className="h-px flex-1 bg-[var(--line)]" />
       </div>
 

@@ -46,7 +46,7 @@ function RatingSelect({
         value={value}
         onChange={(event) => onChange(Number(event.target.value))}
         disabled={disabled}
-        className="soft-input px-4 py-3"
+        className="soft-input rounded-[20px] px-4 py-3"
       >
         <option value={5}>5점</option>
         <option value={4}>4점</option>
@@ -78,24 +78,24 @@ export function ReviewComposer({
   const disabled = !canWriteReview || hasReviewed || !session.authenticated || isPending;
   const parsedImageUrls = useMemo(() => parseImageUrls(form.imageUrlsText), [form.imageUrlsText]);
 
-  let helperText = "구매 이력이 있는 회원만 리뷰를 남길 수 있습니다.";
+  let helperText = "구매 이력이 있는 회원만 리뷰를 작성할 수 있습니다.";
   if (!session.authenticated) {
-    helperText = "리뷰를 작성하려면 로그인해 주세요.";
+    helperText = "리뷰를 작성하려면 먼저 로그인해 주세요.";
   } else if (hasReviewed) {
-    helperText = "이미 이 상품에 대한 리뷰를 작성했습니다. 계정 화면에서 수정/삭제할 수 있습니다.";
+    helperText = "이미 리뷰를 작성한 상품입니다. 마이페이지에서 수정하거나 삭제할 수 있습니다.";
   } else if (canWriteReview) {
-    helperText = "포토 리뷰, 배송/포장 만족도까지 남기면 다른 고객의 의사결정에 더 큰 도움이 됩니다.";
+    helperText = "사진, 배송 만족도, 포장 만족도까지 함께 남기면 다른 고객에게 더 큰 도움이 됩니다.";
   }
 
   return (
-    <section className="surface-card rounded-none p-6 sm:p-8">
+    <section className="surface-card rounded-[32px] p-6 sm:p-8">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="display-eyebrow">리뷰</p>
-          <h2 className="display-heading mt-3 text-3xl">리뷰 작성</h2>
+          <p className="display-eyebrow">리뷰 작성</p>
+          <h2 className="display-heading mt-3 text-3xl">구매 후기를 남겨 주세요.</h2>
         </div>
         <div className="rounded-full border border-[var(--line)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-soft)]">
-          Member Only
+          구매 회원 전용
         </div>
       </div>
 
@@ -109,7 +109,7 @@ export function ReviewComposer({
           setError("");
 
           if (!session.authenticated) {
-            router.push(`/login?next=${encodeURIComponent(pathname || "/")}`);
+            router.push(`/auth?tab=login&next=${encodeURIComponent(pathname || "/")}`);
             return;
           }
 
@@ -145,20 +145,15 @@ export function ReviewComposer({
         />
 
         <label className="grid gap-2">
-          <span className="text-sm font-medium">한 줄 핏 태그</span>
+          <span className="text-sm font-medium">한 줄 태그</span>
           <input
             name="fitTag"
             maxLength={40}
             value={form.fitTag}
-            onChange={(event) =>
-              setForm((current) => ({
-                ...current,
-                fitTag: event.target.value,
-              }))
-            }
+            onChange={(event) => setForm((current) => ({ ...current, fitTag: event.target.value }))}
             disabled={disabled}
-            className="soft-input px-4 py-3"
-            placeholder="예: 공간포인트 / 손에잘맞음 / 휴식루틴"
+            className="soft-input rounded-[20px] px-4 py-3"
+            placeholder="작은 공간에도 잘 맞아요 / 재구매 의사 있어요"
           />
         </label>
 
@@ -168,15 +163,10 @@ export function ReviewComposer({
             name="title"
             maxLength={120}
             value={form.title}
-            onChange={(event) =>
-              setForm((current) => ({
-                ...current,
-                title: event.target.value,
-              }))
-            }
+            onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
             disabled={disabled}
-            className="soft-input px-4 py-3"
-            placeholder="이 상품의 어떤 점이 좋았나요?"
+            className="soft-input rounded-[20px] px-4 py-3"
+            placeholder="어떤 점이 좋았는지 짧게 적어 주세요"
           />
         </label>
 
@@ -187,15 +177,10 @@ export function ReviewComposer({
             rows={5}
             maxLength={2000}
             value={form.content}
-            onChange={(event) =>
-              setForm((current) => ({
-                ...current,
-                content: event.target.value,
-              }))
-            }
+            onChange={(event) => setForm((current) => ({ ...current, content: event.target.value }))}
             disabled={disabled}
-            className="soft-input px-4 py-3"
-            placeholder="사용감, 분위기, 추천 포인트를 남겨 주세요."
+            className="soft-input rounded-[20px] px-4 py-3"
+            placeholder="사용하면서 느낀 점, 추천 이유, 아쉬운 점을 자유롭게 적어 주세요"
           />
         </label>
 
@@ -221,15 +206,10 @@ export function ReviewComposer({
             name="repurchaseYn"
             type="checkbox"
             checked={form.repurchaseYn}
-            onChange={(event) =>
-              setForm((current) => ({
-                ...current,
-                repurchaseYn: event.target.checked,
-              }))
-            }
+            onChange={(event) => setForm((current) => ({ ...current, repurchaseYn: event.target.checked }))}
             disabled={disabled}
           />
-          재구매 의사가 있거나 재구매 경험이 있어요
+          재구매 의사 또는 재구매 경험이 있어요
         </label>
 
         <label className="grid gap-2">
@@ -238,20 +218,15 @@ export function ReviewComposer({
             name="imageUrls"
             rows={3}
             value={form.imageUrlsText}
-            onChange={(event) =>
-              setForm((current) => ({
-                ...current,
-                imageUrlsText: event.target.value,
-              }))
-            }
+            onChange={(event) => setForm((current) => ({ ...current, imageUrlsText: event.target.value }))}
             disabled={disabled}
-            className="soft-input px-4 py-3"
+            className="soft-input rounded-[20px] px-4 py-3"
             placeholder={"https://example.com/review-1.jpg\nhttps://example.com/review-2.jpg"}
           />
         </label>
 
         <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] px-4 py-3 text-sm text-[var(--ink-soft)]">
-          미리보기 이미지 {parsedImageUrls.length}장 / 최대 4장
+          미리보기 이미지 {parsedImageUrls.length}개 / 최대 4개
         </div>
 
         {message ? <p className="text-sm text-[var(--secondary)]">{message}</p> : null}
@@ -260,7 +235,7 @@ export function ReviewComposer({
         <button
           type="submit"
           disabled={disabled}
-          className="button-primary w-full px-5 py-3 disabled:opacity-60"
+          className="button-primary w-full rounded-[20px] px-5 py-3 disabled:opacity-60"
         >
           {isPending ? "등록 중..." : "리뷰 등록"}
         </button>

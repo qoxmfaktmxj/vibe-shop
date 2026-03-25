@@ -92,13 +92,13 @@ export function ProductReviewSection({
 
   return (
     <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-      <article className="surface-card rounded-none p-6 sm:p-8">
+      <article className="surface-card rounded-[32px] p-6 sm:p-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="display-eyebrow">리뷰</p>
-            <h2 className="display-heading mt-3 text-3xl">구매자 리뷰</h2>
+            <h2 className="display-heading mt-3 text-3xl">구매 후기와 만족도</h2>
             <p className="mt-3 text-sm leading-7 text-[var(--ink-soft)]">
-              사진 리뷰, 별점 분포, 도움이 돼요 순 정렬까지 한 번에 확인할 수 있습니다.
+              사진 리뷰, 평점 분포, 도움이 돼요 반응까지 한 화면에서 비교할 수 있습니다.
             </p>
           </div>
           <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.76)] px-5 py-4 text-right">
@@ -113,22 +113,22 @@ export function ProductReviewSection({
         </div>
 
         <div className="mt-8 grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
-          <section className="rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
+          <section className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div className="rounded-[20px] bg-white/80 p-4">
-                <p className="text-xs uppercase tracking-[0.16em] text-[var(--ink-soft)]">Photo</p>
+                <p className="text-xs uppercase tracking-[0.16em] text-[var(--ink-soft)]">포토</p>
                 <p className="mt-2 text-2xl font-semibold">{summary.photoReviewCount}</p>
               </div>
               <div className="rounded-[20px] bg-white/80 p-4">
-                <p className="text-xs uppercase tracking-[0.16em] text-[var(--ink-soft)]">Buyer</p>
+                <p className="text-xs uppercase tracking-[0.16em] text-[var(--ink-soft)]">구매 인증</p>
                 <p className="mt-2 text-2xl font-semibold">{summary.buyerReviewCount}</p>
               </div>
               <div className="rounded-[20px] bg-white/80 p-4">
-                <p className="text-xs uppercase tracking-[0.16em] text-[var(--ink-soft)]">Repurchase</p>
+                <p className="text-xs uppercase tracking-[0.16em] text-[var(--ink-soft)]">재구매</p>
                 <p className="mt-2 text-2xl font-semibold">{summary.repurchaseRatio.toFixed(1)}%</p>
               </div>
               <div className="rounded-[20px] bg-white/80 p-4">
-                <p className="text-xs uppercase tracking-[0.16em] text-[var(--ink-soft)]">Delivery</p>
+                <p className="text-xs uppercase tracking-[0.16em] text-[var(--ink-soft)]">배송</p>
                 <p className="mt-2 text-lg font-semibold">
                   {satisfactionLabel(summary.deliverySatisfactionAverage)}
                 </p>
@@ -136,12 +136,15 @@ export function ProductReviewSection({
             </div>
 
             <div className="mt-4 rounded-[20px] bg-white/80 p-4 text-sm text-[var(--ink-soft)]">
-              포장 만족도 <span className="ml-2 font-semibold text-[var(--ink)]">{satisfactionLabel(summary.packagingSatisfactionAverage)}</span>
+              포장 만족도
+              <span className="ml-2 font-semibold text-[var(--ink)]">
+                {satisfactionLabel(summary.packagingSatisfactionAverage)}
+              </span>
             </div>
           </section>
 
-          <section className="rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
-            <p className="text-sm font-semibold">별점 분포</p>
+          <section className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
+            <p className="text-sm font-semibold">평점 분포</p>
             <div className="mt-4 space-y-3">
               {summary.ratingDistribution.map((item) => (
                 <div key={item.rating} className="grid grid-cols-[42px_1fr_56px] items-center gap-3 text-sm">
@@ -159,11 +162,13 @@ export function ProductReviewSection({
           </section>
         </div>
 
-        <div className="mt-8 rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
+        <div className="mt-8 rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold">포토 리뷰</p>
-              <p className="mt-1 text-sm text-[var(--ink-soft)]">실사용 이미지를 빠르게 살펴보세요.</p>
+              <p className="mt-1 text-sm text-[var(--ink-soft)]">
+                실제 사용 이미지를 빠르게 훑어보며 상품 분위기를 확인할 수 있습니다.
+              </p>
             </div>
             <button
               type="button"
@@ -174,7 +179,7 @@ export function ProductReviewSection({
                   : "border border-[var(--line)] bg-white/80 text-[var(--ink)]"
               }`}
             >
-              사진 리뷰
+              사진 리뷰만 보기
             </button>
           </div>
 
@@ -196,12 +201,12 @@ export function ProductReviewSection({
             </div>
           ) : (
             <div className="mt-4 rounded-[20px] border border-dashed border-[var(--line)] px-4 py-5 text-sm text-[var(--ink-soft)]">
-              현재 선택된 조건에서 사진 리뷰가 없습니다.
+              현재 선택한 조건에서는 사진 리뷰가 없습니다.
             </div>
           )}
         </div>
 
-        <div className="mt-8 flex flex-col gap-3 rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
+        <div className="mt-8 flex flex-col gap-3 rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap gap-2">
               {[
@@ -231,24 +236,24 @@ export function ProductReviewSection({
             </div>
 
             <label className="flex items-center gap-3 text-sm text-[var(--ink-soft)]">
-              <span>리뷰 정렬</span>
+              <span>정렬</span>
               <select
                 name="reviewSort"
                 value={sort}
                 onChange={(event) => loadReviews({ sort: event.target.value })}
-                className="soft-input px-4 py-3"
+                className="soft-input rounded-[20px] px-4 py-3"
               >
                 <option value="newest">최신순</option>
                 <option value="helpful">도움순</option>
-                <option value="rating-high">평점 높은순</option>
-                <option value="rating-low">평점 낮은순</option>
+                <option value="rating-high">평점 높은 순</option>
+                <option value="rating-low">평점 낮은 순</option>
               </select>
             </label>
           </div>
 
           {error ? <p className="text-sm text-red-600">{error}</p> : null}
           {actionMessage ? <p className="text-sm text-[var(--secondary)]">{actionMessage}</p> : null}
-          {isPending ? <p className="text-sm text-[var(--ink-soft)]">리뷰를 불러오는 중...</p> : null}
+          {isPending ? <p className="text-sm text-[var(--ink-soft)]">리뷰를 불러오는 중입니다...</p> : null}
         </div>
 
         <div className="mt-8 space-y-4">
@@ -256,12 +261,13 @@ export function ProductReviewSection({
             reviews.map((review) => {
               const isExpanded = expandedIds.includes(review.id);
               const needsExpand = review.content.length > 180;
-              const previewContent = needsExpand && !isExpanded ? `${review.content.slice(0, 180)}…` : review.content;
+              const previewContent =
+                needsExpand && !isExpanded ? `${review.content.slice(0, 180)}...` : review.content;
 
               return (
                 <article
                   key={review.id}
-                  className="rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6"
+                  className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6"
                 >
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
@@ -287,7 +293,9 @@ export function ProductReviewSection({
                         <RatingStars rating={review.rating} size="sm" />
                         <span className="text-sm text-[var(--ink-soft)]">{review.reviewerName}</span>
                         {review.repurchaseYn ? (
-                          <span className="text-xs font-semibold text-[var(--secondary)]">재구매 의사/경험 있음</span>
+                          <span className="text-xs font-semibold text-[var(--secondary)]">
+                            재구매 의사 있음
+                          </span>
                         ) : null}
                       </div>
                     </div>
@@ -337,7 +345,7 @@ export function ProductReviewSection({
                       type="button"
                       onClick={() => {
                         if (!session.authenticated) {
-                          router.push(`/login?next=${encodeURIComponent(pathname || "/")}`);
+                          router.push(`/auth?tab=login&next=${encodeURIComponent(pathname || "/")}`);
                           return;
                         }
 
@@ -362,7 +370,7 @@ export function ProductReviewSection({
                               );
                               setActionMessage(
                                 response.helpfulVoted
-                                  ? "이 리뷰를 도움이 되는 리뷰로 저장했습니다."
+                                  ? "이 리뷰를 도움이 되는 리뷰로 표시했습니다."
                                   : "도움이 돼요 표시를 취소했습니다.",
                               );
                             } catch (nextError) {
@@ -384,8 +392,8 @@ export function ProductReviewSection({
               );
             })
           ) : (
-            <div className="rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
-              선택한 조건에 맞는 리뷰가 없습니다. 필터를 해제하거나 첫 리뷰를 남겨 보세요.
+            <div className="rounded-[28px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
+              조건에 맞는 리뷰가 없습니다. 필터를 조정하거나 첫 리뷰를 남겨 보세요.
             </div>
           )}
         </div>

@@ -52,7 +52,7 @@ export function WishlistToggleButton({
         onClick={() => {
           if (!session.authenticated) {
             const next = pathname || "/";
-            router.push(`/login?next=${encodeURIComponent(next)}`);
+            router.push(`/auth?tab=login&next=${encodeURIComponent(next)}`);
             return;
           }
 

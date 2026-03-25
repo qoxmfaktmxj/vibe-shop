@@ -43,7 +43,7 @@ export function SignupForm({ nextPath }: { nextPath: string }) {
             required
             value={form.name}
             onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
-            className="soft-input px-4 py-3"
+            className="soft-input rounded-[20px] px-4 py-3"
             placeholder="김민수"
           />
         </label>
@@ -55,7 +55,7 @@ export function SignupForm({ nextPath }: { nextPath: string }) {
             type="email"
             value={form.email}
             onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
-            className="soft-input px-4 py-3"
+            className="soft-input rounded-[20px] px-4 py-3"
             placeholder="you@example.com"
           />
         </label>
@@ -68,7 +68,7 @@ export function SignupForm({ nextPath }: { nextPath: string }) {
             minLength={8}
             value={form.password}
             onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
-            className="soft-input px-4 py-3"
+            className="soft-input rounded-[20px] px-4 py-3"
             placeholder="8자 이상"
           />
         </label>
@@ -85,15 +85,15 @@ export function SignupForm({ nextPath }: { nextPath: string }) {
         <button
           type="submit"
           disabled={isPending}
-          className="button-primary px-5 py-3 disabled:opacity-60"
+          className="button-primary rounded-[20px] px-5 py-3 disabled:opacity-60"
         >
-          {isPending ? "가입 중입니다." : "회원가입"}
+          {isPending ? "가입 중입니다" : "회원가입"}
         </button>
 
         <p className="text-sm text-[var(--ink-soft)]">
           이미 계정이 있다면{" "}
           <Link
-            href={`/login?next=${encodeURIComponent(nextPath)}`}
+            href={`/auth?tab=login&next=${encodeURIComponent(nextPath)}`}
             className="font-semibold text-[var(--primary)]"
           >
             로그인

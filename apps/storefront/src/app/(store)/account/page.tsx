@@ -14,7 +14,7 @@ export default async function AccountPage() {
   const session = await getAuthSession().catch(() => ({ authenticated: false, user: null }));
 
   if (!session.authenticated || !session.user) {
-    redirect("/login?next=/account");
+    redirect("/auth?tab=login&next=/account");
   }
 
   const [profile, addresses, orders, wishlist, reviews] = await Promise.all([
