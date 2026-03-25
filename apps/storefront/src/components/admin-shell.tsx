@@ -20,7 +20,7 @@ function isActivePath(currentPath: string, href: string) {
 }
 
 export function AdminShell({
-  eyebrow = "Vibe Shop Admin",
+  eyebrow = "MARU Digital Atelier \uC6B4\uC601 \uCF58\uC194",
   title,
   description,
   children,
@@ -32,13 +32,17 @@ export function AdminShell({
   const [isLoggingOut, startLoggingOut] = useTransition();
 
   return (
-    <main className="mx-auto flex w-full max-w-[1480px] flex-col gap-6 px-6 py-8 sm:px-8 lg:px-10">
-      <section className="admin-dark rounded-[40px] p-8 sm:p-10">
+    <main className="mx-auto flex w-full max-w-[1480px] flex-col gap-6 px-6 py-6 sm:px-8 lg:px-10">
+      <section className="admin-dark rounded-[40px] p-8 shadow-[0_28px_60px_rgba(16,33,39,0.18)] sm:p-10">
         <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
           <div className="max-w-4xl">
             <p className="eyebrow text-[rgba(237,244,239,0.64)]">{eyebrow}</p>
-            <h1 className="display mt-5 text-5xl font-semibold leading-[0.92] sm:text-6xl">{title}</h1>
-            <p className="mt-5 max-w-3xl text-base leading-8 text-[rgba(237,244,239,0.72)]">{description}</p>
+            <h1 className="display mt-5 text-5xl font-semibold leading-[0.92] sm:text-6xl">
+              {title}
+            </h1>
+            <p className="mt-5 max-w-3xl text-base leading-8 text-[rgba(237,244,239,0.72)]">
+              {description}
+            </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -59,12 +63,12 @@ export function AdminShell({
               }
               className="admin-button-ghost px-5 py-3 disabled:opacity-60"
             >
-              {isLoggingOut ? "Signing out..." : "Sign out"}
+              {isLoggingOut ? "\uB85C\uADF8\uC544\uC6C3 \uC911..." : "\uB85C\uADF8\uC544\uC6C3"}
             </button>
           </div>
         </div>
 
-        <nav className="mt-8 flex flex-wrap gap-3">
+        <nav className="mt-8 flex flex-wrap gap-3" aria-label="\uAD00\uB9AC\uC790 \uC8FC\uC694 \uBA54\uB274">
           {ADMIN_NAV_ITEMS.map((item) => {
             const active = isActivePath(pathname, item.href);
 
@@ -74,7 +78,7 @@ export function AdminShell({
                 href={item.href}
                 className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
                   active
-                    ? "bg-white text-[var(--panel-strong)]"
+                    ? "bg-white text-[var(--panel-strong)] shadow-[0_10px_24px_rgba(255,255,255,0.12)]"
                     : "border border-white/12 text-[rgba(237,244,239,0.78)] hover:border-white/28"
                 }`}
               >

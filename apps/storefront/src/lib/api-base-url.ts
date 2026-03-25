@@ -1,5 +1,6 @@
 function normalizeBaseUrl(value: string) {
-  return value.endsWith("/") ? value.slice(0, -1) : value;
+  const trimmed = value.trim();
+  return trimmed.endsWith("/") ? trimmed.slice(0, -1) : trimmed;
 }
 
 export function resolveApiBaseUrl() {

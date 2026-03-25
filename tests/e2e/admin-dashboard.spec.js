@@ -12,12 +12,15 @@ test("admin dashboard can manage display, products, and order status", async ({ 
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
   const uniqueId = Date.now();
-  const heroTitle = `Ops Edit ${uniqueId}`;
+  const heroTitle = `운영 메인 카피 ${uniqueId}`;
 
   await page.goto("/products/brew-mug", { waitUntil: "networkidle" });
-  await page.getByRole("complementary").getByRole("button", { name: "Add to Bag" }).click();
+  await page
+    .getByRole("complementary")
+    .getByRole("button", { name: /장바구니 담기|Add to Bag/ })
+    .click();
   await expect(
-    page.getByRole("complementary").getByRole("button", { name: "담기 완료" }),
+    page.getByRole("complementary").getByRole("button", { name: /담기 완료|Added/ }),
   ).toBeVisible();
 
   await page.goto("/checkout", { waitUntil: "networkidle" });
@@ -40,17 +43,23 @@ test("admin dashboard can manage display, products, and order status", async ({ 
   await expect(page).toHaveURL(adminUrl);
 
   await page.goto(`${adminUrl}/display`, { waitUntil: "networkidle" });
-  await page.locator('input[name="heroTitle"]').fill(heroTitle);
+  const heroTitleInput = page.locator('input[name="heroTitle"]');
+  const originalHeroTitle = await heroTitleInput.inputValue();
+  await heroTitleInput.fill(heroTitle);
   await page
     .locator("form")
     .filter({ has: page.locator('input[name="heroTitle"]') })
     .locator('button[type="submit"]')
     .click();
-  await expect(page.locator('input[name="heroTitle"]')).toHaveValue(heroTitle);
+  await expect(heroTitleInput).toHaveValue(heroTitle);
 
   await page.goto(`${adminUrl}/products`, { waitUntil: "networkidle" });
-  await page.locator('input[name="productBadge"]').fill("OPS PICK");
-  await page.locator('input[name="productStock"]').fill("5");
+  const productBadgeInput = page.locator('input[name="productBadge"]');
+  const productStockInput = page.locator('input[name="productStock"]');
+  const originalBadge = await productBadgeInput.inputValue();
+  const originalStock = await productStockInput.inputValue();
+  await productBadgeInput.fill("OPS PICK");
+  await productStockInput.fill("5");
   await page
     .locator("form")
     .filter({ has: page.locator('input[name="productName"]') })
@@ -60,14 +69,39 @@ test("admin dashboard can manage display, products, and order status", async ({ 
   await page.goto(`${adminUrl}/orders`, { waitUntil: "networkidle" });
   const orderSelect = page.getByRole("combobox").first();
   await expect(orderSelect).toBeVisible();
+  const originalStatus = await orderSelect.inputValue();
   await orderSelect.selectOption("PREPARING");
-  await page.getByRole("button", { name: "Save status" }).first().click();
+  await page.getByRole("button", { name: /상태 저장|Save status/ }).first().click();
   await expect(orderSelect).toHaveValue("PREPARING");
 
   await page.goto(`${adminUrl}/`, { waitUntil: "networkidle" });
-  await expect(page.getByRole("heading", { name: /admin summary without the monolith/i })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: /핵심 운영 지표를 빠르게 확인하는 메인 보드/ }),
+  ).toBeVisible();
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "12-admin-dashboard.png"),
     fullPage: true,
   });
+
+  await page.goto(`${adminUrl}/orders`, { waitUntil: "networkidle" });
+  const restoreOrderSelect = page.getByRole("combobox").first();
+  await restoreOrderSelect.selectOption(originalStatus);
+  await page.getByRole("button", { name: /상태 저장|Save status/ }).first().click();
+
+  await page.goto(`${adminUrl}/products`, { waitUntil: "networkidle" });
+  await productBadgeInput.fill(originalBadge);
+  await productStockInput.fill(originalStock);
+  await page
+    .locator("form")
+    .filter({ has: page.locator('input[name="productName"]') })
+    .locator('button[type="submit"]')
+    .click();
+
+  await page.goto(`${adminUrl}/display`, { waitUntil: "networkidle" });
+  await heroTitleInput.fill(originalHeroTitle);
+  await page
+    .locator("form")
+    .filter({ has: page.locator('input[name="heroTitle"]') })
+    .locator('button[type="submit"]')
+    .click();
 });

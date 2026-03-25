@@ -7,7 +7,7 @@ import type { AdminMember } from "@/lib/admin-contracts";
 
 function formatDateTime(value: string | null) {
   if (!value) {
-    return "No recent login";
+    return "최근 로그인 없음";
   }
 
   return new Date(value).toLocaleString("ko-KR");
@@ -19,6 +19,24 @@ function formatPrice(value: number) {
 
 function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
+}
+
+function formatProviderLabel(provider: string) {
+  const labels: Record<string, string> = {
+    LOCAL: "일반",
+    GOOGLE: "Google",
+    KAKAO: "카카오",
+  };
+  return labels[provider] ?? provider;
+}
+
+function formatStatusLabel(status: string) {
+  const labels: Record<string, string> = {
+    ACTIVE: "활성",
+    DORMANT: "휴면",
+    BLOCKED: "차단",
+  };
+  return labels[status] ?? status;
 }
 
 export function AdminMemberManager({
@@ -60,10 +78,10 @@ export function AdminMemberManager({
     <article className="admin-card rounded-[36px] p-8">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="eyebrow text-[var(--ink-soft)]">Members</p>
-          <h2 className="display mt-4 text-3xl font-semibold">Member operations</h2>
+          <p className="eyebrow text-[var(--ink-soft)]">회원 관리</p>
+          <h2 className="display mt-4 text-3xl font-semibold">회원 상태와 구매 이력 확인</h2>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--ink-soft)]">
-            Member moderation now lives on its own route and updates locally without reloading unrelated data.
+            회원 상태 변경과 로그인 이력, 누적 구매 금액을 같은 화면에서 빠르게 확인할 수 있습니다.
           </p>
         </div>
 
@@ -73,7 +91,7 @@ export function AdminMemberManager({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             className="admin-input px-4 py-3"
-            placeholder="Search by name, email, or phone"
+            placeholder="이름, 이메일, 전화번호 검색"
           />
           <select
             name="memberStatusFilter"
@@ -81,10 +99,10 @@ export function AdminMemberManager({
             onChange={(event) => setStatusFilter(event.target.value)}
             className="admin-input px-4 py-3"
           >
-            <option value="ALL">All statuses</option>
-            <option value="ACTIVE">ACTIVE</option>
-            <option value="DORMANT">DORMANT</option>
-            <option value="BLOCKED">BLOCKED</option>
+            <option value="ALL">전체 상태</option>
+            <option value="ACTIVE">활성</option>
+            <option value="DORMANT">휴면</option>
+            <option value="BLOCKED">차단</option>
           </select>
           <select
             name="memberProviderFilter"
@@ -92,10 +110,10 @@ export function AdminMemberManager({
             onChange={(event) => setProviderFilter(event.target.value)}
             className="admin-input px-4 py-3"
           >
-            <option value="ALL">All providers</option>
-            <option value="LOCAL">LOCAL</option>
-            <option value="GOOGLE">GOOGLE</option>
-            <option value="KAKAO">KAKAO</option>
+            <option value="ALL">전체 가입 경로</option>
+            <option value="LOCAL">일반</option>
+            <option value="GOOGLE">Google</option>
+            <option value="KAKAO">카카오</option>
           </select>
         </div>
       </div>
@@ -113,23 +131,23 @@ export function AdminMemberManager({
                 <div className="flex flex-wrap items-center gap-3">
                   <p className="text-lg font-semibold">{member.name}</p>
                   <span className="rounded-full bg-[rgba(36,93,90,0.12)] px-3 py-1 text-xs font-semibold text-[var(--teal)]">
-                    {member.status}
+                    {formatStatusLabel(member.status)}
                   </span>
                   <span className="rounded-full bg-black/6 px-3 py-1 text-xs font-semibold text-[var(--ink-soft)]">
-                    {member.provider}
+                    {formatProviderLabel(member.provider)}
                   </span>
                 </div>
                 <p className="text-sm leading-7 text-[var(--ink-soft)]">
-                  {member.email} / {member.phone ?? "No phone"}
+                  {member.email} / {member.phone ?? "전화번호 없음"}
                 </p>
                 <div className="grid gap-2 text-sm text-[var(--ink-soft)] sm:grid-cols-2 xl:grid-cols-4">
-                  <p>Joined {formatDateTime(member.createdAt)}</p>
-                  <p>Last login {formatDateTime(member.lastLoginAt)}</p>
-                  <p>Orders {member.orderCount} / Addresses {member.shippingAddressCount}</p>
-                  <p>Total spent {formatPrice(member.totalSpent)} KRW</p>
+                  <p>가입일 {formatDateTime(member.createdAt)}</p>
+                  <p>최근 로그인 {formatDateTime(member.lastLoginAt)}</p>
+                  <p>주문 {member.orderCount} / 배송지 {member.shippingAddressCount}</p>
+                  <p>누적 구매 {formatPrice(member.totalSpent)}원</p>
                 </div>
                 <p className="text-xs text-[var(--ink-soft)]">
-                  Marketing opt-in: {member.marketingOptIn ? "yes" : "no"}
+                  마케팅 수신 동의: {member.marketingOptIn ? "예" : "아니오"}
                 </p>
               </div>
 
@@ -145,9 +163,9 @@ export function AdminMemberManager({
                   }
                   className="admin-input px-4 py-3"
                 >
-                  <option value="ACTIVE">ACTIVE</option>
-                  <option value="DORMANT">DORMANT</option>
-                  <option value="BLOCKED">BLOCKED</option>
+                  <option value="ACTIVE">활성</option>
+                  <option value="DORMANT">휴면</option>
+                  <option value="BLOCKED">차단</option>
                 </select>
                 <button
                   type="button"
@@ -169,16 +187,16 @@ export function AdminMemberManager({
                             ...current,
                             [member.id]: updatedMember.status,
                           }));
-                          setMessage(`${updatedMember.name} updated.`);
+                          setMessage(`${updatedMember.name} 회원 상태를 저장했습니다.`);
                         } catch (nextError) {
-                          setError(getErrorMessage(nextError, "Failed to update member status."));
+                          setError(getErrorMessage(nextError, "회원 상태를 저장하지 못했습니다."));
                         }
                       })();
                     });
                   }}
                   className="admin-button-secondary px-5 py-3 disabled:opacity-60"
                 >
-                  Save status
+                  상태 저장
                 </button>
               </div>
             </div>

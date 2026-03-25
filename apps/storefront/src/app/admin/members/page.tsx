@@ -9,9 +9,9 @@ export default async function AdminMembersPage() {
 
   return (
     <AdminShell
-      eyebrow="Members"
-      title="Member moderation in a focused workspace."
-      description="Member status changes now load independently and keep the dashboard route lightweight."
+      eyebrow="회원"
+      title="회원 상태와 운영 메모를 확인하는 전용 공간"
+      description="회원 상태 변경을 별도 화면에서 처리해 대시보드와 다른 운영 화면을 가볍게 유지합니다."
     >
       <AdminMemberManager initialMembers={members} />
     </AdminShell>

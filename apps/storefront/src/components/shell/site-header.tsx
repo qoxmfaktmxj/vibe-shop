@@ -26,8 +26,6 @@ export function SiteHeader({ categories = [] }: SiteHeaderProps) {
               Digital Atelier
             </span>
           </Link>
-
-          <SiteAuthActions />
         </div>
 
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6">
@@ -44,6 +42,7 @@ export function SiteHeader({ categories = [] }: SiteHeaderProps) {
           </nav>
 
           <CartHeaderButton />
+          <SiteAuthActions />
         </div>
       </div>
     </header>

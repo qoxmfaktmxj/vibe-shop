@@ -20,7 +20,7 @@ export function SearchForm({
 
   return (
     <form
-      className="flex h-14 w-full border border-[var(--line)] bg-[var(--surface-card)]"
+      className="section-frame grid gap-4 rounded-[32px] p-4 sm:grid-cols-[220px_1fr_auto] sm:items-center sm:p-5"
       onSubmit={(event) => {
         event.preventDefault();
         const trimmedKeyword = keyword.trim();
@@ -35,34 +35,38 @@ export function SearchForm({
         });
       }}
     >
-      <select
-        value={category}
-        onChange={(event) => setCategory(event.target.value)}
-        className="shrink-0 border-r border-[var(--line)] bg-transparent px-4 text-xs font-medium uppercase tracking-[0.1em] text-[var(--ink-soft)] outline-none"
-        style={{ fontFamily: "var(--font-display), monospace" }}
-      >
-        <option value="">전체 카테고리</option>
-        {categories.map((item) => (
-          <option key={item.id} value={item.slug}>
-            {item.name}
-          </option>
-        ))}
-      </select>
+      <label className="grid gap-2">
+        <span className="display-eyebrow">카테고리</span>
+        <select
+          value={category}
+          onChange={(event) => setCategory(event.target.value)}
+          className="soft-input min-h-16 rounded-[20px] px-4 text-[15px] font-medium sm:text-base"
+        >
+          <option value="">전체 카테고리</option>
+          {categories.map((item) => (
+            <option key={item.id} value={item.slug}>
+              {item.name}
+            </option>
+          ))}
+        </select>
+      </label>
 
-      <input
-        value={keyword}
-        onChange={(event) => setKeyword(event.target.value)}
-        placeholder="여름 리빙 10만원 이하 베이지 선물"
-        className="min-w-0 flex-1 bg-transparent px-5 text-sm text-[var(--ink)] outline-none placeholder:text-[var(--ink-muted)]"
-      />
+      <label className="grid gap-2">
+        <span className="display-eyebrow">검색어</span>
+        <input
+          value={keyword}
+          onChange={(event) => setKeyword(event.target.value)}
+          placeholder="머그컵, 린넨 커튼, 10만원 이하"
+          className="soft-input min-h-16 rounded-[20px] px-5 text-[15px] font-medium sm:text-base"
+        />
+      </label>
 
       <button
         type="submit"
         disabled={isPending}
-        className="shrink-0 bg-[var(--ink)] px-6 text-xs font-bold uppercase tracking-[0.1em] disabled:opacity-60"
-        style={{ color: "#ffffff", fontFamily: "var(--font-display), monospace" }}
+        className="button-primary min-h-16 rounded-[20px] px-7 text-sm sm:text-[15px] disabled:opacity-60"
       >
-        {isPending ? "…" : "검색"}
+        {isPending ? "검색 중" : "검색"}
       </button>
     </form>
   );

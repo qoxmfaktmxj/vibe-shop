@@ -10,9 +10,9 @@ export default async function AdminProductsPage() {
 
   return (
     <AdminShell
-      eyebrow="Products"
-      title="Catalog editing by route."
-      description="Product editing and taxonomy management are grouped together without forcing display or reporting data to load."
+      eyebrow="상품"
+      title="상품과 카테고리를 함께 관리하는 카탈로그 작업 공간"
+      description="전시와 통계 데이터와 분리해 상품 편집과 분류 체계 관리에 집중할 수 있도록 구성했습니다."
     >
       <div className="grid gap-6">
         <AdminProductManager initialProducts={products} />

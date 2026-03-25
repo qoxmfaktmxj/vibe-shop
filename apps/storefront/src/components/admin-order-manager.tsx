@@ -21,6 +21,14 @@ function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
 }
 
+function formatCustomerType(value: string) {
+  const labels: Record<string, string> = {
+    MEMBER: "회원",
+    GUEST: "비회원",
+  };
+  return labels[value] ?? value;
+}
+
 export function AdminOrderManager({ initialOrders }: AdminOrderManagerProps) {
   const [orders, setOrders] = useState(initialOrders);
   const [message, setMessage] = useState("");
@@ -29,10 +37,10 @@ export function AdminOrderManager({ initialOrders }: AdminOrderManagerProps) {
 
   return (
     <article className="admin-card rounded-[36px] p-8">
-      <p className="eyebrow text-[var(--ink-soft)]">Orders</p>
-      <h2 className="display mt-4 text-3xl font-semibold">Manage order status</h2>
+      <p className="eyebrow text-[var(--ink-soft)]">주문 관리</p>
+      <h2 className="display mt-4 text-3xl font-semibold">주문 상태 업데이트</h2>
       <p className="mt-4 text-sm leading-7 text-[var(--ink-soft)]">
-        The order queue now stands alone so operational updates do not compete with unrelated page state.
+        운영팀이 바로 확인해야 하는 주문만 모아 상태를 빠르게 전환할 수 있도록 구성했습니다.
       </p>
 
       <div className="mt-8 space-y-4">
@@ -49,13 +57,13 @@ export function AdminOrderManager({ initialOrders }: AdminOrderManagerProps) {
                 </span>
               </div>
               <p className="mt-3 text-sm leading-7 text-[var(--ink-soft)]">
-                {order.customerName} · {order.customerType} · {order.phone}
+                {order.customerName} / {formatCustomerType(order.customerType)} / {order.phone}
               </p>
               <p className="mt-1 text-sm leading-7 text-[var(--ink-soft)]">
-                {order.itemCount} items · {order.paymentMethod} · {order.paymentStatus}
+                상품 {order.itemCount}개 / {order.paymentMethod} / {order.paymentStatus}
               </p>
               <p className="mt-1 text-sm leading-7 text-[var(--ink-soft)]">
-                {formatDateTime(order.createdAt)} · {formatPrice(order.total)}원
+                {formatDateTime(order.createdAt)} / {formatPrice(order.total)}원
               </p>
             </div>
 
@@ -71,14 +79,14 @@ export function AdminOrderManager({ initialOrders }: AdminOrderManagerProps) {
                 }
                 className="admin-input px-4 py-3"
               >
-                <option value="PENDING_PAYMENT">PENDING_PAYMENT</option>
-                <option value="PAID">PAID</option>
-                <option value="PREPARING">PREPARING</option>
-                <option value="SHIPPED">SHIPPED</option>
-                <option value="DELIVERED">DELIVERED</option>
-                <option value="REFUND_REQUESTED">REFUND_REQUESTED</option>
-                <option value="REFUNDED">REFUNDED</option>
-                <option value="CANCELLED">CANCELLED</option>
+                <option value="PENDING_PAYMENT">결제 대기</option>
+                <option value="PAID">결제 완료</option>
+                <option value="PREPARING">상품 준비중</option>
+                <option value="SHIPPED">배송중</option>
+                <option value="DELIVERED">배송 완료</option>
+                <option value="REFUND_REQUESTED">환불 요청</option>
+                <option value="REFUNDED">환불 완료</option>
+                <option value="CANCELLED">주문 취소</option>
               </select>
 
               <button
@@ -98,16 +106,16 @@ export function AdminOrderManager({ initialOrders }: AdminOrderManagerProps) {
                         setOrders((current) =>
                           current.map((item) => (item.orderNumber === nextOrder.orderNumber ? nextOrder : item)),
                         );
-                        setMessage(`Updated ${nextOrder.orderNumber}.`);
+                        setMessage(`${nextOrder.orderNumber} 주문 상태를 저장했습니다.`);
                       } catch (saveError) {
-                        setError(getErrorMessage(saveError, "Failed to update order status."));
+                        setError(getErrorMessage(saveError, "주문 상태를 저장하지 못했습니다."));
                       }
                     })();
                   });
                 }}
                 className="admin-button-secondary px-5 py-3 disabled:opacity-60"
               >
-                {isPending ? "Saving..." : "Save status"}
+                {isPending ? "저장 중..." : "상태 저장"}
               </button>
             </div>
           </div>

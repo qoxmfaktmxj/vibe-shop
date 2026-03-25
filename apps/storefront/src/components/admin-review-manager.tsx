@@ -36,11 +36,11 @@ export function AdminReviewManager({
     <article className="admin-card rounded-[36px] p-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="eyebrow text-[var(--ink-soft)]">Reviews</p>
-          <h2 className="display mt-4 text-3xl font-semibold">리뷰 운영 관리</h2>
+          <p className="eyebrow text-[var(--ink-soft)]">리뷰 운영</p>
+          <h2 className="display mt-4 text-3xl font-semibold">리뷰 공개 상태 관리</h2>
         </div>
         <p className="text-sm text-[var(--ink-soft)]">
-          구매 인증, 포토 리뷰, 도움 수치를 함께 보고 노출 상태를 운영 관점에서 검수합니다.
+          구매 인증, 포토 리뷰, 만족도 지표를 함께 보며 노출 상태를 검토할 수 있습니다.
         </p>
       </div>
 
@@ -70,20 +70,20 @@ export function AdminReviewManager({
                   ) : null}
                 </div>
                 <p className="mt-3 text-sm text-[var(--ink-soft)]">
-                  {review.reviewerName} · {review.reviewerEmail}
+                  {review.reviewerName} / {review.reviewerEmail}
                 </p>
                 <p className="mt-2 text-sm font-semibold text-[var(--primary)]">{renderStars(review.rating)}</p>
                 <p className="mt-3 text-base font-semibold">{review.title}</p>
                 <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">{review.content}</p>
                 <div className="mt-4 grid gap-2 text-sm text-[var(--ink-soft)] sm:grid-cols-2 xl:grid-cols-4">
-                  <p>핏 태그 {review.fitTag ?? "-"}</p>
+                  <p>한 줄 태그 {review.fitTag ?? "-"}</p>
                   <p>재구매 {review.repurchaseYn ? "예" : "아니오"}</p>
                   <p>배송 만족도 {review.deliverySatisfaction ?? "-"}/5</p>
                   <p>포장 만족도 {review.packagingSatisfaction ?? "-"}/5</p>
                 </div>
                 <p className="mt-3 text-sm text-[var(--ink-soft)]">도움이 돼요 {review.helpfulCount}</p>
                 <p className="mt-3 text-xs uppercase tracking-[0.16em] text-[var(--ink-soft)]">
-                  생성 {new Date(review.createdAt).toLocaleString("ko-KR")} · 수정 {new Date(review.updatedAt).toLocaleString("ko-KR")}
+                  생성 {new Date(review.createdAt).toLocaleString("ko-KR")} / 수정 {new Date(review.updatedAt).toLocaleString("ko-KR")}
                 </p>
               </div>
 
@@ -121,7 +121,7 @@ export function AdminReviewManager({
                           );
                           setMessage(`리뷰 ${updatedReview.id} 상태를 저장했습니다.`);
                         } catch (nextError) {
-                          setError(getErrorMessage(nextError, "리뷰 상태 저장 중 문제가 발생했습니다."));
+                          setError(getErrorMessage(nextError, "리뷰 상태 변경 중 문제가 발생했습니다."));
                         }
                       })();
                     });

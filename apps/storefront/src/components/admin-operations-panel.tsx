@@ -40,9 +40,9 @@ export function AdminOperationsPanel({ initialOperations }: { initialOperations:
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="eyebrow text-[var(--ink-soft)]">Operations Assistant</p>
-          <h2 className="display mt-4 text-3xl font-semibold">운영 보조 대시보드</h2>
+          <h2 className="display mt-4 text-3xl font-semibold">Operations Watchboard</h2>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--ink-soft)]">
-            저재고, 이상 주문, 최근 트렌드, 저평점 리뷰를 요청 시점 집계로 묶어 우선 확인 대상을 보여줍니다.
+            Keep low stock, suspicious orders, fast-moving products, and low-rated reviews in one place.
           </p>
         </div>
 
@@ -57,12 +57,12 @@ export function AdminOperationsPanel({ initialOperations }: { initialOperations:
                 try {
                   const nextOperations = await getOperations(filters);
                   setOperations(nextOperations);
-                  setMessage("운영 임계값 기준으로 보조 대시보드를 새로 계산했습니다.");
+                  setMessage("Thresholds updated and the watchboard was recalculated.");
                 } catch (refreshError) {
                   setError(
                     refreshError instanceof Error
                       ? refreshError.message
-                      : "운영 보조 데이터를 새로 불러오지 못했습니다.",
+                      : "Failed to refresh operations data.",
                   );
                 }
               })();
@@ -70,7 +70,7 @@ export function AdminOperationsPanel({ initialOperations }: { initialOperations:
           }}
         >
           <label className="grid gap-2">
-            <span className="text-xs font-medium text-[var(--ink-soft)]">저재고 기준</span>
+            <span className="text-xs font-medium text-[var(--ink-soft)]">Low stock threshold</span>
             <input
               type="number"
               min={1}
@@ -86,7 +86,7 @@ export function AdminOperationsPanel({ initialOperations }: { initialOperations:
             />
           </label>
           <label className="grid gap-2">
-            <span className="text-xs font-medium text-[var(--ink-soft)]">저평점 기준</span>
+            <span className="text-xs font-medium text-[var(--ink-soft)]">Low rating threshold</span>
             <input
               type="number"
               min={1}
@@ -102,7 +102,7 @@ export function AdminOperationsPanel({ initialOperations }: { initialOperations:
             />
           </label>
           <label className="grid gap-2">
-            <span className="text-xs font-medium text-[var(--ink-soft)]">이상 주문 점수</span>
+            <span className="text-xs font-medium text-[var(--ink-soft)]">Suspicious order score</span>
             <input
               type="number"
               min={1}
@@ -118,7 +118,7 @@ export function AdminOperationsPanel({ initialOperations }: { initialOperations:
             />
           </label>
           <button type="submit" disabled={isPending} className="admin-button sm:col-span-3 px-6 py-4 disabled:opacity-60">
-            {isPending ? "다시 계산하는 중" : "운영 임계값 다시 계산"}
+            {isPending ? "Recalculating..." : "Recalculate watchboard"}
           </button>
         </form>
       </div>
@@ -130,33 +130,29 @@ export function AdminOperationsPanel({ initialOperations }: { initialOperations:
         <article className="rounded-[28px] border border-[var(--line)] bg-white/70 p-5">
           <p className="eyebrow text-[var(--ink-soft)]">Low Stock</p>
           <p className="mt-3 text-3xl font-semibold text-[var(--ink)]">{operations.summary.lowStockCount}</p>
-          <p className="mt-2 text-sm text-[var(--ink-soft)]">재고 {operations.summary.lowStockThreshold}개 이하</p>
+          <p className="mt-2 text-sm text-[var(--ink-soft)]">Stock at or below {operations.summary.lowStockThreshold}</p>
         </article>
         <article className="rounded-[28px] border border-[var(--line)] bg-white/70 p-5">
           <p className="eyebrow text-[var(--ink-soft)]">Suspicious Orders</p>
           <p className="mt-3 text-3xl font-semibold text-[var(--ink)]">{operations.summary.suspiciousOrderCount}</p>
-          <p className="mt-2 text-sm text-[var(--ink-soft)]">점수 {operations.summary.suspiciousScoreThreshold} 이상</p>
+          <p className="mt-2 text-sm text-[var(--ink-soft)]">Risk score {operations.summary.suspiciousScoreThreshold} or higher</p>
         </article>
         <article className="rounded-[28px] border border-[var(--line)] bg-white/70 p-5">
           <p className="eyebrow text-[var(--ink-soft)]">Trending Products</p>
           <p className="mt-3 text-3xl font-semibold text-[var(--ink)]">{operations.summary.trendingProductCount}</p>
-          <p className="mt-2 text-sm text-[var(--ink-soft)]">최근 조회·주문·위시리스트 반응</p>
+          <p className="mt-2 text-sm text-[var(--ink-soft)]">Views, paid orders, and wishlist activity</p>
         </article>
         <article className="rounded-[28px] border border-[var(--line)] bg-white/70 p-5">
           <p className="eyebrow text-[var(--ink-soft)]">Review Watch</p>
           <p className="mt-3 text-3xl font-semibold text-[var(--ink)]">{operations.summary.lowRatingReviewCount}</p>
-          <p className="mt-2 text-sm text-[var(--ink-soft)]">평점 {operations.summary.lowRatingThreshold}점 이하 · 출고 대기 {operations.summary.fulfillmentAttentionCount}건</p>
+          <p className="mt-2 text-sm text-[var(--ink-soft)]">Ratings {operations.summary.lowRatingThreshold} and below</p>
         </article>
       </div>
 
       <div className="mt-8 grid gap-6 xl:grid-cols-2">
         <section className="rounded-[28px] border border-[var(--line)] bg-white/72 p-6">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="eyebrow text-[var(--ink-soft)]">Low Stock Queue</p>
-              <h3 className="mt-3 text-2xl font-semibold text-[var(--ink)]">저재고 상품</h3>
-            </div>
-          </div>
+          <p className="eyebrow text-[var(--ink-soft)]">Low Stock Queue</p>
+          <h3 className="mt-3 text-2xl font-semibold text-[var(--ink)]">Low stock products</h3>
           <div className="mt-6 space-y-3">
             {operations.lowStockProducts.map((product) => (
               <article key={product.productId} className="rounded-[22px] border border-[var(--line)] bg-white/80 px-4 py-4">
@@ -164,10 +160,10 @@ export function AdminOperationsPanel({ initialOperations }: { initialOperations:
                   <div>
                     <p className="font-semibold text-[var(--ink)]">{product.productName}</p>
                     <p className="mt-1 text-sm text-[var(--ink-soft)]">
-                      {product.categoryName} · 인기점수 {product.popularityScore}
+                      {product.categoryName} · popularity {product.popularityScore}
                     </p>
                   </div>
-                  <p className="text-sm font-semibold text-red-600">재고 {product.stock}</p>
+                  <p className="text-sm font-semibold text-red-600">stock {product.stock}</p>
                 </div>
               </article>
             ))}
@@ -176,7 +172,7 @@ export function AdminOperationsPanel({ initialOperations }: { initialOperations:
 
         <section className="rounded-[28px] border border-[var(--line)] bg-white/72 p-6">
           <p className="eyebrow text-[var(--ink-soft)]">Suspicious Orders</p>
-          <h3 className="mt-3 text-2xl font-semibold text-[var(--ink)]">이상 징후 주문</h3>
+          <h3 className="mt-3 text-2xl font-semibold text-[var(--ink)]">Flagged orders</h3>
           <div className="mt-6 space-y-3">
             {operations.suspiciousOrders.map((order) => (
               <article key={order.orderNumber} className="rounded-[22px] border border-[var(--line)] bg-white/80 px-4 py-4">
@@ -188,10 +184,12 @@ export function AdminOperationsPanel({ initialOperations }: { initialOperations:
                     </p>
                   </div>
                   <p className={`text-sm font-semibold ${riskTone(order.riskLevel)}`}>
-                    {order.riskLevel} · {order.riskScore}점
+                    {order.riskLevel} · {order.riskScore}
                   </p>
                 </div>
-                <p className="mt-3 text-sm text-[var(--ink)]">{formatPrice(order.total)}원 · {order.itemCount}개 상품</p>
+                <p className="mt-3 text-sm text-[var(--ink)]">
+                  {formatPrice(order.total)} KRW · {order.itemCount} items
+                </p>
                 <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-[var(--ink-soft)]">
                   {order.reasons.map((reason) => (
                     <li key={`${order.orderNumber}-${reason}`}>{reason}</li>
@@ -204,7 +202,7 @@ export function AdminOperationsPanel({ initialOperations }: { initialOperations:
 
         <section className="rounded-[28px] border border-[var(--line)] bg-white/72 p-6">
           <p className="eyebrow text-[var(--ink-soft)]">Trending Products</p>
-          <h3 className="mt-3 text-2xl font-semibold text-[var(--ink)]">최근 반응 상품</h3>
+          <h3 className="mt-3 text-2xl font-semibold text-[var(--ink)]">Fast movers</h3>
           <div className="mt-6 space-y-3">
             {operations.trendingProducts.map((product) => (
               <article key={product.productId} className="rounded-[22px] border border-[var(--line)] bg-white/80 px-4 py-4">
@@ -213,10 +211,10 @@ export function AdminOperationsPanel({ initialOperations }: { initialOperations:
                     <p className="font-semibold text-[var(--ink)]">{product.productName}</p>
                     <p className="mt-1 text-sm text-[var(--ink-soft)]">{product.categoryName}</p>
                   </div>
-                  <p className="text-sm font-semibold text-[var(--primary)]">점수 {product.trendScore}</p>
+                  <p className="text-sm font-semibold text-[var(--primary)]">score {product.trendScore}</p>
                 </div>
                 <p className="mt-3 text-sm text-[var(--ink-soft)]">
-                  조회 {product.recentViewCount} · 결제완료 수량 {product.paidOrderQuantity} · 위시리스트 {product.wishlistCount} · 재고 {product.stock}
+                  views {product.recentViewCount} · paid qty {product.paidOrderQuantity} · wishlist {product.wishlistCount} · stock {product.stock}
                 </p>
               </article>
             ))}
@@ -225,7 +223,7 @@ export function AdminOperationsPanel({ initialOperations }: { initialOperations:
 
         <section className="rounded-[28px] border border-[var(--line)] bg-white/72 p-6">
           <p className="eyebrow text-[var(--ink-soft)]">Review Watch</p>
-          <h3 className="mt-3 text-2xl font-semibold text-[var(--ink)]">저평점 리뷰 확인</h3>
+          <h3 className="mt-3 text-2xl font-semibold text-[var(--ink)]">Low-rated reviews</h3>
           <div className="mt-6 space-y-3">
             {operations.lowRatingReviews.map((review) => (
               <article key={review.reviewId} className="rounded-[22px] border border-[var(--line)] bg-white/80 px-4 py-4">
@@ -236,11 +234,11 @@ export function AdminOperationsPanel({ initialOperations }: { initialOperations:
                       {review.reviewerName} · {formatDateTime(review.createdAt)}
                     </p>
                   </div>
-                  <p className="text-sm font-semibold text-amber-600">{review.rating}점</p>
+                  <p className="text-sm font-semibold text-amber-600">{review.rating} pt</p>
                 </div>
                 <p className="mt-3 text-sm text-[var(--ink)]">{review.title}</p>
                 <p className="mt-2 text-xs text-[var(--ink-soft)]">
-                  {review.status} · 도움수 {review.helpfulCount} · {review.buyerReview ? "구매자 리뷰" : "일반 리뷰"}
+                  {review.status} · helpful {review.helpfulCount} · {review.buyerReview ? "buyer review" : "general review"}
                 </p>
               </article>
             ))}

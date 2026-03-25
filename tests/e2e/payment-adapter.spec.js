@@ -2,13 +2,16 @@ const { expect, test } = require("playwright/test");
 
 test("mobile payment failure keeps the cart for retry", async ({ page }) => {
   await page.goto("/products/brew-mug", { waitUntil: "networkidle" });
-  await page.getByRole("complementary").getByRole("button", { name: "Add to Bag" }).click();
+  await page
+    .getByRole("complementary")
+    .getByRole("button", { name: /장바구니 담기|Add to Bag/ })
+    .click();
   await expect(
-    page.getByRole("complementary").getByRole("button", { name: "담기 완료" }),
+    page.getByRole("complementary").getByRole("button", { name: /담기 완료|Added/ }),
   ).toBeVisible();
 
   await page.goto("/cart", { waitUntil: "networkidle" });
-  await expect(page.getByRole("button", { name: "Remove" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /삭제|제거|Remove/ })).toBeVisible();
 
   await page.goto("/checkout", { waitUntil: "networkidle" });
   const checkoutInputs = page.locator("form input");
@@ -27,5 +30,5 @@ test("mobile payment failure keeps the cart for retry", async ({ page }) => {
   await expect(page.getByRole("heading").first()).toBeVisible();
 
   await page.goto("/cart", { waitUntil: "networkidle" });
-  await expect(page.getByRole("button", { name: "Remove" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /삭제|제거|Remove/ })).toBeVisible();
 });

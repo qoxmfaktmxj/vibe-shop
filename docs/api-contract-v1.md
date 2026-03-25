@@ -4,7 +4,7 @@ Last reviewed: 2026-03-24
 
 # API Contract v1
 
-Vibe Shop API 계약 문서다.  
+Maru API 계약 문서다.
 이 문서는 현재 `apps/api` 구현을 기준으로 정리하며, storefront / admin 이 실제로 사용하는 요청·응답 구조를 중심으로 설명한다.
 
 ## 1. 공통 규칙

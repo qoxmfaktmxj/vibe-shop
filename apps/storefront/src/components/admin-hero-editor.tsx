@@ -26,10 +26,10 @@ export function AdminHeroEditor({
 
   return (
     <article className="admin-card rounded-[36px] p-8">
-      <p className="eyebrow text-[var(--ink-soft)]">Display Hero</p>
-      <h2 className="display mt-4 text-3xl font-semibold">Home hero copy</h2>
+      <p className="eyebrow text-[var(--ink-soft)]">메인 히어로</p>
+      <h2 className="display mt-4 text-3xl font-semibold">상단 메시지와 CTA 편집</h2>
       <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--ink-soft)]">
-        Keep the landing message editable without loading the rest of the admin console.
+        메인 진입 메시지와 CTA를 다른 운영 데이터와 분리해 빠르게 수정할 수 있습니다.
       </p>
 
       <form
@@ -55,16 +55,16 @@ export function AdminHeroEditor({
                   heroCtaLabel: nextDisplay.heroCtaLabel,
                   heroCtaHref: nextDisplay.heroCtaHref,
                 });
-                setMessage("Hero content updated.");
+                setMessage("히어로 콘텐츠를 저장했습니다.");
               } catch (nextError) {
-                setError(getErrorMessage(nextError, "Failed to update hero content."));
+                setError(getErrorMessage(nextError, "히어로 콘텐츠를 저장하지 못했습니다."));
               }
             })();
           });
         }}
       >
         <label className="grid gap-2">
-          <span className="text-sm font-medium">Hero title</span>
+          <span className="text-sm font-medium">메인 제목</span>
           <input
             name="heroTitle"
             required
@@ -75,7 +75,7 @@ export function AdminHeroEditor({
         </label>
 
         <label className="grid gap-2">
-          <span className="text-sm font-medium">Hero subtitle</span>
+          <span className="text-sm font-medium">메인 설명</span>
           <textarea
             name="heroSubtitle"
             required
@@ -88,7 +88,7 @@ export function AdminHeroEditor({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="grid gap-2">
-            <span className="text-sm font-medium">CTA label</span>
+            <span className="text-sm font-medium">버튼 문구</span>
             <input
               name="heroCtaLabel"
               required
@@ -98,7 +98,7 @@ export function AdminHeroEditor({
             />
           </label>
           <label className="grid gap-2">
-            <span className="text-sm font-medium">CTA href</span>
+            <span className="text-sm font-medium">버튼 링크</span>
             <input
               name="heroCtaHref"
               required
@@ -113,7 +113,7 @@ export function AdminHeroEditor({
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
         <button type="submit" disabled={isSaving} className="admin-button w-fit px-6 py-4 disabled:opacity-60">
-          {isSaving ? "Saving..." : "Save hero content"}
+          {isSaving ? "저장 중..." : "히어로 저장"}
         </button>
       </form>
     </article>

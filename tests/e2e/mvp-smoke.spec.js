@@ -32,12 +32,15 @@ test("storefront MVP smoke flow", async ({ page }) => {
     fullPage: true,
   });
 
-  await page.getByRole("complementary").getByRole("button", { name: "Add to Bag" }).click();
+  await page
+    .getByRole("complementary")
+    .getByRole("button", { name: /장바구니 담기|Add to Bag/ })
+    .click();
   await expect(
-    page.getByRole("complementary").getByRole("button", { name: "담기 완료" }),
+    page.getByRole("complementary").getByRole("button", { name: /담기 완료|Added/ }),
   ).toBeVisible();
   await page.goto("/cart", { waitUntil: "networkidle" });
-  await expect(page.getByRole("button", { name: "Remove" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /삭제|제거|Remove/ })).toBeVisible();
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "04-cart.png"),
     fullPage: true,

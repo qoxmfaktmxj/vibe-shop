@@ -19,9 +19,9 @@ public record DemoSeedProperties(
         targetCustomerCount = targetCustomerCount <= 0 ? 3000 : targetCustomerCount;
         targetProductsPerCategory = targetProductsPerCategory <= 0 ? 100 : targetProductsPerCategory;
         adminEmail = adminEmail == null || adminEmail.isBlank()
-            ? "admin@vibeshop.local"
+            ? "admin@maru.local"
             : adminEmail.trim().toLowerCase(Locale.ROOT);
         adminPassword = adminPassword == null ? "" : adminPassword;
-        adminName = adminName == null || adminName.isBlank() ? "Vibe Shop Admin" : adminName.trim();
+        adminName = adminName == null || adminName.isBlank() ? "Maru Admin" : adminName.trim();
     }
 }

@@ -32,8 +32,8 @@ test("admin can review members, see statistics, and block a member account", asy
   await page.locator('input[name="memberQuery"]').fill(email);
   await expect(page.getByText(email)).toBeVisible();
   await page.locator('select[name^="memberStatus-"]').first().selectOption("BLOCKED");
-  await page.getByRole("button", { name: "Save status" }).first().click();
-  await expect(page.getByText(/updated\./)).toBeVisible();
+  await page.getByRole("button", { name: /상태 저장|Save status/ }).first().click();
+  await expect(page.getByText(/updated\.|저장/)).toBeVisible();
 
   await page.goto("/login", { waitUntil: "networkidle" });
   await page.locator('input[type="email"]').fill(email);
@@ -43,7 +43,7 @@ test("admin can review members, see statistics, and block a member account", asy
   await expect(page.getByRole("alert")).toBeVisible();
 
   await page.goto(`${adminUrl}/analytics`, { waitUntil: "networkidle" });
-  await expect(page.getByRole("heading", { name: /reporting without the rest of the console/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /reporting without the rest of the console|통계/ })).toBeVisible();
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "13-admin-member-statistics.png"),
     fullPage: true,

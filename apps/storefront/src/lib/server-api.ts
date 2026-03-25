@@ -17,6 +17,16 @@ import type {
   WishlistItem,
 } from "@/lib/contracts";
 import { resolveApiBaseUrl } from "@/lib/api-base-url";
+import {
+  normalizeCategory,
+  normalizeCategorySlug,
+  normalizeHomeData,
+  normalizeProduct,
+  normalizeProductDetail,
+  normalizeRecommendations,
+  normalizeRecentlyViewed,
+  normalizeWishlist,
+} from "@/lib/catalog-normalize";
 
 export class ApiNotFoundError extends Error {}
 
@@ -49,72 +59,99 @@ async function fetchFromApi<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export async function getHomeData() {
-  return fetchFromApi<HomeResponse>("/api/v1/home", {
+  const data = await fetchFromApi<HomeResponse>("/api/v1/home", {
     headers: await getCookieHeaders(),
   });
+  return normalizeHomeData(data);
 }
 
 export async function getCategories() {
-  return fetchFromApi<Category[]>("/api/v1/categories");
+  const categories = await fetchFromApi<Category[]>("/api/v1/categories");
+  return categories.map((category) => normalizeCategory(category));
+}
+
+async function resolveCategoryParam(category?: string) {
+  if (!category || category !== "living") {
+    return category;
+  }
+
+  const categories = await fetchFromApi<Category[]>("/api/v1/categories");
+  const alias = categories.find((item) => normalizeCategorySlug(item.slug) === "living");
+  return alias?.slug ?? category;
 }
 
 export async function getProducts(category?: string, sort?: string) {
   const params = new URLSearchParams();
-  if (category) {
-    params.set("category", category);
+  const resolvedCategory = await resolveCategoryParam(category);
+  if (resolvedCategory) {
+    params.set("category", resolvedCategory);
   }
   if (sort && sort !== "recommended") {
     params.set("sort", sort);
   }
   const query = params.toString() ? `?${params.toString()}` : "";
-  return fetchFromApi<ProductSummary[]>(`/api/v1/products${query}`, {
+  const products = await fetchFromApi<ProductSummary[]>(`/api/v1/products${query}`, {
     headers: await getCookieHeaders(),
   });
+  return products.map((product) => normalizeProduct(product));
 }
 
 export async function searchProducts(keyword: string, sort?: string, category?: string) {
   const params = new URLSearchParams();
   params.set("q", keyword);
-  if (category) {
-    params.set("category", category);
+  const resolvedCategory = await resolveCategoryParam(category);
+  if (resolvedCategory) {
+    params.set("category", resolvedCategory);
   }
   if (sort && sort !== "recommended") {
     params.set("sort", sort);
   }
   const query = `?${params.toString()}`;
-  return fetchFromApi<ProductSearchResponse>(`/api/v1/search/products${query}`, {
+  const response = await fetchFromApi<ProductSearchResponse>(`/api/v1/search/products${query}`, {
     headers: await getCookieHeaders(),
   });
+  return {
+    ...response,
+    items: response.items.map((item) => normalizeProduct(item)),
+  };
 }
 
 export async function getProduct(slug: string) {
-  return fetchFromApi<ProductDetail>(`/api/v1/products/${slug}`, {
+  const product = await fetchFromApi<ProductDetail>(`/api/v1/products/${slug}`, {
     headers: await getCookieHeaders(),
   });
+  return normalizeProductDetail(product);
 }
 
 export async function getRecentlyViewed() {
-  return fetchFromApi<RecentlyViewedResponse>("/api/v1/recently-viewed", {
+  const response = await fetchFromApi<RecentlyViewedResponse>("/api/v1/recently-viewed", {
     headers: await getCookieHeaders(),
   });
+  return {
+    ...response,
+    items: normalizeRecentlyViewed(response.items),
+  };
 }
 
 export async function getHomeRecommendations() {
-  return fetchFromApi<RecommendationCollection>("/api/v1/recommendations/home", {
+  const response = await fetchFromApi<RecommendationCollection>("/api/v1/recommendations/home", {
     headers: await getCookieHeaders(),
   });
+  return normalizeRecommendations(response);
 }
 
 export async function getProductRecommendations(productId: number) {
-  return fetchFromApi<RecommendationCollection>(`/api/v1/recommendations/products/${productId}`, {
+  const response = await fetchFromApi<RecommendationCollection>(`/api/v1/recommendations/products/${productId}`, {
     headers: await getCookieHeaders(),
   });
+  return normalizeRecommendations(response);
 }
 
 export async function getRecentlyViewedRecommendations() {
-  return fetchFromApi<RecommendationCollection>("/api/v1/recommendations/recently-viewed", {
+  const response = await fetchFromApi<RecommendationCollection>("/api/v1/recommendations/recently-viewed", {
     headers: await getCookieHeaders(),
   });
+  return normalizeRecommendations(response);
 }
 
 export async function getOrder(orderNumber: string, phone?: string) {
@@ -150,9 +187,10 @@ export async function getShippingAddresses(): Promise<ShippingAddress[]> {
 }
 
 export async function getAccountWishlist(): Promise<WishlistItem[]> {
-  return fetchFromApi<WishlistItem[]>("/api/v1/account/wishlist", {
+  const items = await fetchFromApi<WishlistItem[]>("/api/v1/account/wishlist", {
     headers: await getCookieHeaders(),
   });
+  return normalizeWishlist(items);
 }
 
 export async function getAccountReviews(): Promise<MyReview[]> {

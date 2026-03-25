@@ -9,9 +9,9 @@ export default async function AdminOperationsPage() {
 
   return (
     <AdminShell
-      eyebrow="Operations"
-      title="Operational watchlists by route."
-      description="Low-stock queues, suspicious orders, and review watchlists now load in isolation."
+      eyebrow="운영"
+      title="주의가 필요한 운영 이슈를 모아 보는 감시 화면"
+      description="재고 부족, 위험 주문, 리뷰 감시 목록을 한 화면에서 모니터링할 수 있습니다."
     >
       <AdminOperationsPanel initialOperations={operations} />
     </AdminShell>

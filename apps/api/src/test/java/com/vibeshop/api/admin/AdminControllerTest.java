@@ -29,7 +29,7 @@ import org.springframework.test.web.servlet.MvcResult;
 class AdminControllerTest {
 
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
-    private static final String ADMIN_EMAIL = "owner@vibeshop.local";
+    private static final String ADMIN_EMAIL = "owner@maru.local";
     private static final String ADMIN_PASSWORD = "owner1234!";
 
     @Autowired

@@ -1,6 +1,6 @@
-# Vibe Shop
+# Maru
 
-Vibe Shop is a commerce monorepo with a single Next.js web app in `apps/storefront` and a Spring Boot API in `apps/api`. The storefront app serves both customer routes and admin routes under `/admin`.
+Maru is a commerce monorepo with a single Next.js web app in `apps/storefront` and a Spring Boot API in `apps/api`. The storefront app serves both customer routes and admin routes under `/admin`.
 
 ## Apps
 

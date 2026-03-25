@@ -24,10 +24,10 @@ export function AdminStatisticsPanel({
     <article className="admin-card rounded-[36px] p-8">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="eyebrow text-[var(--ink-soft)]">Statistics</p>
-          <h2 className="display mt-4 text-3xl font-semibold">운영 통계</h2>
+          <p className="eyebrow text-[var(--ink-soft)]">운영 통계</p>
+          <h2 className="display mt-4 text-3xl font-semibold">주문과 회원 흐름</h2>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--ink-soft)]">
-            최근 7일, 30일 기준 주문과 신규 회원 흐름을 한 화면에서 확인합니다.
+            최근 7일과 30일 기준 주문, 매출, 신규 회원 흐름을 한 화면에서 확인합니다.
           </p>
         </div>
       </div>
@@ -46,7 +46,7 @@ export function AdminStatisticsPanel({
               신규 회원 {statistics.sevenDay.newMemberCount}명
             </p>
             <p className="rounded-[22px] bg-black/5 px-4 py-3 text-sm">
-              취소 {statistics.sevenDay.cancelledOrderCount}건 · 환불 {statistics.sevenDay.refundedOrderCount}건
+              취소 {statistics.sevenDay.cancelledOrderCount}건 / 환불 {statistics.sevenDay.refundedOrderCount}건
             </p>
           </div>
         </div>
@@ -64,7 +64,7 @@ export function AdminStatisticsPanel({
               신규 회원 {statistics.thirtyDay.newMemberCount}명
             </p>
             <p className="rounded-[22px] bg-black/5 px-4 py-3 text-sm">
-              취소 {statistics.thirtyDay.cancelledOrderCount}건 · 환불 {statistics.thirtyDay.refundedOrderCount}건
+              취소 {statistics.thirtyDay.cancelledOrderCount}건 / 환불 {statistics.thirtyDay.refundedOrderCount}건
             </p>
           </div>
         </div>
@@ -79,7 +79,7 @@ export function AdminStatisticsPanel({
                 <div className="flex items-center justify-between text-sm">
                   <span>{item.date}</span>
                   <span className="text-[var(--ink-soft)]">
-                    주문 {item.orderCount}건 · 회원 {item.newMemberCount}명 · {formatPrice(item.paidRevenue)}원
+                    주문 {item.orderCount}건 / 신규 회원 {item.newMemberCount}명 / {formatPrice(item.paidRevenue)}원
                   </span>
                 </div>
                 <div className="h-3 rounded-full bg-black/6">
@@ -116,7 +116,7 @@ export function AdminStatisticsPanel({
                 <div key={item.productId} className="flex items-center justify-between gap-3 text-sm">
                   <div>
                     <p className="font-semibold">{item.productName}</p>
-                    <p className="text-[var(--ink-soft)]">{item.categoryName} · {item.quantity}개 판매</p>
+                    <p className="text-[var(--ink-soft)]">{item.categoryName} / {item.quantity}개 판매</p>
                   </div>
                   <p>{formatPrice(item.revenue)}원</p>
                 </div>

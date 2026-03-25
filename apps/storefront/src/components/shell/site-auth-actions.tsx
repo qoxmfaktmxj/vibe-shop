@@ -32,9 +32,18 @@ export function SiteAuthActions() {
             router.refresh();
           });
         }}
-        className="inline-flex items-center rounded-full border border-[var(--line-strong)] bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-[1px] hover:bg-[var(--primary-dim)] disabled:cursor-wait disabled:opacity-60"
+        aria-label="로그아웃"
+        className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[var(--ink)] text-white transition hover:-translate-y-[1px] hover:bg-black disabled:cursor-wait disabled:opacity-60"
       >
-        {isPending ? "로그아웃 중..." : "로그아웃"}
+        {isPending ? (
+          <span className="h-4 w-4 animate-pulse rounded-full bg-white/80" aria-hidden="true" />
+        ) : (
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10 17l5-5-5-5" />
+            <path d="M15 12H4" />
+            <path d="M19 4v16" />
+          </svg>
+        )}
       </button>
     );
   }

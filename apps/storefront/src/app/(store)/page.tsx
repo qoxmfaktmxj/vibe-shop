@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import Link from "next/link";
 
 import { ProductCard } from "@/components/catalog/product-card";
@@ -86,9 +86,6 @@ export default async function HomePage() {
 
   const heroTitle = normalizeCopy(home.heroTitle, MAIN_DISPLAY_TITLE);
   const heroSubtitle = normalizeCopy(home.heroSubtitle, MAIN_DISPLAY_SUBTITLE);
-
-  const bestSellerDescription =
-    "조회·주문·위시리스트 집계 기준으로 최근 반응이 좋은 상품을 먼저 보여드립니다.";
 
   return (
     <div className="grid-shell pb-10">
@@ -197,7 +194,7 @@ export default async function HomePage() {
                 <div className="mt-8 flex flex-wrap items-center gap-4">
                   <Link
                     href={heroBanner?.href ?? `/products/${heroProduct?.slug ?? ""}`}
-                    className="inline-flex items-center justify-center rounded-full bg-white px-6 py-4 text-sm font-semibold text-[var(--ink)] transition hover:-translate-y-[1px]"
+                    className="inline-flex items-center justify-center rounded-full bg-white px-6 py-4 text-sm font-semibold text-black transition hover:-translate-y-[1px]"
                   >
                     {normalizeCopy(heroBanner?.ctaLabel || home.heroCtaLabel, "상품 보기")}
                   </Link>
@@ -272,9 +269,6 @@ export default async function HomePage() {
                 {sectionValue(curatedSection, "title", "추천 상품")}
               </h2>
             </div>
-            <p className="max-w-xl text-sm leading-7 text-[var(--ink-soft)]">
-              {sectionValue(curatedSection, "subtitle", "취향에 맞는 상품을 엄선해 구성했습니다.")}
-            </p>
           </div>
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             {home.curatedPicks.slice(0, 4).map((product) => (
@@ -299,13 +293,6 @@ export default async function HomePage() {
                 {sectionValue(promotionSection, "title", "진행 중인 기획전")}
               </h2>
             </div>
-            <p className="max-w-xl text-sm leading-7 text-[var(--ink-soft)]">
-              {sectionValue(
-                promotionSection,
-                "subtitle",
-                "특가와 신상품 혜택을 놓치지 마세요.",
-              )}
-            </p>
           </div>
 
           <div className="grid gap-5 lg:grid-cols-2">
@@ -330,7 +317,7 @@ export default async function HomePage() {
                     </p>
                     <h3 className="mt-3 text-3xl font-light leading-tight">{item.title}</h3>
                     <p className="mt-3 max-w-xl text-sm leading-7 text-white/76">{item.subtitle}</p>
-                    <span className="mt-6 inline-flex rounded-full bg-white px-5 py-3 text-sm font-semibold text-[var(--ink)]">
+                    <span className="mt-6 inline-flex rounded-full bg-white px-5 py-3 text-sm font-semibold text-black">
                       {item.ctaLabel}
                     </span>
                   </div>
@@ -371,9 +358,6 @@ export default async function HomePage() {
                 {sectionValue(bestSellerSection, "title", "베스트셀러")}
               </h2>
             </div>
-            <p className="max-w-xl text-sm leading-7 text-[var(--ink-soft)]">
-              {sectionValue(bestSellerSection, "subtitle", bestSellerDescription)}
-            </p>
           </div>
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             {home.bestSellers.slice(0, 4).map((product) => (

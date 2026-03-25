@@ -1,4 +1,4 @@
-import { ProductCard } from "@/components/catalog/product-card";
+﻿import { ProductCard } from "@/components/catalog/product-card";
 import type { RecommendationCollection } from "@/lib/contracts";
 
 function normalizeBadge(reasonLabel: string, fallbackBadge: string) {
@@ -7,7 +7,7 @@ function normalizeBadge(reasonLabel: string, fallbackBadge: string) {
   }
 
   if (reasonLabel.includes("BEST")) {
-    return "실시간 인기";
+    return "?ㅼ떆媛??멸린";
   }
 
   return reasonLabel;
@@ -15,7 +15,7 @@ function normalizeBadge(reasonLabel: string, fallbackBadge: string) {
 
 export function RecommendationShelf({
   collection,
-  eyebrow = "추천 상품",
+  eyebrow = "異붿쿇 ?곹뭹",
 }: {
   collection: RecommendationCollection;
   eyebrow?: string;
@@ -30,10 +30,9 @@ export function RecommendationShelf({
         <div>
           <p className="display-eyebrow">{eyebrow}</p>
           <h2 className="display-heading mt-3 text-3xl text-[var(--ink)] sm:text-4xl">
-            {collection.title || "추천 상품"}
+            {collection.title || "異붿쿇 ?곹뭹"}
           </h2>
         </div>
-        <p className="max-w-2xl text-sm leading-7 text-[var(--ink-soft)]">{collection.subtitle}</p>
       </div>
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -50,3 +49,4 @@ export function RecommendationShelf({
     </section>
   );
 }
+

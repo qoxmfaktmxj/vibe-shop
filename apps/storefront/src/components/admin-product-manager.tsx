@@ -77,10 +77,10 @@ export function AdminProductManager({
     <article className="admin-card rounded-[36px] p-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="eyebrow text-[var(--ink-soft)]">Products</p>
-          <h2 className="display mt-4 text-3xl font-semibold">Product editing</h2>
+          <p className="eyebrow text-[var(--ink-soft)]">상품 편집</p>
+          <h2 className="display mt-4 text-3xl font-semibold">가격, 재고, 배지, 노출 관리</h2>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--ink-soft)]">
-            Search the catalog and update pricing, stock, badging, and featured placement from a page dedicated to product operations.
+            카탈로그 검색 후 상품 정보를 바로 수정할 수 있도록 상품 운영에 집중한 화면으로 분리했습니다.
           </p>
         </div>
 
@@ -89,7 +89,7 @@ export function AdminProductManager({
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           className="admin-input min-w-[260px] px-4 py-3"
-          placeholder="Search products"
+          placeholder="상품명, 카테고리, 배지 검색"
         />
       </div>
 
@@ -109,7 +109,7 @@ export function AdminProductManager({
               <p className="eyebrow text-[var(--ink-soft)]">{product.categoryName}</p>
               <p className="mt-2 text-lg font-semibold">{product.name}</p>
               <p className="mt-2 text-sm text-[var(--ink-soft)]">
-                Stock {product.stock} · Popularity {product.popularityScore}
+                재고 {product.stock} / 인기 점수 {product.popularityScore}
               </p>
             </button>
           ))}
@@ -132,9 +132,9 @@ export function AdminProductManager({
                     );
                     setProducts(nextProducts);
                     syncSelectedProduct(updatedProduct.id, nextProducts);
-                    setMessage("Product updated.");
+                    setMessage("상품 정보를 저장했습니다.");
                   } catch (saveError) {
-                    setError(getErrorMessage(saveError, "Failed to update product."));
+                    setError(getErrorMessage(saveError, "상품 정보를 저장하지 못했습니다."));
                   }
                 })();
               });
@@ -154,13 +154,13 @@ export function AdminProductManager({
                 <p className="eyebrow text-[var(--ink-soft)]">{selectedProduct.categoryName}</p>
                 <p className="mt-3 text-2xl font-semibold">{selectedProduct.slug}</p>
                 <p className="mt-3 text-sm leading-7 text-[var(--ink-soft)]">
-                  This editor is now isolated from orders, display, reviews, and member state.
+                  이 편집기는 주문, 전시, 리뷰 상태와 분리되어 상품 자체에만 집중합니다.
                 </p>
               </div>
             </div>
 
             <label className="grid gap-2">
-              <span className="text-sm font-medium">Name</span>
+              <span className="text-sm font-medium">상품명</span>
               <input
                 name="productName"
                 value={form.name}
@@ -170,7 +170,7 @@ export function AdminProductManager({
             </label>
 
             <label className="grid gap-2">
-              <span className="text-sm font-medium">Summary</span>
+              <span className="text-sm font-medium">요약 설명</span>
               <textarea
                 name="productSummary"
                 rows={3}
@@ -184,7 +184,7 @@ export function AdminProductManager({
 
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <label className="grid gap-2">
-                <span className="text-sm font-medium">Badge</span>
+                <span className="text-sm font-medium">배지</span>
                 <input
                   name="productBadge"
                   value={form.badge}
@@ -194,7 +194,7 @@ export function AdminProductManager({
               </label>
 
               <label className="grid gap-2">
-                <span className="text-sm font-medium">Price</span>
+                <span className="text-sm font-medium">가격</span>
                 <input
                   name="productPrice"
                   type="number"
@@ -208,7 +208,7 @@ export function AdminProductManager({
               </label>
 
               <label className="grid gap-2">
-                <span className="text-sm font-medium">Stock</span>
+                <span className="text-sm font-medium">재고</span>
                 <input
                   name="productStock"
                   type="number"
@@ -222,7 +222,7 @@ export function AdminProductManager({
               </label>
 
               <label className="grid gap-2">
-                <span className="text-sm font-medium">Popularity</span>
+                <span className="text-sm font-medium">인기 점수</span>
                 <input
                   name="productPopularityScore"
                   type="number"
@@ -248,14 +248,14 @@ export function AdminProductManager({
                   setForm((current) => ({ ...current, featured: event.target.checked }))
                 }
               />
-              Feature on storefront
+              메인에 대표 상품으로 노출
             </label>
 
             {message ? <p className="text-sm text-[var(--teal)]">{message}</p> : null}
             {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
             <button type="submit" disabled={isSaving} className="admin-button w-fit px-6 py-4 disabled:opacity-60">
-              {isSaving ? "Saving" : "Save product"}
+              {isSaving ? "저장 중..." : "상품 저장"}
             </button>
           </form>
         ) : null}

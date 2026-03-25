@@ -24,9 +24,9 @@ It does not replace a future component library, but it defines the rules the cur
 
 ## Brand Rules
 
-- Product name: `Vibe Shop`
-- Customer app title: `Vibe Shop`
-- Admin app title: `Vibe Shop Admin`
+- Product name: `Maru`
+- Customer app title: `Maru`
+- Admin app title: `Maru Admin`
 - Avoid introducing alternate product names in metadata, nav, or headers.
 
 ## Storefront Tokens

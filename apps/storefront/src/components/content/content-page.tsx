@@ -23,7 +23,7 @@ export function ContentPage({
 
       <aside className="surface-card rounded-[36px] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(241,239,233,0.76))] p-8 sm:p-10">
         <div className="space-y-6 text-sm leading-7 text-[var(--ink-soft)]">{children}</div>
-        <Link href="/" className="button-secondary mt-8 px-5 py-3">
+        <Link href="/" className="button-secondary mt-8 rounded-[20px] px-5 py-3">
           메인으로 돌아가기
         </Link>
       </aside>

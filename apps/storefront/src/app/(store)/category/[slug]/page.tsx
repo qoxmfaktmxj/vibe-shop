@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { ProductCard } from "@/components/catalog/product-card";
 import { ProductSortTabs } from "@/components/catalog/product-sort-tabs";
+import { SearchForm } from "@/components/search/search-form";
 import { getCategories, getProducts } from "@/lib/server-api";
 
 export default async function CategoryPage({
@@ -52,6 +53,20 @@ export default async function CategoryPage({
           <p className="mt-4 text-sm leading-7 text-white/78">
             {category.heroSubtitle || category.description}
           </p>
+        </div>
+      </section>
+
+      <section className="surface-card rounded-[36px] p-6 sm:p-8">
+        <div className="max-w-3xl">
+          <p className="display-eyebrow">Search Studio</p>
+          <h2 className="display-heading mt-3 text-3xl">원하는 상품을 카테고리 안에서도 바로 찾아보세요.</h2>
+          <p className="mt-4 text-sm leading-7 text-[var(--ink-soft)]">
+            현재 카테고리를 유지한 채로 검색어를 바꾸면 다른 상품도 함께 확인할 수 있습니다.
+          </p>
+        </div>
+
+        <div className="mt-6">
+          <SearchForm categories={categories} initialCategory={slug} />
         </div>
       </section>
 

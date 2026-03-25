@@ -175,7 +175,7 @@ public class DemoDataSeeder implements ApplicationRunner {
         for (int i = 1; i <= needed; i++) {
             int ordinal = existing + i;
             String name = "데모고객 " + ordinal;
-            String email = "demo-user-" + ordinal + "@vibeshop.local";
+            String email = "demo-user-" + ordinal + "@maru.local";
             String provider = switch (ordinal % 4) {
                 case 0 -> "GOOGLE";
                 case 1 -> "LOCAL";
@@ -368,7 +368,7 @@ public class DemoDataSeeder implements ApplicationRunner {
                 SELECT COUNT(*)
                 FROM product_reviews review
                 JOIN users user_account ON user_account.id = review.user_id
-                WHERE user_account.email LIKE 'demo-user-%@vibeshop.local'
+                WHERE user_account.email LIKE 'demo-user-%@maru.local'
                 """,
             Integer.class
         );
@@ -377,7 +377,7 @@ public class DemoDataSeeder implements ApplicationRunner {
         }
 
         List<Long> demoUserIds = jdbcTemplate.query(
-            "SELECT id FROM users WHERE email LIKE 'demo-user-%@vibeshop.local' ORDER BY id",
+            "SELECT id FROM users WHERE email LIKE 'demo-user-%@maru.local' ORDER BY id",
             (rs, rowNum) -> rs.getLong("id")
         );
         if (demoUserIds.isEmpty()) {

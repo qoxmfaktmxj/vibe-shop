@@ -10,9 +10,9 @@ export default async function AdminDisplayPage() {
 
   return (
     <AdminShell
-      eyebrow="Display"
-      title="Merchandising and hero control."
-      description="Display editing now loads only the datasets needed for storefront merchandising changes."
+      eyebrow="전시"
+      title="메인 배너와 전시 구성을 관리하는 작업 공간"
+      description="스토어프론트 전시에 필요한 데이터만 불러와 히어로와 배너 구성을 빠르게 조정할 수 있습니다."
     >
       <div className="grid gap-6">
         <AdminHeroEditor initialDisplay={display} />

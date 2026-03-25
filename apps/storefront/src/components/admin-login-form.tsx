@@ -26,40 +26,44 @@ export function LoginForm() {
               await signIn(form);
               window.location.assign("/admin");
             } catch (loginError) {
-              setError(loginError instanceof Error ? loginError.message : "Failed to sign in.");
+              setError(
+                loginError instanceof Error
+                  ? loginError.message
+                  : "\uB85C\uADF8\uC778\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.",
+              );
             }
           })();
         });
       }}
     >
       <label className="grid gap-2">
-        <span className="text-sm font-medium">Email</span>
+        <span className="text-sm font-medium">\uC774\uBA54\uC77C</span>
         <input
           required
           type="email"
           value={form.email}
           onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
           className="admin-input px-4 py-3"
-          placeholder="owner@example.com"
+          placeholder="admin@maru.local"
         />
       </label>
 
       <label className="grid gap-2">
-        <span className="text-sm font-medium">Password</span>
+        <span className="text-sm font-medium">\uBE44\uBC00\uBC88\uD638</span>
         <input
           required
           type="password"
           value={form.password}
           onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
           className="admin-input px-4 py-3"
-          placeholder="Enter your password"
+          placeholder="\uBE44\uBC00\uBC88\uD638\uB97C \uC785\uB825\uD574 \uC8FC\uC138\uC694"
         />
       </label>
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
       <button type="submit" disabled={isPending} className="admin-button px-6 py-4 disabled:opacity-60">
-        {isPending ? "Signing in..." : "Sign in"}
+        {isPending ? "\uB85C\uADF8\uC778 \uC911..." : "\uB85C\uADF8\uC778"}
       </button>
     </form>
   );

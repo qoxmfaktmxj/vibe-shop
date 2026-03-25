@@ -28,25 +28,34 @@ export default async function SearchPage({
 
   return (
     <div className="grid-shell space-y-8">
-      <section>
+      <section className="space-y-4">
+        <div className="max-w-3xl">
+          <p className="display-eyebrow">Search Studio</p>
+          <h1 className="display-heading mt-3 text-4xl">원하는 무드의 상품만 빠르게 골라보세요.</h1>
+          <p className="mt-4 text-sm leading-7 text-[var(--ink-soft)]">
+            검색어와 카테고리를 함께 조합해서 지금 보고 싶은 상품군만 정확하게 좁혀볼 수 있습니다.
+          </p>
+        </div>
         <SearchForm categories={categories} initialCategory={currentCategory} />
       </section>
 
       {shouldRenderResults ? (
-        <section className="surface-card p-6 sm:p-8">
+        <section className="surface-card rounded-[32px] p-6 sm:p-8">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="display-eyebrow">검색 결과</p>
               <h2 className="display-heading mt-3 text-3xl">
                 {keyword
-                  ? `“${keyword}” 검색 결과`
+                  ? `"${keyword}" 검색 결과`
                   : `${selectedCategory?.name ?? "카테고리"} 전시 결과`}
               </h2>
               <p className="mt-3 text-sm text-[var(--ink-soft)]">
-                {selectedCategory ? `${selectedCategory.name} 카테고리만 표시 중` : "전체 카테고리"}
+                {selectedCategory
+                  ? `${selectedCategory.name} 카테고리만 표시 중입니다.`
+                  : "전체 카테고리를 기준으로 결과를 보여줍니다."}
               </p>
             </div>
-            <p className="text-sm text-[var(--ink-soft)]">{products.length}개 상품</p>
+            <p className="status-pill">{products.length}개 상품</p>
           </div>
 
           {searchResult?.appliedFilters?.length ? (
@@ -54,7 +63,7 @@ export default async function SearchPage({
               {searchResult.appliedFilters.map((filter) => (
                 <span
                   key={`${filter.type}-${filter.value}`}
-                  className="rounded-full border border-[var(--line)] bg-[rgba(255,255,255,0.82)] px-3 py-2 text-xs font-medium text-[var(--ink-soft)]"
+                  className="chip-link rounded-full text-[var(--ink-soft)]"
                 >
                   {filter.label}
                 </span>
@@ -64,7 +73,7 @@ export default async function SearchPage({
 
           {searchResult?.fallback?.applied ? (
             <div className="mt-5 rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.76)] p-4 text-sm leading-7 text-[var(--ink-soft)]">
-              <p className="font-semibold text-[var(--ink)]">해석된 검색 조건을 조금 넓혀 보여드렸습니다.</p>
+              <p className="font-semibold text-[var(--ink)]">검색 조건을 조금 넓혀서 결과를 보여드리고 있습니다.</p>
               <p className="mt-2">{searchResult.fallback.reason}</p>
             </div>
           ) : null}
@@ -89,8 +98,8 @@ export default async function SearchPage({
               ))}
             </div>
           ) : (
-            <div className="mt-8 rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm text-[var(--ink-soft)]">
-              검색 결과가 없습니다. 다른 키워드나 카테고리 조합으로 다시 시도해 주세요.
+            <div className="mt-8 rounded-[24px] border border-dashed border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
+              결과가 없습니다. 다른 검색어를 입력하거나 카테고리 필터를 바꿔서 다시 시도해 보세요.
             </div>
           )}
         </section>
@@ -100,12 +109,10 @@ export default async function SearchPage({
             <Link
               key={item.id}
               href={`/search?category=${item.slug}`}
-              className="surface-card rounded-sm p-6 transition hover:-translate-y-1"
+              className="surface-card hover-lift rounded-[28px] p-6 transition"
             >
               <p className="display-eyebrow">{item.name}</p>
-              <p className="display-heading mt-4 text-2xl text-[var(--ink)]">
-                {item.description}
-              </p>
+              <p className="display-heading mt-4 text-2xl text-[var(--ink)]">{item.description}</p>
             </Link>
           ))}
         </section>
