@@ -55,7 +55,7 @@ function renderStars(rating: number) {
 
 function SummaryStat({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
+    <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-4 sm:p-5">
       <p className="display-eyebrow">{label}</p>
       <p className="mt-3 text-2xl font-semibold text-[var(--ink)]">{value}</p>
     </div>
@@ -64,7 +64,7 @@ function SummaryStat({ label, value }: { label: string; value: ReactNode }) {
 
 function QuickActionLink({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <Link href={href} className="button-secondary px-4 py-3 text-center">
+    <Link href={href} className="button-secondary min-h-11 w-full px-4 py-3 text-center">
       {children}
     </Link>
   );
@@ -86,7 +86,7 @@ function QuickActionButton({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className="button-secondary px-4 py-3 text-center disabled:cursor-wait disabled:opacity-60"
+      className="button-secondary min-h-11 w-full px-4 py-3 text-center disabled:cursor-wait disabled:opacity-60 sm:w-auto"
     >
       {children}
     </button>
@@ -374,21 +374,21 @@ export function AccountDashboard({
   };
 
   return (
-    <div className="grid-shell space-y-6">
+    <div className="grid-shell space-y-5 sm:space-y-6">
       <section className="grid gap-6 xl:grid-cols-[1.12fr_0.88fr]">
-        <article className="surface-card rounded-[36px] p-8 sm:p-10">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-            <div className="flex gap-5">
-              <div className="flex h-18 w-18 shrink-0 items-center justify-center rounded-full border border-[var(--line)] bg-[rgba(255,255,255,0.82)] text-2xl font-semibold text-[var(--ink)] sm:h-20 sm:w-20 sm:text-3xl">
+        <article className="surface-card rounded-[32px] p-6 sm:rounded-[36px] sm:p-8 lg:p-10">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:gap-5">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-[var(--line)] bg-[rgba(255,255,255,0.82)] text-xl font-semibold text-[var(--ink)] sm:h-20 sm:w-20 sm:text-3xl">
                 {initials}
               </div>
               <div>
                 <p className="display-eyebrow">My Account</p>
                 <h1 className="display-heading mt-4 text-4xl">내 계정</h1>
-                <p className="mt-4 max-w-2xl text-base leading-8 text-[var(--ink-soft)]">
+                <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--ink-soft)] sm:text-base sm:leading-8">
                   주문, 배송지, 찜, 리뷰를 한곳에서 빠르게 확인하고 바로 관리할 수 있도록 정리했습니다.
                 </p>
-                <div className="mt-5 space-y-2 text-sm text-[var(--ink-soft)]">
+                <div className="mt-5 space-y-2 text-xs text-[var(--ink-soft)] sm:text-sm">
                   <p className="font-semibold text-[var(--ink)]">{profile.name}</p>
                   <p>{profile.email}</p>
                   <p>
@@ -398,7 +398,7 @@ export function AccountDashboard({
               </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 lg:w-[340px]">
+            <div className="grid w-full gap-3 sm:grid-cols-2 lg:w-[340px]">
               <QuickActionButton onClick={() => setProfileEditing((current) => !current)}>
                 회원정보 수정
               </QuickActionButton>
@@ -415,14 +415,14 @@ export function AccountDashboard({
                     router.refresh();
                   });
                 }}
-                className="button-primary px-4 py-3 disabled:cursor-wait disabled:opacity-60"
+                className="button-primary min-h-11 w-full px-4 py-3 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
               >
                 로그아웃
               </button>
             </div>
           </div>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
             <SummaryStat label="주문" value={profile.orderCount} />
             <SummaryStat label="배송지" value={profile.addressCount} />
             <SummaryStat label="찜" value={profile.wishlistCount} />
@@ -437,7 +437,7 @@ export function AccountDashboard({
           ) : null}
         </article>
 
-        <article id="account-profile" className="surface-card rounded-[36px] p-8 sm:p-10">
+        <article id="account-profile" className="surface-card rounded-[32px] p-6 sm:rounded-[36px] sm:p-8 lg:p-10">
           <div className="flex items-end justify-between gap-4">
             <div>
               <p className="display-eyebrow">Profile</p>
@@ -448,8 +448,8 @@ export function AccountDashboard({
             </QuickActionButton>
           </div>
 
-          <div className="mt-8 grid gap-4">
-            <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
+          <div className="mt-6 grid gap-4">
+            <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-4 sm:p-5">
               <p className="display-eyebrow">이름</p>
               {profileEditing ? (
                 <div className="mt-4 space-y-3">
@@ -464,7 +464,7 @@ export function AccountDashboard({
                       type="button"
                       disabled={isPending}
                       onClick={handleProfileSave}
-                      className="button-primary px-4 py-3 disabled:cursor-wait disabled:opacity-60"
+                      className="button-primary min-h-11 w-full px-4 py-3 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
                     >
                       저장
                     </button>
@@ -482,11 +482,11 @@ export function AccountDashboard({
                 <p className="mt-3 text-xl font-semibold">{profile.name}</p>
               )}
             </div>
-            <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
+            <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-4 sm:p-5">
               <p className="display-eyebrow">이메일</p>
               <p className="mt-3 text-sm text-[var(--ink-soft)]">{profile.email}</p>
             </div>
-            <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5">
+            <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-4 sm:p-5">
               <p className="display-eyebrow">가입 방식</p>
               <p className="mt-3 text-sm text-[var(--ink-soft)]">{providerLabel}</p>
             </div>
@@ -495,7 +495,7 @@ export function AccountDashboard({
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.02fr_0.98fr]">
-        <article className="surface-card rounded-[36px] p-8 sm:p-10">
+        <article className="surface-card rounded-[32px] p-6 sm:rounded-[36px] sm:p-8 lg:p-10">
           <div className="flex items-end justify-between gap-4">
             <div>
               <p className="display-eyebrow">Orders</p>
@@ -503,7 +503,7 @@ export function AccountDashboard({
             </div>
             <QuickActionLink href="/orders">전체 주문 보기</QuickActionLink>
           </div>
-          <div className="mt-8 space-y-4">
+          <div className="mt-6 space-y-4">
             {recentOrders.length > 0 ? (
               recentOrders.map((order) => (
                 <Link
@@ -513,7 +513,7 @@ export function AccountDashboard({
                 >
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                      <p className="text-lg font-semibold">{order.orderNumber}</p>
+                      <p className="text-base font-semibold sm:text-lg">{order.orderNumber}</p>
                       <p className="mt-2 text-sm text-[var(--ink-soft)]">
                         {new Date(order.createdAt).toLocaleDateString("ko-KR")} · {order.customerName}
                       </p>
@@ -531,7 +531,7 @@ export function AccountDashboard({
           </div>
         </article>
 
-        <article id="account-addresses" className="surface-card rounded-[36px] p-8 sm:p-10">
+        <article id="account-addresses" className="surface-card rounded-[32px] p-6 sm:rounded-[36px] sm:p-8 lg:p-10">
           <div className="flex items-end justify-between gap-4">
             <div>
               <p className="display-eyebrow">Address Book</p>
@@ -545,11 +545,11 @@ export function AccountDashboard({
             </div>
           </div>
 
-          <div className="mt-8 space-y-4">
+          <div className="mt-6 space-y-4">
             {defaultAddress ? (
-              <article className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6">
+              <article className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5 sm:p-6">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-lg font-semibold">{defaultAddress.label}</p>
+                  <p className="text-base font-semibold sm:text-lg">{defaultAddress.label}</p>
                   <span className="rounded-full bg-[rgba(28,107,81,0.12)] px-3 py-1 text-xs font-semibold text-[var(--secondary)]">
                     기본 배송지
                   </span>
@@ -569,11 +569,11 @@ export function AccountDashboard({
             )}
 
             {additionalAddresses.length > 0 ? (
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-2">
                 {additionalAddresses.map((address) => (
                   <article
                     key={address.id}
-                    className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.62)] p-5"
+                    className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.62)] p-4 sm:p-5"
                   >
                     <p className="text-base font-semibold">{address.label}</p>
                     <p className="mt-2 text-sm text-[var(--ink-soft)]">{address.recipientName}</p>
@@ -588,7 +588,7 @@ export function AccountDashboard({
 
           {addressManagerOpen ? (
             <div id="account-address-manager" className="mt-8 space-y-4 border-t border-[var(--line)] pt-8">
-              <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                 <div>
                   <p className="display-eyebrow">Manage</p>
                   <h3 className="mt-3 text-xl font-semibold">배송지 관리</h3>
@@ -608,7 +608,7 @@ export function AccountDashboard({
                   {addresses.map((address) => (
                     <article
                       key={address.id}
-                      className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5"
+                      className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-4 sm:p-5"
                     >
                       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                         <div>
@@ -660,8 +660,8 @@ export function AccountDashboard({
                 </div>
               ) : null}
 
-              <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6">
-                <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5 sm:p-6">
+                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                   <div>
                     <p className="display-eyebrow">Editor</p>
                     <h3 className="mt-3 text-xl font-semibold">
@@ -673,11 +673,11 @@ export function AccountDashboard({
                   ) : null}
                 </div>
 
-                <div className="mt-6 grid gap-4 md:grid-cols-2">
+                <div className="mt-6 grid gap-4 sm:grid-cols-2">
                   <input
                     value={addressDraft.label}
                     onChange={(event) => setAddressDraft((current) => ({ ...current, label: event.target.value }))}
-                    className="soft-input rounded-[20px] px-4 py-3"
+                    className="soft-input min-h-11 rounded-[20px] px-4 py-3"
                     placeholder="배송지 이름"
                   />
                   <input
@@ -685,13 +685,13 @@ export function AccountDashboard({
                     onChange={(event) =>
                       setAddressDraft((current) => ({ ...current, recipientName: event.target.value }))
                     }
-                    className="soft-input rounded-[20px] px-4 py-3"
+                    className="soft-input min-h-11 rounded-[20px] px-4 py-3"
                     placeholder="받는 분"
                   />
                   <input
                     value={addressDraft.phone}
                     onChange={(event) => setAddressDraft((current) => ({ ...current, phone: event.target.value }))}
-                    className="soft-input rounded-[20px] px-4 py-3"
+                    className="soft-input min-h-11 rounded-[20px] px-4 py-3"
                     placeholder="연락처"
                   />
                   <input
@@ -699,7 +699,7 @@ export function AccountDashboard({
                     onChange={(event) =>
                       setAddressDraft((current) => ({ ...current, postalCode: event.target.value }))
                     }
-                    className="soft-input rounded-[20px] px-4 py-3"
+                    className="soft-input min-h-11 rounded-[20px] px-4 py-3"
                     placeholder="우편번호"
                   />
                   <input
@@ -727,12 +727,12 @@ export function AccountDashboard({
                   기본 배송지로 저장
                 </label>
 
-                <div className="mt-6 flex flex-wrap gap-3">
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                   <button
                     type="button"
                     disabled={addressPendingId !== null}
                     onClick={handleAddressSave}
-                    className="button-primary px-4 py-3 disabled:cursor-wait disabled:opacity-60"
+                    className="button-primary min-h-11 w-full px-4 py-3 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
                   >
                     {editingAddressId ? "배송지 수정 저장" : "배송지 추가"}
                   </button>
@@ -745,7 +745,7 @@ export function AccountDashboard({
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">
-        <article className="surface-card rounded-[36px] p-8 sm:p-10">
+        <article className="surface-card rounded-[32px] p-6 sm:rounded-[36px] sm:p-8 lg:p-10">
           <div className="flex items-end justify-between gap-4">
             <div>
               <p className="display-eyebrow">Wishlist</p>
@@ -753,14 +753,14 @@ export function AccountDashboard({
             </div>
             <QuickActionLink href="/search">상품 더 보기</QuickActionLink>
           </div>
-          <div className="mt-8 space-y-4">
+          <div className="mt-6 space-y-4">
             {wishlistPreview.length > 0 ? (
               wishlistPreview.map((item) => (
                 <article
                   key={item.productId}
-                  className="grid gap-4 rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5 sm:grid-cols-[120px_minmax(0,1fr)]"
+                  className="grid gap-4 rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-4 sm:p-5 sm:grid-cols-[120px_minmax(0,1fr)]"
                 >
-                  <Link href={`/products/${item.slug}`} className="relative min-h-[140px] overflow-hidden rounded-[24px]">
+                  <Link href={`/products/${item.slug}`} className="relative min-h-[180px] overflow-hidden rounded-[24px] sm:min-h-[140px]">
                     <Image src={item.imageUrl} alt={item.imageAlt} fill sizes="120px" className="object-cover" />
                   </Link>
                   <div>
@@ -769,17 +769,17 @@ export function AccountDashboard({
                       {item.name}
                     </Link>
                     <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">{item.summary}</p>
-                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                      <p className="text-lg font-semibold">{formatPrice(item.price)}원</p>
-                      <div className="flex gap-3">
-                        <Link href={`/products/${item.slug}`} className="button-secondary px-4 py-3">
+                    <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+                      <p className="text-base font-semibold sm:text-lg">{formatPrice(item.price)}원</p>
+                      <div className="flex flex-col gap-3 sm:flex-row">
+                        <Link href={`/products/${item.slug}`} className="button-secondary min-h-11 w-full px-4 py-3 sm:w-auto">
                           상품 보기
                         </Link>
                         <button
                           type="button"
                           disabled={wishlistPendingId === item.productId}
                           onClick={() => handleWishlistRemove(item.productId)}
-                          className="button-secondary px-4 py-3 disabled:cursor-wait disabled:opacity-60"
+                          className="button-secondary min-h-11 w-full px-4 py-3 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
                         >
                           찜 해제
                         </button>
@@ -796,7 +796,7 @@ export function AccountDashboard({
           </div>
         </article>
 
-        <article className="surface-card rounded-[36px] p-8 sm:p-10">
+        <article className="surface-card rounded-[32px] p-6 sm:rounded-[36px] sm:p-8 lg:p-10">
           <div className="flex items-end justify-between gap-4">
             <div>
               <p className="display-eyebrow">Reviews</p>
@@ -804,16 +804,16 @@ export function AccountDashboard({
             </div>
             <span className="text-sm text-[var(--ink-soft)]">최근 {reviewPreview.length}개 미리보기</span>
           </div>
-          <div className="mt-8 space-y-4">
+          <div className="mt-6 space-y-4">
             {reviewPreview.length > 0 ? (
               reviewPreview.map((review) => {
                 const isEditing = reviewEditorId === review.id && reviewDraft;
 
                 return (
-                  <article key={review.id} className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6">
+                  <article key={review.id} className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5 sm:p-6">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <Link href={`/products/${review.productSlug}`} className="text-lg font-semibold">
+                        <Link href={`/products/${review.productSlug}`} className="text-base font-semibold sm:text-lg">
                           {review.productName}
                         </Link>
                         <p className="mt-2 text-sm text-[var(--ink-soft)]">
@@ -827,7 +827,7 @@ export function AccountDashboard({
 
                     {isEditing ? (
                       <div className="mt-5 space-y-4">
-                        <div className="grid gap-4 sm:grid-cols-[160px_minmax(0,1fr)]">
+                        <div className="grid gap-4 lg:grid-cols-[160px_minmax(0,1fr)]">
                           <select
                             value={reviewDraft.rating}
                             onChange={(event) =>
@@ -837,7 +837,7 @@ export function AccountDashboard({
                                   : current,
                               )
                             }
-                            className="soft-input rounded-[20px] px-4 py-3"
+                            className="soft-input min-h-11 rounded-[20px] px-4 py-3"
                           >
                             {[5, 4, 3, 2, 1].map((value) => (
                               <option key={value} value={value}>
@@ -852,7 +852,7 @@ export function AccountDashboard({
                                 current ? { ...current, title: event.target.value } : current,
                               )
                             }
-                            className="soft-input rounded-[20px] px-4 py-3"
+                            className="soft-input min-h-11 rounded-[20px] px-4 py-3"
                             placeholder="리뷰 제목"
                           />
                         </div>
@@ -863,7 +863,7 @@ export function AccountDashboard({
                               current ? { ...current, content: event.target.value } : current,
                             )
                           }
-                          className="soft-input min-h-[132px] w-full rounded-[24px] px-4 py-4"
+                          className="soft-input min-h-[148px] w-full rounded-[24px] px-4 py-4"
                           placeholder="리뷰 내용을 입력해 주세요"
                         />
                         <div className="flex flex-wrap gap-3">
@@ -871,7 +871,7 @@ export function AccountDashboard({
                             type="button"
                             disabled={reviewPendingId === review.id}
                             onClick={() => handleReviewSave(review)}
-                            className="button-primary px-4 py-3 disabled:cursor-wait disabled:opacity-60"
+                            className="button-primary min-h-11 w-full px-4 py-3 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
                           >
                             리뷰 저장
                           </button>
@@ -889,8 +889,8 @@ export function AccountDashboard({
                       <>
                         <p className="mt-4 text-base font-semibold">{review.title}</p>
                         <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">{review.content}</p>
-                        <div className="mt-5 flex flex-wrap gap-3">
-                          <Link href={`/products/${review.productSlug}`} className="button-secondary px-4 py-3">
+                        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                          <Link href={`/products/${review.productSlug}`} className="button-secondary min-h-11 w-full px-4 py-3 sm:w-auto">
                             상품 보기
                           </Link>
                           <QuickActionButton
@@ -905,7 +905,7 @@ export function AccountDashboard({
                             type="button"
                             disabled={reviewPendingId === review.id}
                             onClick={() => handleReviewDelete(review.id)}
-                            className="button-secondary px-4 py-3 disabled:cursor-wait disabled:opacity-60"
+                            className="button-secondary min-h-11 w-full px-4 py-3 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
                           >
                             리뷰 삭제
                           </button>
