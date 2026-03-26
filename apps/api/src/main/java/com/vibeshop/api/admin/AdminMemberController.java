@@ -7,13 +7,16 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.vibeshop.api.admin.AdminDtos.AdminManagedAccountResponse;
 import com.vibeshop.api.admin.AdminDtos.AdminMemberResponse;
+import com.vibeshop.api.admin.AdminDtos.CreateAdminAccountRequest;
 import com.vibeshop.api.admin.AdminDtos.UpdateAdminMemberStatusRequest;
 
 @RestController
@@ -39,6 +42,23 @@ public class AdminMemberController {
     ) {
         adminAccessGuard.requireAdmin(adminSessionToken);
         return adminMemberService.getMembers(status, provider, keyword);
+    }
+
+    @GetMapping("/admins")
+    List<AdminManagedAccountResponse> adminAccounts(
+        @CookieValue(value = ADMIN_SESSION_COOKIE, required = false) String adminSessionToken
+    ) {
+        adminAccessGuard.requireOwner(adminSessionToken);
+        return adminMemberService.getAdminAccounts();
+    }
+
+    @PostMapping("/admins")
+    AdminManagedAccountResponse createAdminAccount(
+        @CookieValue(value = ADMIN_SESSION_COOKIE, required = false) String adminSessionToken,
+        @Valid @RequestBody CreateAdminAccountRequest request
+    ) {
+        adminAccessGuard.requireOwner(adminSessionToken);
+        return adminMemberService.createAdminAccount(request);
     }
 
     @PutMapping("/{memberId}/status")

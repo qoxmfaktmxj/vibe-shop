@@ -5,6 +5,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -291,6 +292,29 @@ public final class AdminDtos {
         long orderCount,
         long shippingAddressCount,
         BigDecimal totalSpent
+    ) {
+    }
+
+    public record AdminManagedAccountResponse(
+        Long id,
+        String name,
+        String email,
+        String role,
+        String status,
+        String provider,
+        OffsetDateTime createdAt,
+        OffsetDateTime lastLoginAt
+    ) {
+    }
+
+    public record CreateAdminAccountRequest(
+        @NotBlank(message = "관리자 이름을 입력해 주세요.")
+        @Size(max = 80, message = "관리자 이름은 80자 이하로 입력해 주세요.") String name,
+        @NotBlank(message = "관리자 이메일을 입력해 주세요.")
+        @Email(message = "올바른 이메일 형식을 입력해 주세요.") String email,
+        @NotBlank(message = "관리자 비밀번호를 입력해 주세요.")
+        @Size(min = 8, message = "관리자 비밀번호는 8자 이상이어야 합니다.") String password,
+        @NotBlank(message = "관리자 역할을 선택해 주세요.") String role
     ) {
     }
 

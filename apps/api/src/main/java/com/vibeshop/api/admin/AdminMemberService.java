@@ -1,6 +1,8 @@
 package com.vibeshop.api.admin;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -11,7 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.vibeshop.api.account.ShippingAddressRepository;
 import com.vibeshop.api.admin.AdminDtos.AdminMemberResponse;
+import com.vibeshop.api.admin.AdminDtos.AdminManagedAccountResponse;
+import com.vibeshop.api.admin.AdminDtos.CreateAdminAccountRequest;
 import com.vibeshop.api.admin.AdminDtos.UpdateAdminMemberStatusRequest;
+import com.vibeshop.api.auth.AuthProviderType;
 import com.vibeshop.api.auth.User;
 import com.vibeshop.api.auth.UserRepository;
 import com.vibeshop.api.auth.UserRole;
@@ -23,31 +28,36 @@ import com.vibeshop.api.order.CustomerOrderRepository;
 import com.vibeshop.api.order.OrderPayment;
 import com.vibeshop.api.order.OrderPaymentRepository;
 import com.vibeshop.api.order.PaymentStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 @Transactional
 public class AdminMemberService {
 
     private static final BigDecimal ZERO = BigDecimal.ZERO;
+    private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
 
     private final UserRepository userRepository;
     private final UserSessionRepository userSessionRepository;
     private final ShippingAddressRepository shippingAddressRepository;
     private final CustomerOrderRepository customerOrderRepository;
     private final OrderPaymentRepository orderPaymentRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public AdminMemberService(
         UserRepository userRepository,
         UserSessionRepository userSessionRepository,
         ShippingAddressRepository shippingAddressRepository,
         CustomerOrderRepository customerOrderRepository,
-        OrderPaymentRepository orderPaymentRepository
+        OrderPaymentRepository orderPaymentRepository,
+        PasswordEncoder passwordEncoder
     ) {
         this.userRepository = userRepository;
         this.userSessionRepository = userSessionRepository;
         this.shippingAddressRepository = shippingAddressRepository;
         this.customerOrderRepository = customerOrderRepository;
         this.orderPaymentRepository = orderPaymentRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional(readOnly = true)
@@ -60,6 +70,34 @@ public class AdminMemberService {
             .filter(user -> matchesKeyword(user, keyword))
             .map(user -> toResponse(user, metrics))
             .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<AdminManagedAccountResponse> getAdminAccounts() {
+        return userRepository.findAll(Sort.by(Sort.Direction.ASC, "role").and(Sort.by(Sort.Direction.ASC, "createdAt"))).stream()
+            .filter(User::isAdmin)
+            .map(this::toAdminAccountResponse)
+            .toList();
+    }
+
+    public AdminManagedAccountResponse createAdminAccount(CreateAdminAccountRequest request) {
+        String normalizedEmail = normalizeEmail(request.email());
+        if (userRepository.findByEmailIgnoreCase(normalizedEmail).isPresent()) {
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        }
+
+        UserRole role = parseAdminRole(request.role());
+        OffsetDateTime now = OffsetDateTime.now(SEOUL);
+        User user = userRepository.save(new User(
+            request.name().trim(),
+            normalizedEmail,
+            passwordEncoder.encode(request.password()),
+            AuthProviderType.LOCAL,
+            role,
+            now
+        ));
+
+        return toAdminAccountResponse(user);
     }
 
     public AdminMemberResponse updateMemberStatus(Long memberId, UpdateAdminMemberStatusRequest request) {
@@ -93,6 +131,19 @@ public class AdminMemberService {
             metrics.orderCountByUserId().getOrDefault(user.getId(), 0L),
             metrics.addressCountByUserId().getOrDefault(user.getId(), 0L),
             metrics.totalSpentByUserId().getOrDefault(user.getId(), ZERO)
+        );
+    }
+
+    private AdminManagedAccountResponse toAdminAccountResponse(User user) {
+        return new AdminManagedAccountResponse(
+            user.getId(),
+            user.getName(),
+            user.getEmail(),
+            user.getRole().name(),
+            user.getStatus().name(),
+            user.getProvider().name(),
+            user.getCreatedAt(),
+            user.getLastLoginAt()
         );
     }
 
@@ -160,6 +211,25 @@ public class AdminMemberService {
         } catch (IllegalArgumentException exception) {
             throw new IllegalArgumentException("유효한 회원 상태가 아닙니다.");
         }
+    }
+
+    private UserRole parseAdminRole(String role) {
+        UserRole parsedRole;
+        try {
+            parsedRole = UserRole.valueOf(role.trim().toUpperCase());
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalArgumentException("유효한 관리자 역할이 아닙니다.");
+        }
+
+        if (parsedRole == UserRole.CUSTOMER) {
+            throw new IllegalArgumentException("관리자 역할만 생성할 수 있습니다.");
+        }
+
+        return parsedRole;
+    }
+
+    private String normalizeEmail(String email) {
+        return email.trim().toLowerCase();
     }
 
     private record MemberMetrics(

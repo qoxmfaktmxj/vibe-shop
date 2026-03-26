@@ -183,6 +183,24 @@ export type AdminMember = {
   totalSpent: number;
 };
 
+export type AdminManagedAccount = {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  status: string;
+  provider: string;
+  createdAt: string;
+  lastLoginAt: string | null;
+};
+
+export type CreateAdminAccountPayload = {
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+};
+
 export type UpdateAdminMemberStatusPayload = {
   status: string;
 };

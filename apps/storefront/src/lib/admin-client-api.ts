@@ -3,6 +3,7 @@ import type {
   AdminCategoryPayload,
   AdminDisplay,
   AdminDisplayItem,
+  AdminManagedAccount,
   AdminMember,
   AdminOperations,
   AdminOrder,
@@ -10,6 +11,7 @@ import type {
   AdminReview,
   AdminSession,
   AdminStatistics,
+  CreateAdminAccountPayload,
   CreateAdminProductPayload,
   DeleteAdminCategoryResponse,
   DeleteAdminDisplayItemResponse,
@@ -193,6 +195,15 @@ export async function updateMemberStatus(
 ): Promise<AdminMember> {
   return fetchJson<AdminMember>(`/api/v1/admin/members/${memberId}/status`, {
     method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function createAdminAccount(
+  payload: CreateAdminAccountPayload,
+): Promise<AdminManagedAccount> {
+  return fetchJson<AdminManagedAccount>("/api/v1/admin/members/admins", {
+    method: "POST",
     body: JSON.stringify(payload),
   });
 }

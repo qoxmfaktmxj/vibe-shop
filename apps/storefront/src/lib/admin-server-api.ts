@@ -5,6 +5,7 @@ import type {
   AdminCategory,
   AdminDashboard,
   AdminDisplay,
+  AdminManagedAccount,
   AdminMember,
   AdminOperations,
   AdminOrder,
@@ -77,6 +78,12 @@ export async function getAdminOrders(): Promise<AdminOrder[]> {
 
 export async function getAdminMembers(): Promise<AdminMember[]> {
   return fetchFromApi<AdminMember[]>("/api/v1/admin/members", {
+    headers: await getCookieHeaders(),
+  });
+}
+
+export async function getAdminManagedAccounts(): Promise<AdminManagedAccount[]> {
+  return fetchFromApi<AdminManagedAccount[]>("/api/v1/admin/members/admins", {
     headers: await getCookieHeaders(),
   });
 }

@@ -1,6 +1,7 @@
 package com.vibeshop.api.admin;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasItems;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -601,6 +602,86 @@ class AdminControllerTest {
     }
 
     @Test
+    void ownerCanCreateAdminAccountAndNewAdminCanLogin() throws Exception {
+        Cookie ownerCookie = loginAsAdmin();
+
+        mockMvc.perform(post("/api/v1/admin/members/admins")
+                .cookie(ownerCookie)
+                .contentType("application/json")
+                .content("""
+                    {
+                      "name": "MD Admin",
+                      "email": "md-admin@maru.local",
+                      "password": "adminpass123!",
+                      "role": "MD"
+                    }
+                    """))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.email").value("md-admin@maru.local"))
+            .andExpect(jsonPath("$.role").value("MD"))
+            .andExpect(jsonPath("$.status").value("ACTIVE"))
+            .andExpect(jsonPath("$.provider").value("LOCAL"));
+
+        mockMvc.perform(get("/api/v1/admin/members/admins").cookie(ownerCookie))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[*].email", hasItems(ADMIN_EMAIL, "md-admin@maru.local")));
+
+        Cookie mdCookie = loginAs("md-admin@maru.local", "adminpass123!");
+
+        mockMvc.perform(get("/api/v1/admin/dashboard").cookie(mdCookie))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.productCount").value(1));
+    }
+
+    @Test
+    void nonOwnerAdminCannotCreateAdminAccount() throws Exception {
+        jdbcClient.sql("""
+            INSERT INTO users (
+                id,
+                name,
+                email,
+                password_hash,
+                provider,
+                role,
+                status,
+                marketing_opt_in,
+                created_at,
+                last_login_at
+            )
+            VALUES (
+                901,
+                'Ops Manager',
+                'ops-manager@maru.local',
+                ?,
+                'LOCAL',
+                'OPS',
+                'ACTIVE',
+                FALSE,
+                CURRENT_TIMESTAMP,
+                NULL
+            )
+            """)
+            .param(passwordEncoder.encode("opsmanager123!"))
+            .update();
+
+        Cookie opsCookie = loginAs("ops-manager@maru.local", "opsmanager123!");
+
+        mockMvc.perform(post("/api/v1/admin/members/admins")
+                .cookie(opsCookie)
+                .contentType("application/json")
+                .content("""
+                    {
+                      "name": "Blocked Admin",
+                      "email": "blocked-admin@maru.local",
+                      "password": "adminpass123!",
+                      "role": "CS"
+                    }
+                    """))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.message").value("OWNER 권한이 필요합니다."));
+    }
+
+    @Test
     void adminOperationsDashboardAggregatesOperationalSignals() throws Exception {
         OffsetDateTime now = OffsetDateTime.now(SEOUL);
 
@@ -876,7 +957,87 @@ class AdminControllerTest {
             .andExpect(jsonPath("$.lowRatingReviews[0].reviewId").value(1001));
     }
 
+    @Test
+    void ownerCanCreateAdminAccount() throws Exception {
+        Cookie adminCookie = loginAsAdmin();
+
+        mockMvc.perform(post("/api/v1/admin/members/admins")
+                .cookie(adminCookie)
+                .contentType("application/json")
+                .content("""
+                    {
+                      "name": "Ops Manager",
+                      "email": "ops-manager@maru.local",
+                      "password": "ops12345!",
+                      "role": "OPS"
+                    }
+                    """))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name").value("Ops Manager"))
+            .andExpect(jsonPath("$.email").value("ops-manager@maru.local"))
+            .andExpect(jsonPath("$.role").value("OPS"))
+            .andExpect(jsonPath("$.status").value("ACTIVE"))
+            .andExpect(jsonPath("$.provider").value("LOCAL"));
+
+        Integer adminCount = jdbcClient.sql("SELECT COUNT(*) FROM users WHERE email = 'ops-manager@maru.local' AND role = 'OPS'")
+            .query(Integer.class)
+            .single();
+        assertThat(adminCount).isEqualTo(1);
+    }
+
+    @Test
+    void nonOwnerCannotCreateAdminAccount() throws Exception {
+        jdbcClient.sql("""
+            INSERT INTO users (
+                id,
+                name,
+                email,
+                password_hash,
+                provider,
+                role,
+                status,
+                marketing_opt_in,
+                created_at,
+                last_login_at
+            )
+            VALUES (
+                901,
+                'MD Admin',
+                'md-admin@maru.local',
+                ?,
+                'LOCAL',
+                'MD',
+                'ACTIVE',
+                FALSE,
+                CURRENT_TIMESTAMP,
+                NULL
+            )
+            """)
+            .param(passwordEncoder.encode("mdadmin123!"))
+            .update();
+
+        Cookie adminCookie = loginAs("md-admin@maru.local", "mdadmin123!");
+
+        mockMvc.perform(post("/api/v1/admin/members/admins")
+                .cookie(adminCookie)
+                .contentType("application/json")
+                .content("""
+                    {
+                      "name": "Blocked Owner",
+                      "email": "blocked-owner@maru.local",
+                      "password": "owner12345!",
+                      "role": "OWNER"
+                    }
+                    """))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.message").value("OWNER 권한이 필요합니다."));
+    }
+
     private Cookie loginAsAdmin() throws Exception {
+        return loginAs(ADMIN_EMAIL, ADMIN_PASSWORD);
+    }
+
+    private Cookie loginAs(String email, String password) throws Exception {
         MvcResult loginResult = mockMvc.perform(post("/api/v1/admin/session/login")
                 .contentType("application/json")
                 .content("""
@@ -884,7 +1045,7 @@ class AdminControllerTest {
                       "email": "%s",
                       "password": "%s"
                     }
-                    """.formatted(ADMIN_EMAIL, ADMIN_PASSWORD)))
+                    """.formatted(email, password)))
             .andExpect(status().isOk())
             .andExpect(header().doesNotExist("X-Admin-Session-Token"))
             .andExpect(cookie().exists("vibe_shop_admin_session"))
