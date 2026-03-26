@@ -29,18 +29,18 @@ export default async function AuthPage({
 
   return (
     <AuthFormShell
-      eyebrow="회원 인증"
-      title={isSignup ? "회원가입" : "로그인"}
+      eyebrow="계정 안내"
+      title={isSignup ? "회원가입으로 전환" : "로그인"}
       description={
         isSignup
-          ? "새 계정을 만들면 주문 내역, 장바구니, 찜 목록을 한곳에서 이어서 관리할 수 있습니다."
+          ? "아직 계정이 없다면 회원가입으로 새 계정을 만들 수 있습니다."
           : "기존 계정으로 로그인하면 주문, 배송, 리뷰, 찜 목록을 바로 확인할 수 있습니다."
       }
       alternateHref={`/auth?tab=${isSignup ? "login" : "signup"}&next=${encodeURIComponent(nextPath)}`}
       alternateLabel={isSignup ? "로그인으로 전환" : "회원가입으로 전환"}
       alternateDescription={
         isSignup
-          ? "이미 계정이 있다면 로그인으로 바로 이어서 이용할 수 있습니다."
+          ? "이미 계정이 있다면 로그인으로 바로 이동해 기존 계정을 사용할 수 있습니다."
           : "아직 계정이 없다면 회원가입으로 새 계정을 만들 수 있습니다."
       }
     >

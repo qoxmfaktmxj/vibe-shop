@@ -17,7 +17,7 @@ export default async function StoreLayout({
   return (
     <AuthProvider initialSession={authSession}>
       <CartProvider>
-        <div className="min-h-screen bg-[var(--surface)] text-[var(--ink)]">
+        <div className="min-h-screen bg-[var(--background)] text-[var(--ink)]">
           <SiteHeader categories={categories} />
           <main className="page-container flex w-full flex-col pb-24 pt-6 sm:pb-24 sm:pt-8 lg:pb-28">
             {children}

@@ -1,10 +1,10 @@
-export const ADMIN_NAV_ITEMS = [
-  { href: "/admin", label: "\uAC1C\uC694" },
-  { href: "/admin/display", label: "\uC804\uC2DC" },
-  { href: "/admin/products", label: "\uC0C1\uD488" },
-  { href: "/admin/orders", label: "\uC8FC\uBB38" },
-  { href: "/admin/members", label: "\uD68C\uC6D0" },
-  { href: "/admin/reviews", label: "\uB9AC\uBDF0" },
-  { href: "/admin/analytics", label: "\uD1B5\uACC4" },
-  { href: "/admin/operations", label: "\uC6B4\uC601" },
+﻿export const ADMIN_NAV_ITEMS = [
+  { href: "/admin", label: "개요" },
+  { href: "/admin/display", label: "전시" },
+  { href: "/admin/products", label: "상품" },
+  { href: "/admin/orders", label: "주문" },
+  { href: "/admin/members", label: "회원" },
+  { href: "/admin/reviews", label: "리뷰" },
+  { href: "/admin/analytics", label: "통계" },
+  { href: "/admin/operations", label: "운영" },
 ] as const;

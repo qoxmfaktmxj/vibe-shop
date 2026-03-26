@@ -45,16 +45,19 @@ public class CatalogController {
     }
 
     @GetMapping("/products")
-    List<ProductSummary> products(
+    PagedProductResponse products(
         @CookieValue(value = AUTH_SESSION_COOKIE, required = false) String authSessionToken,
         @RequestParam(required = false) String category,
-        @RequestParam(required = false, name = "q") String keyword,
-        @RequestParam(required = false) String sort
+        @RequestParam(required = false) String sort,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size
     ) {
-        return catalogService.getProducts(
+        size = Math.min(size, 100);
+        return catalogService.getProductsPaged(
             category,
-            keyword,
             sort,
+            page,
+            size,
             authService.resolveAuthenticatedUserId(authSessionToken)
         );
     }
@@ -72,12 +75,17 @@ public class CatalogController {
         @CookieValue(value = AUTH_SESSION_COOKIE, required = false) String authSessionToken,
         @RequestParam(required = false, name = "q") String keyword,
         @RequestParam(required = false) String category,
-        @RequestParam(required = false) String sort
+        @RequestParam(required = false) String sort,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size
     ) {
+        size = Math.min(size, 100);
         return productSearchService.search(
             keyword,
             category,
             sort,
+            page,
+            size,
             authService.resolveAuthenticatedUserId(authSessionToken)
         );
     }

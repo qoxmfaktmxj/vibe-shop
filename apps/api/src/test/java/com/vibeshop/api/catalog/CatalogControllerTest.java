@@ -131,24 +131,27 @@ class CatalogControllerTest {
     void productsSupportNewestAndPopularSorts() throws Exception {
         mockMvc.perform(get("/api/v1/products").param("sort", "newest"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].slug").value("balance-yoga-mat"))
-            .andExpect(jsonPath("$[1].slug").value("stone-plate-set"));
+            .andExpect(jsonPath("$.items[0].slug").value("balance-yoga-mat"))
+            .andExpect(jsonPath("$.items[1].slug").value("stone-plate-set"))
+            .andExpect(jsonPath("$.page").value(0))
+            .andExpect(jsonPath("$.totalItems").value(4));
 
         mockMvc.perform(get("/api/v1/products").param("sort", "popular"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].slug").value("linen-bed-set"))
-            .andExpect(jsonPath("$[1].slug").value("stone-plate-set"));
+            .andExpect(jsonPath("$.items[0].slug").value("linen-bed-set"))
+            .andExpect(jsonPath("$.items[1].slug").value("stone-plate-set"));
     }
 
     @Test
     void searchCanFilterByCategoryAndKeyword() throws Exception {
-        mockMvc.perform(get("/api/v1/products")
+        mockMvc.perform(get("/api/v1/search/products")
                 .param("category", "living")
                 .param("q", "living")
                 .param("sort", "newest"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()").value(2))
-            .andExpect(jsonPath("$[0].slug").value("arch-wall-mirror"));
+            .andExpect(jsonPath("$.items.length()").value(2))
+            .andExpect(jsonPath("$.items[0].slug").value("arch-wall-mirror"))
+            .andExpect(jsonPath("$.page").value(0));
     }
 
     @Test

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -20,7 +20,7 @@ function isActivePath(currentPath: string, href: string) {
 }
 
 export function AdminShell({
-  eyebrow = "MARU Digital Atelier \uC6B4\uC601 \uCF58\uC194",
+  eyebrow = "MARU Digital Atelier 운영 콘솔",
   title,
   description,
   children,
@@ -62,12 +62,12 @@ export function AdminShell({
               }
               className="admin-button-ghost px-5 py-3 disabled:opacity-60"
             >
-              {isLoggingOut ? "\uB85C\uADF8\uC544\uC6C3 \uC911..." : "\uB85C\uADF8\uC544\uC6C3"}
+              {isLoggingOut ? "로그아웃 중..." : "로그아웃"}
             </button>
           </div>
         </div>
 
-        <nav className="mt-8 flex flex-wrap gap-3" aria-label="\uAD00\uB9AC\uC790 \uC8FC\uC694 \uBA54\uB274">
+        <nav className="mt-8 flex flex-wrap gap-3" aria-label="관리자 주요 메뉴">
           {ADMIN_NAV_ITEMS.map((item) => {
             const active = isActivePath(pathname, item.href);
 

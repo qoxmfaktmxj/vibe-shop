@@ -87,7 +87,7 @@ export function SignupForm({ nextPath }: { nextPath: string }) {
           disabled={isPending}
           className="button-primary rounded-[20px] px-5 py-3 disabled:opacity-60"
         >
-          {isPending ? "가입 중입니다" : "회원가입"}
+          {isPending ? "가입 중..." : "회원가입"}
         </button>
 
         <p className="text-sm text-[var(--ink-soft)]">

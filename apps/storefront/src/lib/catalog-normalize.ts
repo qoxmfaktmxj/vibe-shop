@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   Category,
   HomeResponse,
   ProductDetail,
@@ -10,22 +10,22 @@ import type {
 
 const CATEGORY_COPY: Record<string, { name: string; description: string; heroTitle: string; heroSubtitle: string }> = {
   living: {
-    name: "\uB9AC\uBE59",
-    description: "\uACF5\uAC04\uC744 \uC815\uB9AC\uD558\uACE0 \uBD84\uC704\uAE30\uB97C \uB9CC\uB4DC\uB294 \uB9AC\uBE59 \uC140\uB809\uC158",
-    heroTitle: "\uACF5\uAC04\uC744 \uC815\uB9AC\uD558\uB294 \uB9AC\uBE59 \uC140\uB809\uC158",
-    heroSubtitle: "\uC790\uC5F0\uC2A4\uB7FD\uAC8C \uBA38\uBB34\uB294 \uAC70\uC2E4\uACFC \uCE68\uC2E4 \uC544\uC774\uD15C\uC744 \uCC9C\uCC9C\uD788 \uC0B4\uD3B4\uBCF4\uC138\uC694.",
+    name: "리빙",
+    description: "공간을 정리하고 분위기를 만드는 리빙 셀렉션",
+    heroTitle: "공간을 정리하는 리빙 셀렉션",
+    heroSubtitle: "자연스럽게 머무는 거실과 침실 아이템을 천천히 살펴보세요.",
   },
   kitchen: {
-    name: "\uD0A4\uCE5C",
-    description: "\uC2DD\uD0C1\uACFC \uC870\uB9AC \uC2DC\uAC04\uC744 \uC815\uB3C8\uD558\uB294 \uD0A4\uCE5C \uC140\uB809\uC158",
-    heroTitle: "\uD14C\uC774\uBE14\uACFC \uC870\uB9AC\uB97C \uC704\uD55C \uD0A4\uCE5C \uC140\uB809\uC158",
-    heroSubtitle: "\uD50C\uB808\uC774\uD305\uACFC \uC870\uB9AC \uB3D9\uC120\uC5D0 \uB9DE\uCD98 \uC2E4\uC6A9\uC801\uC778 \uB3C4\uAD6C\uC640 \uC2DD\uAE30\uB97C \uD55C \uBC88\uC5D0 \uC0B4\uD3B4\uBCF4\uC138\uC694.",
+    name: "키친",
+    description: "식탁과 조리 시간을 정돈하는 키친 셀렉션",
+    heroTitle: "테이블과 조리를 위한 키친 셀렉션",
+    heroSubtitle: "플레이팅과 조리 동선에 맞춘 실용적인 도구와 식기를 한 번에 살펴보세요.",
   },
   wellness: {
-    name: "\uC6F0\uB2C8\uC2A4",
-    description: "\uD558\uB8E8\uC758 \uADE0\uD615\uC744 \uB354\uD558\uB294 \uC6F0\uB2C8\uC2A4 \uC140\uB809\uC158",
-    heroTitle: "\uD734\uC2DD\uACFC \uB8E8\uD2F4\uC744 \uC704\uD55C \uC6F0\uB2C8\uC2A4 \uC140\uB809\uC158",
-    heroSubtitle: "\uD734\uC2DD\uACFC \uC140\uD504 \uCF00\uC5B4 \uB8E8\uD2F4\uC5D0 \uC5B4\uC6B8\uB9AC\uB294 \uC544\uC774\uD15C\uC744 \uD55C\uACF3\uC5D0 \uBAA8\uC558\uC2B5\uB2C8\uB2E4.",
+    name: "웰니스",
+    description: "하루의 균형을 더하는 웰니스 셀렉션",
+    heroTitle: "휴식과 루틴을 위한 웰니스 셀렉션",
+    heroSubtitle: "휴식과 셀프 케어 루틴에 어울리는 아이템을 한곳에 모았습니다.",
   },
 };
 

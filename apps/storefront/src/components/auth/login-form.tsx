@@ -80,7 +80,7 @@ export function LoginForm({
           disabled={isPending}
           className="button-primary rounded-[20px] px-5 py-3 disabled:opacity-60"
         >
-          {isPending ? "로그인 중입니다" : "로그인"}
+          {isPending ? "로그인 중..." : "로그인"}
         </button>
 
         <p className="text-sm text-[var(--ink-soft)]">

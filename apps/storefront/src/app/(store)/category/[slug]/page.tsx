@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ProductCard } from "@/components/catalog/product-card";
 import { ProductSortTabs } from "@/components/catalog/product-sort-tabs";
 import { SearchForm } from "@/components/search/search-form";
+import { Pagination } from "@/components/ui/pagination";
 import { getCategories, getProducts } from "@/lib/server-api";
 
 export default async function CategoryPage({
@@ -12,17 +13,18 @@ export default async function CategoryPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ sort?: string }>;
+  searchParams: Promise<{ sort?: string; page?: string }>;
 }) {
   const { slug } = await params;
-  const { sort } = await searchParams;
+  const { sort, page: pageParam } = await searchParams;
   const currentSort = sort?.trim() || "recommended";
+  const currentPage = Math.max(1, Number(pageParam) || 1);
 
-  const [categories, products, newestProducts, popularProducts] = await Promise.all([
+  const [categories, productsResponse, newestResponse, popularResponse] = await Promise.all([
     getCategories(),
-    getProducts(slug, currentSort),
-    getProducts(slug, "newest"),
-    getProducts(slug, "popular"),
+    getProducts(slug, currentSort, currentPage - 1, 20),
+    getProducts(slug, "newest", 0, 4),
+    getProducts(slug, "popular", 0, 4),
   ]);
 
   const category = categories.find((item) => item.slug === slug);
@@ -30,6 +32,15 @@ export default async function CategoryPage({
   if (!category) {
     notFound();
   }
+
+  const products = productsResponse.items;
+  const totalPages = productsResponse.totalPages;
+
+  const newestProducts = newestResponse.items;
+  const popularProducts = popularResponse.items;
+
+  const baseParams: Record<string, string> = {};
+  if (currentSort !== "recommended") baseParams.sort = currentSort;
 
   return (
     <div className="grid-shell space-y-8">
@@ -124,6 +135,15 @@ export default async function CategoryPage({
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
+
+        {totalPages > 1 && (
+          <Pagination
+            page={currentPage}
+            totalPages={totalPages}
+            basePath={`/category/${slug}`}
+            baseParams={baseParams}
+          />
+        )}
       </section>
     </div>
   );

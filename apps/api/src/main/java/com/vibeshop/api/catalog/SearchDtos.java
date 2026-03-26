@@ -39,7 +39,13 @@ public final class SearchDtos {
         List<ProductSummary> items,
         ParsedSearchQueryResponse parsedQuery,
         List<AppliedFilterResponse> appliedFilters,
-        SearchFallbackResponse fallback
+        SearchFallbackResponse fallback,
+        int page,
+        int size,
+        long totalItems,
+        int totalPages,
+        boolean hasNext,
+        boolean hasPrev
     ) {
     }
 }

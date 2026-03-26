@@ -18,12 +18,12 @@ export function SiteHeader({ categories = [] }: SiteHeaderProps) {
   const links = categories.slice(0, 6);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-white/92 backdrop-blur">
+    <header className="sticky top-0 z-50 border-b border-[var(--chrome-border)] bg-[var(--chrome-bg-strong)] text-[var(--chrome-fg)] backdrop-blur-md">
       <div className="page-container flex flex-col gap-4 py-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <Link href="/" className="flex flex-col leading-none text-[var(--ink)]">
+          <Link href="/" className="flex flex-col leading-none text-[var(--chrome-fg)]">
             <span className="text-xl font-semibold tracking-tight">Maru</span>
-            <span className="mt-1 text-[10px] uppercase tracking-[0.28em] text-[var(--ink-soft)]">
+            <span className="mt-1 text-[10px] uppercase tracking-[0.28em] text-[var(--chrome-fg-muted)]">
               디지털 아틀리에
             </span>
           </Link>
@@ -41,7 +41,7 @@ export function SiteHeader({ categories = [] }: SiteHeaderProps) {
               <a
                 key={category.id}
                 href={category.slug ? `/category/${encodeURIComponent(category.slug)}` : "/search"}
-                className="text-sm text-[var(--ink-soft)] transition-colors hover:text-[var(--ink)]"
+                className="border-b border-transparent pb-1 text-sm text-[var(--chrome-fg-muted)] transition-colors hover:border-[var(--chrome-fg)] hover:text-[var(--chrome-fg)]"
               >
                 {category.name}
               </a>

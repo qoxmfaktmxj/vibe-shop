@@ -8,6 +8,7 @@ import type {
   MyReview,
   OrderResponse,
   OrderSummaryResponse,
+  PagedProductResponse,
   ProductDetail,
   ProductSearchResponse,
   ProductSummary,
@@ -80,7 +81,12 @@ async function resolveCategoryParam(category?: string) {
   return alias?.slug ?? category;
 }
 
-export async function getProducts(category?: string, sort?: string) {
+export async function getProducts(
+  category?: string,
+  sort?: string,
+  page = 0,
+  size = 20,
+): Promise<PagedProductResponse> {
   const params = new URLSearchParams();
   const resolvedCategory = await resolveCategoryParam(category);
   if (resolvedCategory) {
@@ -89,14 +95,25 @@ export async function getProducts(category?: string, sort?: string) {
   if (sort && sort !== "recommended") {
     params.set("sort", sort);
   }
-  const query = params.toString() ? `?${params.toString()}` : "";
-  const products = await fetchFromApi<ProductSummary[]>(`/api/v1/products${query}`, {
+  params.set("page", String(page));
+  params.set("size", String(size));
+  const query = `?${params.toString()}`;
+  const response = await fetchFromApi<PagedProductResponse>(`/api/v1/products${query}`, {
     headers: await getCookieHeaders(),
   });
-  return products.map((product) => normalizeProduct(product));
+  return {
+    ...response,
+    items: response.items.map((product) => normalizeProduct(product)),
+  };
 }
 
-export async function searchProducts(keyword: string, sort?: string, category?: string) {
+export async function searchProducts(
+  keyword: string,
+  sort?: string,
+  category?: string,
+  page = 0,
+  size = 20,
+): Promise<ProductSearchResponse> {
   const params = new URLSearchParams();
   params.set("q", keyword);
   const resolvedCategory = await resolveCategoryParam(category);
@@ -106,6 +123,8 @@ export async function searchProducts(keyword: string, sort?: string, category?: 
   if (sort && sort !== "recommended") {
     params.set("sort", sort);
   }
+  params.set("page", String(page));
+  params.set("size", String(size));
   const query = `?${params.toString()}`;
   const response = await fetchFromApi<ProductSearchResponse>(`/api/v1/search/products${query}`, {
     headers: await getCookieHeaders(),

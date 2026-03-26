@@ -1,26 +1,34 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ece9e4;
-  --surface: #f2efe9;
-  --surface-low: #e5e0d8;
-  --surface-high: #f6f2ec;
-  --surface-card: rgba(255, 255, 255, 0.86);
+  --background: #fff0e5;
+  --surface: #fcf9f1;
+  --surface-low: #f3e7d6;
+  --surface-high: #fff7ef;
+  --surface-card: rgba(252, 249, 241, 0.84);
   --ink: #1a1a1a;
-  --ink-soft: #666666;
-  --ink-muted: #8b8b8b;
-  --primary: #1a1a1a;
-  --primary-dim: #333333;
-  --secondary: #1c6b51;
-  --secondary-soft: #a6f2d1;
-  --line: #dfdad1;
-  --line-strong: #c8c1b7;
+  --ink-soft: #625546;
+  --ink-muted: #907764;
+  --primary: #5f5e5e;
+  --primary-dim: #4d4b4b;
+  --secondary: #5c6947;
+  --secondary-soft: #e7decf;
+  --line: #d8c7b6;
+  --line-strong: #c4af9b;
   --shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
   --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.05);
   --shadow-strong: 0 28px 54px rgba(28, 29, 31, 0.12);
   --accent-caramel: #c2956a;
   --accent-sienna: #8f5a3c;
   --accent-taupe: #a38979;
+  --chrome-bg: #8b5a2b;
+  --chrome-bg-strong: rgba(139, 90, 43, 0.92);
+  --chrome-fg: #faf7f6;
+  --chrome-fg-muted: rgba(250, 247, 246, 0.72);
+  --chrome-fg-subtle: rgba(250, 247, 246, 0.4);
+  --chrome-border: rgba(250, 247, 246, 0.14);
+  --chrome-hover: rgba(255, 255, 255, 0.12);
+  --focus-warm: #f3e7d6;
 }
 
 @theme inline {
@@ -44,9 +52,9 @@ body {
   min-height: 100vh;
   overflow-x: clip;
   background:
-    radial-gradient(circle at top left, rgba(194, 149, 106, 0.18), transparent 26%),
-    radial-gradient(circle at top right, rgba(28, 107, 81, 0.12), transparent 24%),
-    linear-gradient(180deg, #f3efe8 0%, var(--background) 46%, #e6e1da 100%);
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.5), transparent 20%),
+    radial-gradient(circle at top right, rgba(194, 149, 106, 0.18), transparent 24%),
+    linear-gradient(180deg, #fff7ef 0%, var(--background) 40%, #f1dece 100%);
   color: var(--ink);
   font-family: var(--font-display), sans-serif;
   word-break: keep-all;
@@ -177,7 +185,7 @@ textarea::placeholder {
 }
 
 .glass-nav {
-  background: rgba(242, 239, 233, 0.9);
+  background: rgba(252, 249, 241, 0.92);
   backdrop-filter: blur(14px);
 }
 
@@ -200,7 +208,7 @@ textarea::placeholder {
 }
 
 .soft-input:focus-visible {
-  outline: 2px solid rgba(28, 107, 81, 0.9);
+  outline: 2px solid rgba(139, 90, 43, 0.45);
   outline-offset: 2px;
 }
 
@@ -302,7 +310,7 @@ button:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  outline: 2px solid rgba(28, 107, 81, 0.9);
+  outline: 2px solid rgba(139, 90, 43, 0.45);
   outline-offset: 2px;
 }
 

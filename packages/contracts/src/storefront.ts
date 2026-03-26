@@ -171,6 +171,22 @@ export type ProductSearchResponse = {
   parsedQuery: ParsedSearchQuery;
   appliedFilters: AppliedSearchFilter[];
   fallback: SearchFallback | null;
+  page: number;
+  size: number;
+  totalItems: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+};
+
+export type PagedProductResponse = {
+  items: ProductSummary[];
+  page: number;
+  size: number;
+  totalItems: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
 };
 
 export type AuthenticatedUser = {

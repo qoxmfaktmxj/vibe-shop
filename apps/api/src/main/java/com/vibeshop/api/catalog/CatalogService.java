@@ -6,6 +6,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -148,6 +151,37 @@ public class CatalogService {
             .toList();
     }
 
+    public PagedProductResponse getProductsPaged(String categorySlug, String sort, int page, int size, Long userId) {
+        String normalizedCategorySlug = categorySlug == null || categorySlug.isBlank() ? null : categorySlug.trim();
+        String normalizedSort = sort == null || sort.isBlank() ? "recommended" : sort.trim();
+
+        Sort springSort = toSpringSort(normalizedSort);
+        PageRequest pageRequest = PageRequest.of(page, size, springSort);
+
+        Page<Product> productPage = normalizedCategorySlug == null
+            ? productRepository.findAllByCategory_VisibleTrue(pageRequest)
+            : productRepository.findByCategory_SlugAndCategory_VisibleTrue(normalizedCategorySlug, pageRequest);
+
+        Set<Long> wishlistedProductIds = wishlistService.getWishlistedProductIds(
+            userId,
+            productPage.getContent().stream().map(Product::getId).toList()
+        );
+
+        List<ProductSummary> items = productPage.getContent().stream()
+            .map(product -> toProductSummary(product, wishlistedProductIds.contains(product.getId())))
+            .toList();
+
+        return new PagedProductResponse(
+            items,
+            productPage.getNumber(),
+            productPage.getSize(),
+            productPage.getTotalElements(),
+            productPage.getTotalPages(),
+            productPage.hasNext(),
+            productPage.hasPrevious()
+        );
+    }
+
     public ProductDetailResponse getProduct(String slug, Long userId) {
         Product product = productRepository.findBySlugAndCategory_VisibleTrue(slug)
             .orElseThrow(() -> new ResourceNotFoundException("상품을 찾을 수 없습니다."));
@@ -269,6 +303,22 @@ public class CatalogService {
         };
 
         products.sort(comparator);
+    }
+
+    private Sort toSpringSort(String sort) {
+        return switch (sort) {
+            case "newest" -> Sort.by(Sort.Direction.DESC, "createdAt").and(Sort.by(Sort.Direction.DESC, "id"));
+            case "popular" -> Sort.by(Sort.Direction.DESC, "popularityScore")
+                .and(Sort.by(Sort.Direction.DESC, "featured"))
+                .and(Sort.by(Sort.Direction.DESC, "createdAt"))
+                .and(Sort.by(Sort.Direction.ASC, "id"));
+            case "price-asc" -> Sort.by(Sort.Direction.ASC, "price").and(Sort.by(Sort.Direction.ASC, "id"));
+            case "price-desc" -> Sort.by(Sort.Direction.DESC, "price").and(Sort.by(Sort.Direction.ASC, "id"));
+            default -> Sort.by(Sort.Direction.DESC, "featured")
+                .and(Sort.by(Sort.Direction.DESC, "popularityScore"))
+                .and(Sort.by(Sort.Direction.DESC, "createdAt"))
+                .and(Sort.by(Sort.Direction.ASC, "id"));
+        };
     }
 
     private OffsetDateTime now() {

@@ -108,21 +108,23 @@ public class ProductSearchService {
         this.jdbcClient = jdbcClient;
     }
 
-    public ProductSearchResponse search(String rawQuery, String explicitCategory, String sort, Long userId) {
+    public ProductSearchResponse search(String rawQuery, String explicitCategory, String sort, int page, int size, Long userId) {
         SearchCriteria parsedCriteria = parse(rawQuery, explicitCategory);
         SearchExecution primaryExecution = execute(parsedCriteria, sort, userId);
         if (!primaryExecution.items().isEmpty() || !parsedCriteria.hasSearchSignals()) {
-            return new ProductSearchResponse(
+            return toPagedResponse(
                 primaryExecution.items(),
                 toParsedQuery(parsedCriteria),
                 buildAppliedFilters(parsedCriteria),
-                null
+                null,
+                page,
+                size
             );
         }
 
         SearchExecution relaxedExecution = execute(parsedCriteria.relaxOptionalSignals(), sort, userId);
         if (!relaxedExecution.items().isEmpty()) {
-            return new ProductSearchResponse(
+            return toPagedResponse(
                 relaxedExecution.items(),
                 toParsedQuery(parsedCriteria),
                 buildAppliedFilters(parsedCriteria.relaxOptionalSignals()),
@@ -130,7 +132,9 @@ public class ProductSearchService {
                     true,
                     "세부 조건이 너무 촘촘해서 색상·시즌·용도 조건을 완화한 결과를 보여드렸습니다.",
                     List.of("color", "season", "useCase", "gender")
-                )
+                ),
+                page,
+                size
             );
         }
 
@@ -141,7 +145,7 @@ public class ProductSearchService {
             if (parsedCriteria.categoryFromQuery()) {
                 relaxedFilters.add("category");
             }
-            return new ProductSearchResponse(
+            return toPagedResponse(
                 broaderExecution.items(),
                 toParsedQuery(parsedCriteria),
                 buildAppliedFilters(broaderCriteria),
@@ -149,15 +153,49 @@ public class ProductSearchService {
                     true,
                     "가격대와 질의 내 카테고리 조건을 조금 넓혀서 검색 결과를 보여드렸습니다.",
                     relaxedFilters
-                )
+                ),
+                page,
+                size
             );
         }
 
-        return new ProductSearchResponse(
+        return toPagedResponse(
             List.of(),
             toParsedQuery(parsedCriteria),
             buildAppliedFilters(parsedCriteria),
-            null
+            null,
+            page,
+            size
+        );
+    }
+
+    private ProductSearchResponse toPagedResponse(
+        List<ProductSummary> allItems,
+        ParsedSearchQueryResponse parsedQuery,
+        List<AppliedFilterResponse> appliedFilters,
+        SearchFallbackResponse fallback,
+        int page,
+        int size
+    ) {
+        long totalItems = allItems.size();
+        int totalPages = size > 0 ? (int) Math.ceil((double) totalItems / size) : 0;
+        int fromIndex = page * size;
+        int toIndex = Math.min(fromIndex + size, allItems.size());
+        List<ProductSummary> pagedItems = (fromIndex >= allItems.size())
+            ? List.of()
+            : allItems.subList(fromIndex, toIndex);
+
+        return new ProductSearchResponse(
+            pagedItems,
+            parsedQuery,
+            appliedFilters,
+            fallback,
+            page,
+            size,
+            totalItems,
+            totalPages,
+            page < totalPages - 1,
+            page > 0
         );
     }
 
