@@ -1,34 +1,36 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fff0e5;
-  --surface: #fcf9f1;
-  --surface-low: #f3e7d6;
-  --surface-high: #fff7ef;
-  --surface-card: rgba(252, 249, 241, 0.84);
-  --ink: #1a1a1a;
-  --ink-soft: #625546;
-  --ink-muted: #907764;
-  --primary: #5f5e5e;
-  --primary-dim: #4d4b4b;
-  --secondary: #5c6947;
-  --secondary-soft: #e7decf;
-  --line: #d8c7b6;
-  --line-strong: #c4af9b;
+  --background: #eaddca;
+  --surface: #f5ede4;
+  --surface-low: #ede4d8;
+  --surface-high: #e4dbc9;
+  --surface-card: rgba(248, 245, 242, 0.78);
+  --ink: #2c2823;
+  --ink-soft: #5d5449;
+  --ink-muted: #726f68;
+  --primary: #4a4742;
+  --primary-dim: #3e3b37;
+  --secondary: #5d5449;
+  --secondary-soft: #e2d7c7;
+  --line: #aba79e;
+  --line-strong: #8f877d;
   --shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
   --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.05);
   --shadow-strong: 0 28px 54px rgba(28, 29, 31, 0.12);
   --accent-caramel: #c2956a;
   --accent-sienna: #8f5a3c;
   --accent-taupe: #a38979;
-  --chrome-bg: #8b5a2b;
-  --chrome-bg-strong: rgba(139, 90, 43, 0.92);
-  --chrome-fg: #faf7f6;
-  --chrome-fg-muted: rgba(250, 247, 246, 0.72);
-  --chrome-fg-subtle: rgba(250, 247, 246, 0.4);
-  --chrome-border: rgba(250, 247, 246, 0.14);
-  --chrome-hover: rgba(255, 255, 255, 0.12);
-  --focus-warm: #f3e7d6;
+  --chrome-bg: #4b2321;
+  --chrome-bg-strong: rgba(75, 35, 33, 0.9);
+  --chrome-fg: #ffffff;
+  --chrome-fg-muted: rgba(255, 255, 255, 0.74);
+  --chrome-fg-subtle: rgba(255, 255, 255, 0.42);
+  --chrome-border: rgba(255, 255, 255, 0.16);
+  --chrome-hover: rgba(255, 255, 255, 0.1);
+  --focus-warm: #f5ede4;
+  --footer-surface: rgba(255, 255, 255, 0.1);
+  --footer-border: rgba(171, 167, 158, 0.35);
 }
 
 @theme inline {
@@ -52,9 +54,9 @@ body {
   min-height: 100vh;
   overflow-x: clip;
   background:
-    radial-gradient(circle at top left, rgba(255, 255, 255, 0.5), transparent 20%),
-    radial-gradient(circle at top right, rgba(194, 149, 106, 0.18), transparent 24%),
-    linear-gradient(180deg, #fff7ef 0%, var(--background) 40%, #f1dece 100%);
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.22), transparent 18%),
+    radial-gradient(circle at top right, rgba(93, 84, 73, 0.08), transparent 24%),
+    linear-gradient(180deg, #f2e7d7 0%, var(--background) 42%, #ddd0be 100%);
   color: var(--ink);
   font-family: var(--font-display), sans-serif;
   word-break: keep-all;
@@ -181,11 +183,11 @@ textarea::placeholder {
 }
 
 .button-hot:hover {
-  background: #17684e;
+  background: #534c43;
 }
 
 .glass-nav {
-  background: rgba(252, 249, 241, 0.92);
+  background: rgba(245, 237, 228, 0.9);
   backdrop-filter: blur(14px);
 }
 
@@ -208,7 +210,7 @@ textarea::placeholder {
 }
 
 .soft-input:focus-visible {
-  outline: 2px solid rgba(139, 90, 43, 0.45);
+  outline: 2px solid rgba(44, 40, 35, 0.35);
   outline-offset: 2px;
 }
 
@@ -230,8 +232,8 @@ textarea::placeholder {
 }
 
 .section-frame {
-  border: 1px solid rgba(26, 26, 26, 0.08);
-  background: rgba(255, 255, 255, 0.64);
+  border: 1px solid rgba(74, 71, 66, 0.1);
+  background: rgba(248, 245, 242, 0.64);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
   backdrop-filter: blur(12px);
 }
@@ -240,8 +242,8 @@ textarea::placeholder {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(26, 26, 26, 0.12);
-  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(74, 71, 66, 0.12);
+  background: rgba(248, 245, 242, 0.72);
   padding: 0.7rem 1rem;
   font-size: 0.75rem;
   font-weight: 600;
@@ -254,16 +256,16 @@ textarea::placeholder {
 
 .chip-link:hover {
   transform: translateY(-1px);
-  border-color: rgba(26, 26, 26, 0.24);
-  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(74, 71, 66, 0.24);
+  background: rgba(248, 245, 242, 0.9);
 }
 
 .status-pill {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  border: 1px solid rgba(26, 26, 26, 0.1);
-  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(74, 71, 66, 0.1);
+  background: rgba(248, 245, 242, 0.8);
   padding: 0.6rem 0.9rem;
   font-size: 0.72rem;
   font-weight: 700;
@@ -310,7 +312,7 @@ button:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  outline: 2px solid rgba(139, 90, 43, 0.45);
+  outline: 2px solid rgba(44, 40, 35, 0.35);
   outline-offset: 2px;
 }
 
