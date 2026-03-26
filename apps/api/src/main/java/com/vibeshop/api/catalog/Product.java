@@ -88,6 +88,44 @@ public class Product {
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
+    public Product(
+        Category category,
+        String slug,
+        String name,
+        String summary,
+        String description,
+        BigDecimal price,
+        String badge,
+        String accentColor,
+        String imageUrl,
+        String imageAlt,
+        boolean featured,
+        int stock,
+        int popularityScore,
+        OffsetDateTime createdAt
+    ) {
+        validateAdminValues(price, stock, popularityScore);
+
+        this.category = category;
+        this.slug = slug;
+        this.name = name;
+        this.summary = summary;
+        this.description = description;
+        this.price = price;
+        this.badge = badge;
+        this.accentColor = accentColor;
+        this.imageUrl = imageUrl;
+        this.imageAlt = imageAlt;
+        this.featured = featured;
+        this.stock = stock;
+        this.popularityScore = popularityScore;
+        this.seasonTag = "all_season";
+        this.useCaseTag = "daily";
+        this.genderTag = "unisex";
+        this.searchKeywords = String.join(", ", name, summary, description, badge, slug, category.getName());
+        this.createdAt = createdAt;
+    }
+
     public void decreaseStock(int quantity) {
         if (quantity < 1) {
             throw new IllegalArgumentException("수량은 1개 이상이어야 합니다.");
@@ -114,12 +152,7 @@ public class Product {
         int popularityScore,
         boolean featured
     ) {
-        if (stock < 0) {
-            throw new IllegalArgumentException("재고는 0 이상이어야 합니다.");
-        }
-        if (popularityScore < 0) {
-            throw new IllegalArgumentException("인기 점수는 0 이상이어야 합니다.");
-        }
+        validateAdminValues(price, stock, popularityScore);
 
         this.name = name;
         this.summary = summary;
@@ -128,5 +161,17 @@ public class Product {
         this.stock = stock;
         this.popularityScore = popularityScore;
         this.featured = featured;
+    }
+
+    private void validateAdminValues(BigDecimal price, int stock, int popularityScore) {
+        if (price == null || price.signum() < 0) {
+            throw new IllegalArgumentException("가격은 0 이상이어야 합니다.");
+        }
+        if (stock < 0) {
+            throw new IllegalArgumentException("재고는 0 이상이어야 합니다.");
+        }
+        if (popularityScore < 0) {
+            throw new IllegalArgumentException("인기 점수는 0 이상이어야 합니다.");
+        }
     }
 }

@@ -17,7 +17,7 @@ export function RecentlyViewedShelf({ recentlyViewed }: { recentlyViewed: Recent
         </div>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
         {recentlyViewed.items.map((product) => (
           <div key={product.id} className="space-y-3">
             <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.76)] px-4 py-3">

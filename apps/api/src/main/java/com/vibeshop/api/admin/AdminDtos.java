@@ -218,6 +218,32 @@ public final class AdminDtos {
     ) {
     }
 
+    public record CreateAdminProductRequest(
+        @NotBlank(message = "상품 카테고리를 선택해 주세요.")
+        @Size(max = 80, message = "상품 카테고리 slug는 80자 이하여야 합니다.") String categorySlug,
+        @NotBlank(message = "상품 slug를 입력해 주세요.")
+        @Size(max = 120, message = "상품 slug는 120자 이하여야 합니다.") String slug,
+        @NotBlank(message = "상품명을 입력해 주세요.")
+        @Size(max = 120, message = "상품명은 120자 이하여야 합니다.") String name,
+        @NotBlank(message = "상품 요약을 입력해 주세요.")
+        @Size(max = 255, message = "상품 요약은 255자 이하여야 합니다.") String summary,
+        @NotBlank(message = "상품 설명을 입력해 주세요.")
+        @Size(max = 5000, message = "상품 설명은 5000자 이하여야 합니다.") String description,
+        @DecimalMin(value = "0", message = "가격은 0 이상이어야 합니다.") BigDecimal price,
+        @NotBlank(message = "배지 문구를 입력해 주세요.")
+        @Size(max = 50, message = "배지 문구는 50자 이하여야 합니다.") String badge,
+        @NotBlank(message = "강조 색상을 입력해 주세요.")
+        @Size(max = 20, message = "강조 색상은 20자 이하여야 합니다.") String accentColor,
+        @NotBlank(message = "이미지 경로를 입력해 주세요.")
+        @Size(max = 255, message = "이미지 경로는 255자 이하여야 합니다.") String imageUrl,
+        @NotBlank(message = "이미지 대체 텍스트를 입력해 주세요.")
+        @Size(max = 255, message = "이미지 대체 텍스트는 255자 이하여야 합니다.") String imageAlt,
+        boolean featured,
+        @Min(value = 0, message = "재고는 0 이상이어야 합니다.") int stock,
+        @Min(value = 0, message = "인기 점수는 0 이상이어야 합니다.") int popularityScore
+    ) {
+    }
+
     public record UpdateAdminProductRequest(
         @NotBlank(message = "상품명을 입력해 주세요.")
         @Size(max = 120, message = "상품명은 120자 이하로 입력해 주세요.") String name,

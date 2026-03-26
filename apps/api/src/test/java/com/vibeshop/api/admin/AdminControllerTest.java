@@ -254,6 +254,66 @@ class AdminControllerTest {
     }
 
     @Test
+    void adminCanCreateProductAndRejectDuplicateSlug() throws Exception {
+        Cookie adminCookie = loginAsAdmin();
+
+        mockMvc.perform(post("/api/v1/admin/products")
+                .cookie(adminCookie)
+                .contentType("application/json")
+                .content("""
+                    {
+                      "categorySlug": "living",
+                      "slug": "admin-new-product",
+                      "name": "Admin New Product",
+                      "summary": "Created from admin.",
+                      "description": "Detailed admin product description.",
+                      "price": 129000,
+                      "badge": "NEW",
+                      "accentColor": "#245d5a",
+                      "imageUrl": "/images/products/living-02.jpg",
+                      "imageAlt": "Admin New Product image",
+                      "featured": false,
+                      "stock": 12,
+                      "popularityScore": 77
+                    }
+                    """))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.slug").value("admin-new-product"))
+            .andExpect(jsonPath("$.categorySlug").value("living"))
+            .andExpect(jsonPath("$.name").value("Admin New Product"))
+            .andExpect(jsonPath("$.stock").value(12))
+            .andExpect(jsonPath("$.price").value(129000));
+
+        Integer productCount = jdbcClient.sql("SELECT COUNT(*) FROM products WHERE slug = 'admin-new-product'")
+            .query(Integer.class)
+            .single();
+        assertThat(productCount).isEqualTo(1);
+
+        mockMvc.perform(post("/api/v1/admin/products")
+                .cookie(adminCookie)
+                .contentType("application/json")
+                .content("""
+                    {
+                      "categorySlug": "living",
+                      "slug": "admin-new-product",
+                      "name": "Duplicate Product",
+                      "summary": "Created from admin.",
+                      "description": "Duplicate slug should fail.",
+                      "price": 119000,
+                      "badge": "NEW",
+                      "accentColor": "#245d5a",
+                      "imageUrl": "/images/products/living-03.jpg",
+                      "imageAlt": "Duplicate Product image",
+                      "featured": false,
+                      "stock": 8,
+                      "popularityScore": 55
+                    }
+                    """))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("이미 사용 중인 상품 slug입니다."));
+    }
+
+    @Test
     void adminCanManageMembersAndReadStatistics() throws Exception {
         OffsetDateTime now = OffsetDateTime.now(SEOUL);
 

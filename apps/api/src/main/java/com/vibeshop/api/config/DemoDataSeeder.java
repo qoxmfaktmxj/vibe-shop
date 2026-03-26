@@ -227,16 +227,15 @@ public class DemoDataSeeder implements ApplicationRunner {
             (rs, rowNum) -> Map.entry(rs.getString("slug"), rs.getLong("id"))
         ).forEach(entry -> categoryIds.put(entry.getKey(), entry.getValue()));
 
-        seedProductsForCategory(categoryIds.get("living"), "living", "리빙", "living-room", livingProductTypes());
-        seedProductsForCategory(categoryIds.get("kitchen"), "kitchen", "키친", "kitchen", kitchenProductTypes());
-        seedProductsForCategory(categoryIds.get("wellness"), "wellness", "웰니스", "spa", wellnessProductTypes());
+        seedProductsForCategory(categoryIds.get("living"), "living", "리빙", livingProductTypes());
+        seedProductsForCategory(categoryIds.get("kitchen"), "kitchen", "키친", kitchenProductTypes());
+        seedProductsForCategory(categoryIds.get("wellness"), "wellness", "웰니스", wellnessProductTypes());
     }
 
     private void seedProductsForCategory(
         Long categoryId,
         String categorySlug,
         String categoryLabel,
-        String imageKeyword,
         List<String> productTypes
     ) {
         if (categoryId == null) {
@@ -285,8 +284,7 @@ public class DemoDataSeeder implements ApplicationRunner {
             boolean featured = ordinal % 11 == 0;
             int stock = 3 + (ordinal % 55);
             int popularityScore = 120 + ((properties.targetProductsPerCategory() - ordinal) * 3) + (featured ? 90 : 0);
-            String imageUrl = "https://loremflickr.com/1200/1600/" + imageKeyword + "?lock="
-                + imageLockBase(categorySlug) + ordinal;
+            String imageUrl = catalogImagePath(categorySlug, ordinal);
             String imageAlt = name + " 대표 이미지";
             String color = normalizeColor(accent);
             String seasonTag = switch (ordinal % 4) {
@@ -672,19 +670,14 @@ public class DemoDataSeeder implements ApplicationRunner {
             return List.of();
         }
 
-        String keyword = switch (product.categorySlug()) {
-            case "living" -> "living-room";
-            case "kitchen" -> "kitchen";
-            default -> "spa";
-        };
-        int lockBase = 9000 + (productIndex * 7) + (reviewIndex * 3);
+        int baseSeed = 9000 + (productIndex * 7) + (reviewIndex * 3);
         if ((productIndex + reviewIndex) % 5 == 0) {
             return List.of(
-                "https://loremflickr.com/1200/1200/" + keyword + "?lock=" + lockBase,
-                "https://loremflickr.com/1200/1200/" + keyword + "?lock=" + (lockBase + 1)
+                catalogImagePath(product.categorySlug(), baseSeed),
+                catalogImagePath(product.categorySlug(), baseSeed + 1)
             );
         }
-        return List.of("https://loremflickr.com/1200/1200/" + keyword + "?lock=" + lockBase);
+        return List.of(catalogImagePath(product.categorySlug(), baseSeed));
     }
 
     private long basePrice(String categorySlug) {
@@ -695,12 +688,9 @@ public class DemoDataSeeder implements ApplicationRunner {
         };
     }
 
-    private int imageLockBase(String categorySlug) {
-        return switch (categorySlug) {
-            case "living" -> 5000;
-            case "kitchen" -> 6000;
-            default -> 7000;
-        };
+    private String catalogImagePath(String categorySlug, int seed) {
+        int normalizedSeed = Math.floorMod(seed - 1, 100) + 1;
+        return "/images/products/" + categorySlug + "-" + String.format(Locale.ROOT, "%02d", normalizedSeed) + ".jpg";
     }
 
     private String normalizeColor(String accent) {

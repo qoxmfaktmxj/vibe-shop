@@ -47,7 +47,7 @@ export function RecommendationShelf({
         </div>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
         {collection.items.map((product) => (
           <ProductCard
             key={product.id}

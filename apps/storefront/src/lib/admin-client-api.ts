@@ -10,6 +10,7 @@ import type {
   AdminReview,
   AdminSession,
   AdminStatistics,
+  CreateAdminProductPayload,
   DeleteAdminCategoryResponse,
   DeleteAdminDisplayItemResponse,
   DisplayItemPayload,
@@ -141,6 +142,15 @@ export async function updateProduct(
 ): Promise<AdminProduct> {
   return fetchJson<AdminProduct>(`/api/v1/admin/products/${productId}`, {
     method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function createProduct(
+  payload: CreateAdminProductPayload,
+): Promise<AdminProduct> {
+  return fetchJson<AdminProduct>("/api/v1/admin/products", {
+    method: "POST",
     body: JSON.stringify(payload),
   });
 }

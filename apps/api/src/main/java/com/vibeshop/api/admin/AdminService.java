@@ -21,6 +21,7 @@ import com.vibeshop.api.admin.AdminDtos.AdminOrderResponse;
 import com.vibeshop.api.admin.AdminDtos.AdminProductResponse;
 import com.vibeshop.api.admin.AdminDtos.CreateAdminCategoryRequest;
 import com.vibeshop.api.admin.AdminDtos.CreateAdminDisplayItemRequest;
+import com.vibeshop.api.admin.AdminDtos.CreateAdminProductRequest;
 import com.vibeshop.api.admin.AdminDtos.DeleteAdminCategoryResponse;
 import com.vibeshop.api.admin.AdminDtos.DeleteAdminDisplayItemResponse;
 import com.vibeshop.api.admin.AdminDtos.UpdateAdminCategoryRequest;
@@ -137,6 +138,36 @@ public class AdminService {
             : productRepository.search(normalizedCategorySlug, normalizedKeyword);
 
         return products.stream().map(this::toProductResponse).toList();
+    }
+
+    public AdminProductResponse createProduct(CreateAdminProductRequest request) {
+        String normalizedCategorySlug = normalize(request.categorySlug());
+        Category category = categoryRepository.findBySlug(normalizedCategorySlug)
+            .orElseThrow(() -> new ResourceNotFoundException("카테고리를 찾을 수 없습니다."));
+
+        String normalizedProductSlug = normalizeProductSlug(request.slug());
+        if (productRepository.existsBySlugIgnoreCase(normalizedProductSlug)) {
+            throw new IllegalArgumentException("이미 사용 중인 상품 slug입니다.");
+        }
+
+        Product product = productRepository.save(new Product(
+            category,
+            normalizedProductSlug,
+            request.name().trim(),
+            request.summary().trim(),
+            request.description().trim(),
+            request.price(),
+            request.badge().trim(),
+            request.accentColor().trim(),
+            request.imageUrl().trim(),
+            request.imageAlt().trim(),
+            request.featured(),
+            request.stock(),
+            request.popularityScore(),
+            now()
+        ));
+
+        return toProductResponse(product);
     }
 
     public AdminProductResponse updateProduct(Long productId, UpdateAdminProductRequest request) {
@@ -388,6 +419,14 @@ public class AdminService {
         String normalized = slug.trim().toLowerCase();
         if (!SLUG_ALLOWED.matcher(normalized).matches()) {
             throw new IllegalArgumentException("카테고리 slug는 영문 소문자, 숫자, 하이픈만 사용할 수 있습니다.");
+        }
+        return normalized;
+    }
+
+    private String normalizeProductSlug(String slug) {
+        String normalized = slug.trim().toLowerCase();
+        if (!SLUG_ALLOWED.matcher(normalized).matches()) {
+            throw new IllegalArgumentException("상품 slug는 영문 소문자, 숫자, 하이픈만 사용할 수 있습니다.");
         }
         return normalized;
     }

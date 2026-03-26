@@ -15,7 +15,7 @@ export default async function AdminProductsPage() {
       description="전시와 통계 데이터와 분리해 상품 편집과 분류 체계 관리에 집중할 수 있도록 구성했습니다."
     >
       <div className="grid gap-6">
-        <AdminProductManager initialProducts={products} />
+        <AdminProductManager initialProducts={products} categories={categories} />
         <AdminCategoryManager initialCategories={categories} />
       </div>
     </AdminShell>

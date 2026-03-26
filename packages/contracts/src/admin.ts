@@ -134,6 +134,22 @@ export type UpdateAdminProductPayload = {
   featured: boolean;
 };
 
+export type CreateAdminProductPayload = {
+  categorySlug: string;
+  slug: string;
+  name: string;
+  summary: string;
+  description: string;
+  price: number;
+  badge: string;
+  accentColor: string;
+  imageUrl: string;
+  imageAlt: string;
+  featured: boolean;
+  stock: number;
+  popularityScore: number;
+};
+
 export type AdminOrder = {
   orderNumber: string;
   status: string;

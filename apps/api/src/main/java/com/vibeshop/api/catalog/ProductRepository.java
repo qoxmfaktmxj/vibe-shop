@@ -29,6 +29,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @EntityGraph(attributePaths = "category")
     Optional<Product> findBySlug(String slug);
 
+    boolean existsBySlugIgnoreCase(String slug);
+
     @EntityGraph(attributePaths = "category")
     Optional<Product> findBySlugAndCategory_VisibleTrue(String slug);
 

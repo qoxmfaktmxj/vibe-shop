@@ -40,7 +40,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
                 src={product.imageUrl}
                 alt={product.imageAlt}
                 fill
-                sizes="(min-width: 1280px) 22rem, (min-width: 768px) 45vw, 100vw"
+                sizes="(min-width: 1280px) 23vw, (min-width: 1024px) 31vw, (min-width: 768px) 45vw, 100vw"
                 className="object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[rgba(11,14,22,0.62)] via-transparent to-[rgba(255,255,255,0.06)]" />

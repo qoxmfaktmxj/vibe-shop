@@ -20,14 +20,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "loremflickr.com",
-      },
-    ],
-  },
   turbopack: {
     root: path.join(dirname, "../.."),
   },

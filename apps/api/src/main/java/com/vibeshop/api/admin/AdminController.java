@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.vibeshop.api.admin.AdminDtos.AdminDashboardResponse;
 import com.vibeshop.api.admin.AdminDtos.AdminOrderResponse;
 import com.vibeshop.api.admin.AdminDtos.AdminProductResponse;
+import com.vibeshop.api.admin.AdminDtos.CreateAdminProductRequest;
 import com.vibeshop.api.admin.AdminDtos.UpdateAdminOrderStatusRequest;
 import com.vibeshop.api.admin.AdminDtos.UpdateAdminProductRequest;
 
@@ -49,6 +51,15 @@ public class AdminController {
     ) {
         adminAccessGuard.requireAdmin(adminSessionToken);
         return adminService.getProducts(category, keyword);
+    }
+
+    @PostMapping("/products")
+    AdminProductResponse createProduct(
+        @CookieValue(value = ADMIN_SESSION_COOKIE, required = false) String adminSessionToken,
+        @Valid @RequestBody CreateAdminProductRequest request
+    ) {
+        adminAccessGuard.requireAdmin(adminSessionToken);
+        return adminService.createProduct(request);
     }
 
     @PutMapping("/products/{productId}")

@@ -279,7 +279,7 @@ export default async function HomePage() {
               </h2>
             </div>
           </div>
-          <div className="grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {home.curatedPicks.slice(0, 4).map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -350,7 +350,7 @@ export default async function HomePage() {
               {sectionValue(newestSection, "subtitle", "지금 막 들어온 상품들을 편하게 둘러보세요.")}
             </p>
           </div>
-          <div className="grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {home.newArrivals.slice(0, 4).map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -368,7 +368,7 @@ export default async function HomePage() {
               </h2>
             </div>
           </div>
-          <div className="grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {home.bestSellers.slice(0, 4).map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
