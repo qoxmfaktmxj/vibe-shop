@@ -40,7 +40,7 @@ export function SiteHeader({ categories = [] }: SiteHeaderProps) {
             {links.map((category) => (
               <a
                 key={category.id}
-                href={`/?category=${encodeURIComponent(category.slug ?? category.name)}`}
+                href={category.slug ? `/category/${encodeURIComponent(category.slug)}` : "/search"}
                 className="text-sm text-[var(--ink-soft)] transition-colors hover:text-[var(--ink)]"
               >
                 {category.name}
