@@ -43,11 +43,7 @@ test(
     await page.goto(`${adminUrl}/members`, { waitUntil: "networkidle" });
     await page.locator('input[name="memberQuery"]').fill(email);
 
-    const memberRow = page
-      .locator("div")
-      .filter({ has: page.getByText(email) })
-      .filter({ has: page.locator('select[name^="memberStatus-"]') })
-      .first();
+    const memberRow = page.locator(`[data-member-email="${email}"]`);
     await expect(memberRow).toBeVisible();
 
     const statusSelect = memberRow.locator('select[name^="memberStatus-"]');

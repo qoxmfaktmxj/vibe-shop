@@ -321,6 +321,8 @@ export function AdminMemberManager({
             return (
               <div
                 key={member.id}
+                data-member-email={member.email}
+                data-member-id={member.id}
                 className="grid gap-4 rounded-[28px] border border-[var(--line)] bg-white/72 p-5 xl:grid-cols-[minmax(0,1fr)_220px]"
               >
                 <div className="grid gap-3">

@@ -28,6 +28,7 @@ export function AdminReviewManager({
   reviews: AdminReview[];
 }) {
   const [items, setItems] = useState(reviews);
+  const [draftStatuses, setDraftStatuses] = useState<Record<number, string>>({});
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -50,6 +51,7 @@ export function AdminReviewManager({
             <div
               key={review.id}
               data-review-id={review.id}
+              data-review-title={review.title}
               className="grid gap-4 rounded-[28px] border border-[var(--line)] bg-white/72 p-5 xl:grid-cols-[minmax(0,1fr)_240px]"
             >
               <div>
@@ -89,13 +91,12 @@ export function AdminReviewManager({
 
               <div className="grid gap-3">
                 <select
-                  value={review.status}
+                  value={draftStatuses[review.id] ?? review.status}
                   onChange={(event) =>
-                    setItems((current) =>
-                      current.map((item) =>
-                        item.id === review.id ? { ...item, status: event.target.value } : item,
-                      ),
-                    )
+                    setDraftStatuses((current) => ({
+                      ...current,
+                      [review.id]: event.target.value,
+                    }))
                   }
                   className="admin-input px-4 py-3"
                 >
@@ -104,21 +105,24 @@ export function AdminReviewManager({
                 </select>
                 <button
                   type="button"
-                  disabled={isPending}
+                  disabled={isPending || (draftStatuses[review.id] ?? review.status) === review.status}
                   onClick={() => {
                     setMessage("");
                     setError("");
                     startTransition(() => {
                       void (async () => {
                         try {
-                          const nextStatus =
-                            items.find((item) => item.id === review.id)?.status ?? review.status;
+                          const nextStatus = draftStatuses[review.id] ?? review.status;
                           const updatedReview = await updateReviewStatus(review.id, {
                             status: nextStatus,
                           });
                           setItems((current) =>
                             current.map((item) => (item.id === updatedReview.id ? updatedReview : item)),
                           );
+                          setDraftStatuses((current) => ({
+                            ...current,
+                            [review.id]: updatedReview.status,
+                          }));
                           setMessage(`리뷰 ${updatedReview.id} 상태를 저장했습니다.`);
                         } catch (nextError) {
                           setError(getErrorMessage(nextError, "리뷰 상태 변경 중 문제가 발생했습니다."));

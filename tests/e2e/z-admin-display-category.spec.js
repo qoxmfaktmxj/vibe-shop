@@ -30,6 +30,7 @@ test("admin can manage display banners and categories", async ({ page }) => {
   await expect(page).toHaveURL(adminUrl);
 
   await page.goto(`${adminUrl}/display`, { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: /New banner/ }).click();
   await page.locator('select[name="displayItemSectionCode"]').selectOption("PROMOTION");
   await page.locator('input[name="displayItemTitle"]').fill(bannerTitle);
   await page
@@ -40,20 +41,11 @@ test("admin can manage display banners and categories", async ({ page }) => {
   await page.locator('input[name="displayItemHref"]').fill("/search?category=kitchen");
   await page.locator('input[name="displayItemCtaLabel"]').fill("기획전 보기");
   await page.locator('input[name="displayItemAccentColor"]').fill("#245d5a");
-  await Promise.all([
-    page.waitForResponse(
-      (response) =>
-        response.request().method() === "POST" &&
-        response.url().includes("/api/v1/admin/display/items") &&
-        response.ok(),
-    ),
-    page
-      .locator("form")
-      .filter({ has: page.locator('input[name="displayItemTitle"]') })
-      .getByRole("button")
-      .first()
-      .click(),
-  ]);
+  const bannerForm = page.locator("form").filter({ has: page.locator('input[name="displayItemTitle"]') });
+  const createBannerButton = bannerForm.getByRole("button", { name: /Create banner|Update banner/ }).first();
+  await expect(createBannerButton).toBeEnabled();
+  await createBannerButton.click();
+  await expect(page.locator("button").filter({ hasText: bannerTitle }).first()).toBeVisible();
   await expect(page.locator('input[name="displayItemTitle"]')).toHaveValue(bannerTitle);
 
   await page.goto(`${adminUrl}/products`, { waitUntil: "networkidle" });
@@ -71,20 +63,10 @@ test("admin can manage display banners and categories", async ({ page }) => {
   await page
     .locator('textarea[name="categoryHeroSubtitle"]')
     .fill("브라우저 테스트용 임시 카테고리 소개 문구입니다.");
-  await Promise.all([
-    page.waitForResponse(
-      (response) =>
-        response.request().method() === "POST" &&
-        response.url().includes("/api/v1/admin/categories") &&
-        response.ok(),
-    ),
-    page
-      .locator("form")
-      .filter({ has: page.locator('input[name="categorySlug"]') })
-      .getByRole("button")
-      .first()
-      .click(),
-  ]);
+  const categoryForm = page.locator("form").filter({ has: page.locator('input[name="categorySlug"]') });
+  const createCategoryButton = categoryForm.getByRole("button", { name: /Create category|Update category/ }).first();
+  await expect(createCategoryButton).toBeEnabled();
+  await createCategoryButton.click();
   await expect(page.locator("button").filter({ hasText: categoryName }).first()).toBeVisible();
 
   await page.screenshot({

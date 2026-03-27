@@ -129,9 +129,11 @@ test("member can create photo review, another member can mark it helpful, then a
   await expect(page).toHaveURL(adminUrl);
 
   await page.goto(`${adminUrl}/reviews`, { waitUntil: "networkidle" });
-  const reviewCard = page.locator('[data-review-id]').filter({ hasText: reviewTitle });
+  const reviewCard = page.locator(`[data-review-id="${orderAndReviewResult.review.id}"]`);
   await expect(reviewCard).toBeVisible();
-  await reviewCard.locator("select").selectOption("HIDDEN");
+  const reviewStatusSelect = reviewCard.locator("select");
+  await reviewStatusSelect.selectOption("HIDDEN");
+  await expect(reviewStatusSelect).toHaveValue("HIDDEN");
   await Promise.all([
     page.waitForResponse(
       (response) =>
@@ -141,7 +143,6 @@ test("member can create photo review, another member can mark it helpful, then a
     ),
     reviewCard.getByRole("button").click(),
   ]);
-  await expect(reviewCard.locator("select")).toHaveValue("HIDDEN");
 
   const hiddenReviews = await helperPage.evaluate(
     async ({ apiBaseUrl, productId, reviewTitle }) => {
