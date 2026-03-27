@@ -6,7 +6,14 @@ const { expect, test } = require("playwright/test");
 const OUTPUT_DIR = path.join(process.cwd(), "output", "playwright");
 const storefrontUrl = process.env.E2E_STOREFRONT_URL ?? "http://127.0.0.1:4100";
 const adminUrl = `${storefrontUrl}/admin`;
-const adminPassword = process.env.E2E_ADMIN_PASSWORD ?? process.env.APP_DEMO_ADMIN_PASSWORD ?? "admin1234!";
+const adminEmail =
+  process.env.E2E_ADMIN_EMAIL ??
+  process.env.APP_DEMO_ADMIN_EMAIL ??
+  "admin@maru.local";
+const adminPassword =
+  process.env.E2E_ADMIN_PASSWORD ??
+  process.env.APP_DEMO_ADMIN_PASSWORD ??
+  "admin1234!";
 
 test("admin dashboard can manage display, products, and order status", async ({ page }) => {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -15,12 +22,21 @@ test("admin dashboard can manage display, products, and order status", async ({ 
   const heroTitle = `운영 메인 카피 ${uniqueId}`;
 
   await page.goto("/products/brew-mug", { waitUntil: "networkidle" });
-  await page
-    .getByRole("complementary")
-    .getByRole("button", { name: /장바구니 담기|Add to Bag/ })
-    .click();
+  const addToCartButton = page.locator("button.button-hot").first();
+  await addToCartButton.scrollIntoViewIfNeeded();
+  await Promise.all([
+    page.waitForResponse(
+      (response) =>
+        response.request().method() === "PUT" &&
+        response.url().includes("/api/v1/cart/items/") &&
+        response.ok(),
+    ),
+    addToCartButton.click(),
+  ]);
+
+  await page.goto("/cart", { waitUntil: "networkidle" });
   await expect(
-    page.getByRole("complementary").getByRole("button", { name: /담기 완료|Added/ }),
+    page.locator("button").filter({ hasText: /삭제|제거|Remove/ }).first(),
   ).toBeVisible();
 
   await page.goto("/checkout", { waitUntil: "networkidle" });
@@ -32,12 +48,14 @@ test("admin dashboard can manage display, products, and order status", async ({ 
   await checkoutInputs.nth(4).fill("15F");
   await page.locator("form textarea").fill("Admin dashboard test order.");
   await page.locator('input[name="paymentMethod"][value="CARD"]').check({ force: true });
-  await page.getByRole("button", { name: /주문하기|Place order|바로 주문/ }).click();
+  await page
+    .getByRole("button", { name: /주문하기|Place order|바로 주문/ })
+    .click();
 
   await expect(page).toHaveURL(/\/orders\/[A-Z0-9]+(?:\?phone=.*)?$/);
 
   await page.goto(`${adminUrl}/login`, { waitUntil: "networkidle" });
-  await page.locator('input[type="email"]').fill("admin@vibeshop.local");
+  await page.locator('input[type="email"]').fill(adminEmail);
   await page.locator('input[type="password"]').fill(adminPassword);
   await page.locator('form button[type="submit"]').click();
   await expect(page).toHaveURL(adminUrl);
@@ -71,13 +89,14 @@ test("admin dashboard can manage display, products, and order status", async ({ 
   await expect(orderSelect).toBeVisible();
   const originalStatus = await orderSelect.inputValue();
   await orderSelect.selectOption("PREPARING");
-  await page.getByRole("button", { name: /상태 저장|Save status/ }).first().click();
+  await page
+    .getByRole("button", { name: /상태 저장|Save status/ })
+    .first()
+    .click();
   await expect(orderSelect).toHaveValue("PREPARING");
 
   await page.goto(`${adminUrl}/`, { waitUntil: "networkidle" });
-  await expect(
-    page.getByRole("heading", { name: /핵심 운영 지표를 빠르게 확인하는 메인 보드/ }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: /메인 보드/ })).toBeVisible();
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "12-admin-dashboard.png"),
     fullPage: true,
@@ -86,7 +105,10 @@ test("admin dashboard can manage display, products, and order status", async ({ 
   await page.goto(`${adminUrl}/orders`, { waitUntil: "networkidle" });
   const restoreOrderSelect = page.getByRole("combobox").first();
   await restoreOrderSelect.selectOption(originalStatus);
-  await page.getByRole("button", { name: /상태 저장|Save status/ }).first().click();
+  await page
+    .getByRole("button", { name: /상태 저장|Save status/ })
+    .first()
+    .click();
 
   await page.goto(`${adminUrl}/products`, { waitUntil: "networkidle" });
   await productBadgeInput.fill(originalBadge);

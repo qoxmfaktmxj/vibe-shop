@@ -5,9 +5,10 @@ import { getAdminManagedAccounts, getAdminMembers } from "@/lib/admin-server-api
 
 export default async function AdminMembersPage() {
   const session = await requireAdminSession();
+  const adminUser = session.user!;
   const members = await getAdminMembers();
   const managedAccounts =
-    session.user.role === "OWNER" ? await getAdminManagedAccounts().catch(() => []) : [];
+    adminUser.role === "OWNER" ? await getAdminManagedAccounts().catch(() => []) : [];
 
   return (
     <AdminShell
@@ -18,7 +19,7 @@ export default async function AdminMembersPage() {
       <AdminMemberManager
         initialMembers={members}
         initialManagedAccounts={managedAccounts}
-        currentAdminRole={session.user.role}
+        currentAdminRole={adminUser.role}
       />
     </AdminShell>
   );

@@ -2,6 +2,7 @@ import { cache } from "react";
 import { cookies } from "next/headers";
 
 import type {
+  AdminBootstrapStatus,
   AdminCategory,
   AdminDashboard,
   AdminDisplay,
@@ -42,6 +43,12 @@ async function fetchFromApi<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const getAdminSession = cache(async (): Promise<AdminSession> =>
   fetchFromApi<AdminSession>("/api/v1/admin/session", {
+    headers: await getCookieHeaders(),
+  }),
+);
+
+export const getAdminBootstrapStatus = cache(async (): Promise<AdminBootstrapStatus> =>
+  fetchFromApi<AdminBootstrapStatus>("/api/v1/admin/session/bootstrap", {
     headers: await getCookieHeaders(),
   }),
 );

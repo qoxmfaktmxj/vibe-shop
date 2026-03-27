@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.vibeshop.api.admin.AdminDtos.AdminBootstrapStatusResponse;
 import com.vibeshop.api.admin.AdminDtos.AdminSessionResponse;
 import com.vibeshop.api.admin.AdminDtos.AdminSessionUserResponse;
+import com.vibeshop.api.admin.AdminDtos.BootstrapAdminSignupRequest;
 import com.vibeshop.api.auth.AuthDtos.LoginRequest;
 import com.vibeshop.api.auth.AuthService;
 import com.vibeshop.api.auth.User;
@@ -45,6 +47,16 @@ public class AdminAuthController {
         return toResponse(session.user());
     }
 
+    @PostMapping("/signup")
+    AdminSessionResponse signUp(
+        @Valid @RequestBody BootstrapAdminSignupRequest request,
+        HttpServletResponse response
+    ) {
+        AuthService.AuthenticatedSession session = authService.signUpBootstrapAdmin(request);
+        applyAuthenticatedSession(response, session);
+        return toResponse(session.user());
+    }
+
     @PostMapping("/logout")
     AdminSessionResponse logout(
         @CookieValue(value = ADMIN_SESSION_COOKIE, required = false) String sessionToken,
@@ -66,6 +78,11 @@ public class AdminAuthController {
                 clearSessionCookie(response);
                 return AdminSessionResponse.unauthenticated();
             });
+    }
+
+    @GetMapping("/bootstrap")
+    AdminBootstrapStatusResponse bootstrapStatus() {
+        return new AdminBootstrapStatusResponse(authService.canBootstrapAdmin());
     }
 
     private void applyAuthenticatedSession(HttpServletResponse response, AuthService.AuthenticatedSession session) {

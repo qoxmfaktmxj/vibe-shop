@@ -2,12 +2,24 @@
 
 import { createContext, useContext, useState } from "react";
 
-import { getAdminSession, signIn, signOut } from "@/lib/admin-client-api";
-import type { AdminSession, LoginPayload } from "@/lib/admin-contracts";
+import {
+  getAdminSession,
+  signIn,
+  signOut,
+  signUpBootstrapAdmin,
+} from "@/lib/admin-client-api";
+import type {
+  AdminSession,
+  BootstrapAdminSignupPayload,
+  LoginPayload,
+} from "@/lib/admin-contracts";
 
 type AuthContextValue = {
   session: AdminSession;
   signIn: (payload: LoginPayload) => Promise<AdminSession>;
+  signUpBootstrapAdmin: (
+    payload: BootstrapAdminSignupPayload,
+  ) => Promise<AdminSession>;
   signOut: () => Promise<AdminSession>;
   refreshSession: () => Promise<AdminSession>;
 };
@@ -38,6 +50,17 @@ export function AdminAuthProvider({
     return confirmedSession;
   };
 
+  const handleBootstrapSignUp = async (
+    payload: BootstrapAdminSignupPayload,
+  ) => {
+    await signUpBootstrapAdmin(payload);
+    const confirmedSession = await refreshSession();
+    if (!confirmedSession.authenticated) {
+      throw new Error("관리자 세션을 확인할 수 없습니다. 다시 시도해 주세요.");
+    }
+    return confirmedSession;
+  };
+
   const handleSignOut = async () => {
     const nextSession = await signOut();
     setSession(nextSession);
@@ -49,6 +72,7 @@ export function AdminAuthProvider({
       value={{
         session,
         signIn: handleSignIn,
+        signUpBootstrapAdmin: handleBootstrapSignUp,
         signOut: handleSignOut,
         refreshSession,
       }}

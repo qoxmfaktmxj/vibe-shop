@@ -176,6 +176,66 @@ class AdminControllerTest {
     }
 
     @Test
+    void bootstrapSignupIsAllowedOnlyWhenNoAdminExists() throws Exception {
+        jdbcClient.sql("DELETE FROM user_sessions").update();
+        jdbcClient.sql("DELETE FROM users").update();
+
+        mockMvc.perform(get("/api/v1/admin/session/bootstrap"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.signupEnabled").value(true));
+
+        MvcResult signupResult = mockMvc.perform(post("/api/v1/admin/session/signup")
+                .contentType("application/json")
+                .content("""
+                    {
+                      "name": "Bootstrap Owner",
+                      "email": "bootstrap-owner@maru.local",
+                      "password": "bootstrap123!"
+                    }
+                    """))
+            .andExpect(status().isOk())
+            .andExpect(cookie().exists("vibe_shop_admin_session"))
+            .andExpect(jsonPath("$.authenticated").value(true))
+            .andExpect(jsonPath("$.user.email").value("bootstrap-owner@maru.local"))
+            .andExpect(jsonPath("$.user.role").value("OWNER"))
+            .andReturn();
+
+        Cookie adminCookie = signupResult.getResponse().getCookie("vibe_shop_admin_session");
+        assertThat(adminCookie).isNotNull();
+
+        Integer ownerCount = jdbcClient.sql("""
+            SELECT COUNT(*)
+            FROM users
+            WHERE email = 'bootstrap-owner@maru.local'
+              AND role = 'OWNER'
+            """)
+            .query(Integer.class)
+            .single();
+        assertThat(ownerCount).isEqualTo(1);
+
+        mockMvc.perform(get("/api/v1/admin/session").cookie(adminCookie))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.authenticated").value(true))
+            .andExpect(jsonPath("$.user.role").value("OWNER"));
+
+        mockMvc.perform(get("/api/v1/admin/session/bootstrap"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.signupEnabled").value(false));
+
+        mockMvc.perform(post("/api/v1/admin/session/signup")
+                .contentType("application/json")
+                .content("""
+                    {
+                      "name": "Second Owner",
+                      "email": "second-owner@maru.local",
+                      "password": "bootstrap123!"
+                    }
+                    """))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("이미 관리자 계정이 있습니다."));
+    }
+
+    @Test
     void adminCanUpdateDisplayProductAndOrderStatus() throws Exception {
         mockMvc.perform(post("/api/v1/orders")
                 .contentType("application/json")

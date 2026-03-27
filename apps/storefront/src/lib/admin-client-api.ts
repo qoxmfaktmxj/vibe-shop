@@ -1,4 +1,5 @@
 import type {
+  AdminBootstrapStatus,
   AdminCategory,
   AdminCategoryPayload,
   AdminDisplay,
@@ -11,6 +12,7 @@ import type {
   AdminReview,
   AdminSession,
   AdminStatistics,
+  BootstrapAdminSignupPayload,
   CreateAdminAccountPayload,
   CreateAdminProductPayload,
   DeleteAdminCategoryResponse,
@@ -52,8 +54,23 @@ export async function getAdminSession(): Promise<AdminSession> {
   });
 }
 
+export async function getAdminBootstrapStatus(): Promise<AdminBootstrapStatus> {
+  return fetchJson<AdminBootstrapStatus>("/api/v1/admin/session/bootstrap", {
+    method: "GET",
+  });
+}
+
 export async function signIn(payload: LoginPayload): Promise<AdminSession> {
   return fetchJson<AdminSession>("/api/v1/admin/session/login", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function signUpBootstrapAdmin(
+  payload: BootstrapAdminSignupPayload,
+): Promise<AdminSession> {
+  return fetchJson<AdminSession>("/api/v1/admin/session/signup", {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -78,10 +95,13 @@ export async function updateDisplaySection(
   sectionCode: string,
   payload: UpdateAdminDisplaySectionPayload,
 ): Promise<AdminDisplay["sections"][number]> {
-  return fetchJson<AdminDisplay["sections"][number]>(`/api/v1/admin/display/sections/${sectionCode}`, {
-    method: "PUT",
-    body: JSON.stringify(payload),
-  });
+  return fetchJson<AdminDisplay["sections"][number]>(
+    `/api/v1/admin/display/sections/${sectionCode}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    },
+  );
 }
 
 export async function createDisplayItem(
@@ -106,9 +126,12 @@ export async function updateDisplayItem(
 export async function deleteDisplayItem(
   itemId: number,
 ): Promise<DeleteAdminDisplayItemResponse> {
-  return fetchJson<DeleteAdminDisplayItemResponse>(`/api/v1/admin/display/items/${itemId}`, {
-    method: "DELETE",
-  });
+  return fetchJson<DeleteAdminDisplayItemResponse>(
+    `/api/v1/admin/display/items/${itemId}`,
+    {
+      method: "DELETE",
+    },
+  );
 }
 
 export async function createCategory(
@@ -133,9 +156,12 @@ export async function updateCategory(
 export async function deleteCategory(
   categoryId: number,
 ): Promise<DeleteAdminCategoryResponse> {
-  return fetchJson<DeleteAdminCategoryResponse>(`/api/v1/admin/categories/${categoryId}`, {
-    method: "DELETE",
-  });
+  return fetchJson<DeleteAdminCategoryResponse>(
+    `/api/v1/admin/categories/${categoryId}`,
+    {
+      method: "DELETE",
+    },
+  );
 }
 
 export async function updateProduct(
@@ -184,9 +210,12 @@ export async function getMembers(query?: {
   }
 
   const search = params.toString();
-  return fetchJson<AdminMember[]>(`/api/v1/admin/members${search ? `?${search}` : ""}`, {
-    method: "GET",
-  });
+  return fetchJson<AdminMember[]>(
+    `/api/v1/admin/members${search ? `?${search}` : ""}`,
+    {
+      method: "GET",
+    },
+  );
 }
 
 export async function updateMemberStatus(
@@ -227,9 +256,12 @@ export async function getReviews(query?: {
   }
 
   const search = params.toString();
-  return fetchJson<AdminReview[]>(`/api/v1/admin/reviews${search ? `?${search}` : ""}`, {
-    method: "GET",
-  });
+  return fetchJson<AdminReview[]>(
+    `/api/v1/admin/reviews${search ? `?${search}` : ""}`,
+    {
+      method: "GET",
+    },
+  );
 }
 
 export async function updateReviewStatus(
@@ -259,7 +291,10 @@ export async function getOperations(query?: {
   }
 
   const search = params.toString();
-  return fetchJson<AdminOperations>(`/api/v1/admin/operations${search ? `?${search}` : ""}`, {
-    method: "GET",
-  });
+  return fetchJson<AdminOperations>(
+    `/api/v1/admin/operations${search ? `?${search}` : ""}`,
+    {
+      method: "GET",
+    },
+  );
 }

@@ -32,6 +32,19 @@ public final class AdminDtos {
         }
     }
 
+    public record AdminBootstrapStatusResponse(boolean signupEnabled) {
+    }
+
+    public record BootstrapAdminSignupRequest(
+        @NotBlank(message = "관리자 이름을 입력해 주세요.")
+        @Size(max = 80, message = "관리자 이름은 80자 이하로 입력해 주세요.") String name,
+        @NotBlank(message = "관리자 이메일을 입력해 주세요.")
+        @Email(message = "올바른 이메일 형식을 입력해 주세요.") String email,
+        @NotBlank(message = "관리자 비밀번호를 입력해 주세요.")
+        @Size(min = 8, message = "관리자 비밀번호는 8자 이상이어야 합니다.") String password
+    ) {
+    }
+
     public record AdminDisplayItemResponse(
         Long id,
         String title,

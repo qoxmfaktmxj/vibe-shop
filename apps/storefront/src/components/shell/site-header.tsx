@@ -24,7 +24,7 @@ export function SiteHeader({ categories = [] }: SiteHeaderProps) {
           <Link href="/" className="flex flex-col leading-none text-[var(--chrome-fg)]">
             <span className="text-xl font-semibold tracking-tight">Maru</span>
             <span className="mt-1 text-[10px] uppercase tracking-[0.28em] text-[var(--chrome-fg-muted)]">
-              디지털 아틀리에
+              리빙 아틀리에
             </span>
           </Link>
 

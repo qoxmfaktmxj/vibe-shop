@@ -7,6 +7,7 @@ const OUTPUT_DIR = path.join(process.cwd(), "output", "playwright");
 const storefrontUrl = process.env.E2E_STOREFRONT_URL ?? "http://127.0.0.1:4100";
 const adminUrl = `${storefrontUrl}/admin`;
 const apiBaseUrl = process.env.API_BASE_URL ?? "http://127.0.0.1:8180";
+const adminEmail = process.env.E2E_ADMIN_EMAIL ?? process.env.APP_DEMO_ADMIN_EMAIL ?? "admin@maru.local";
 const adminPassword = process.env.E2E_ADMIN_PASSWORD ?? process.env.APP_DEMO_ADMIN_PASSWORD ?? "admin1234!";
 
 test("member can create photo review, another member can mark it helpful, then admin can moderate it", async ({ page, browser }) => {
@@ -113,7 +114,7 @@ test("member can create photo review, another member can mark it helpful, then a
   await helperReviewCard.getByRole("button").last().click();
 
   await page.goto(`${adminUrl}/login`, { waitUntil: "networkidle" });
-  await page.locator('input[type="email"]').fill("admin@vibeshop.local");
+  await page.locator('input[type="email"]').fill(adminEmail);
   await page.locator('input[type="password"]').fill(adminPassword);
   await page.locator('form button[type="submit"]').click();
   await expect(page).toHaveURL(adminUrl);

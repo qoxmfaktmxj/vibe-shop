@@ -10,6 +10,10 @@ export type AdminSession = {
   user: AdminUser | null;
 };
 
+export type AdminBootstrapStatus = {
+  signupEnabled: boolean;
+};
+
 export type AdminDisplayItem = {
   id: number;
   title: string;
@@ -356,6 +360,12 @@ export type AdminDashboard = {
 };
 
 export type LoginPayload = {
+  email: string;
+  password: string;
+};
+
+export type BootstrapAdminSignupPayload = {
+  name: string;
   email: string;
   password: string;
 };

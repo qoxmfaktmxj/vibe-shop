@@ -33,8 +33,8 @@ export function SiteFooter() {
             </span>
           </div>
           <p className="max-w-sm leading-7 text-[var(--ink-soft)]">
-            怨듦컙怨?猷⑦떞???먯뿰?ㅻ읇寃??댁슱由щ뒗 由щ튃 ??됱뀡???쒖븞?⑸땲??
-            由щ튃, ?ㅼ튇, ?곕땲??移댄뀒怨좊━???곹뭹怨??댁빞湲곕? 李⑤텇???ㅼ쑝濡??먮젅?댁뀡?⑸땲??
+            공간과 루틴에 자연스럽게 어울리는 리빙 셀렉션을 제안합니다.
+            리빙, 키친, 웰니스 카테고리의 상품과 이야기를 차분한 톤으로 큐레이션합니다.
           </p>
         </div>
 
@@ -43,20 +43,20 @@ export function SiteFooter() {
             className="text-[10px] tracking-[0.3em] uppercase text-[var(--ink)]"
             style={{ fontFamily: "var(--font-display), monospace" }}
           >
-            ?덈궡
+            안내
           </p>
           <div className="flex flex-col gap-3">
             <Link href="/faq" className="text-[var(--ink-soft)] transition hover:text-[var(--primary)]">
-              ?먯＜ 臾삳뒗 吏덈Ц
+              자주 묻는 질문
             </Link>
             <Link href="/terms" className="text-[var(--ink-soft)] transition hover:text-[var(--primary)]">
-              ?댁슜?쎄?
+              이용약관
             </Link>
             <Link href="/privacy" className="text-[var(--ink-soft)] transition hover:text-[var(--primary)]">
-              媛쒖씤?뺣낫 泥섎━諛⑹묠
+              개인정보 처리방침
             </Link>
             <Link href="/lookup-order" className="text-[var(--ink-soft)] transition hover:text-[var(--primary)]">
-              鍮꾪쉶??二쇰Ц 議고쉶
+              비회원 주문 조회
             </Link>
           </div>
         </div>
@@ -66,7 +66,7 @@ export function SiteFooter() {
             className="text-[10px] tracking-[0.3em] uppercase text-[var(--ink)]"
             style={{ fontFamily: "var(--font-display), monospace" }}
           >
-            諛붾줈媛湲?
+            바로가기
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -74,20 +74,20 @@ export function SiteFooter() {
               className="border border-[var(--line)] bg-[var(--surface-high)] px-4 py-2 text-[10px] font-medium uppercase tracking-[0.14em] text-[var(--ink)] transition hover:border-[var(--primary)] hover:text-[var(--primary)]"
               style={{ fontFamily: "var(--font-display), monospace" }}
             >
-              ?곹뭹 寃??
+              상품 검색
             </Link>
             <Link
               href="/orders"
               className="border border-[var(--line)] bg-[var(--surface-high)] px-4 py-2 text-[10px] font-medium uppercase tracking-[0.14em] text-[var(--ink)] transition hover:border-[var(--primary)] hover:text-[var(--primary)]"
               style={{ fontFamily: "var(--font-display), monospace" }}
             >
-              二쇰Ц ?댁뿭
+              주문 내역
             </Link>
           </div>
         </div>
 
         <div className="text-xs text-[var(--ink-muted)] lg:col-span-3">
-          짤 2026 MARU ?붿????꾪?由ъ뿉. 紐⑤뱺 沅뚮━ 蹂댁쑀.
+          © 2026 MARU 디지털 아틀리에. 모든 권리 보유.
         </div>
       </div>
     </footer>

@@ -11,8 +11,10 @@ import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.vibeshop.api.admin.AdminDtos.BootstrapAdminSignupRequest;
 import com.vibeshop.api.auth.AuthDtos.LoginRequest;
 import com.vibeshop.api.auth.AuthDtos.SignUpRequest;
 import com.vibeshop.api.auth.AuthDtos.SocialExchangeRequest;
@@ -43,7 +45,7 @@ public class AuthService {
     public AuthenticatedSession signUp(SignUpRequest request) {
         String normalizedEmail = normalizeEmail(request.email());
         if (userRepository.findByEmailIgnoreCase(normalizedEmail).isPresent()) {
-            throw new IllegalArgumentException("이미 가입한 이메일입니다.");
+            throw new IllegalArgumentException("\uC774\uBBF8 \uAC00\uC785\uD55C \uC774\uBA54\uC77C\uC785\uB2C8\uB2E4.");
         }
 
         OffsetDateTime now = OffsetDateTime.now(SEOUL);
@@ -71,12 +73,36 @@ public class AuthService {
         return createSession(user, OffsetDateTime.now(SEOUL));
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public AuthenticatedSession signUpBootstrapAdmin(BootstrapAdminSignupRequest request) {
+        if (!canBootstrapAdmin()) {
+            throw new IllegalArgumentException("\uC774\uBBF8 \uAD00\uB9AC\uC790 \uACC4\uC815\uC774 \uC788\uC2B5\uB2C8\uB2E4.");
+        }
+
+        String normalizedEmail = normalizeEmail(request.email());
+        if (userRepository.findByEmailIgnoreCase(normalizedEmail).isPresent()) {
+            throw new IllegalArgumentException("\uC774\uBBF8 \uC0AC\uC6A9 \uC911\uC778 \uC774\uBA54\uC77C\uC785\uB2C8\uB2E4.");
+        }
+
+        OffsetDateTime now = OffsetDateTime.now(SEOUL);
+        User user = userRepository.save(new User(
+            request.name().trim(),
+            normalizedEmail,
+            passwordEncoder.encode(request.password()),
+            AuthProviderType.LOCAL,
+            UserRole.OWNER,
+            now
+        ));
+
+        return createSession(user, now);
+    }
+
     @Transactional
     public AuthenticatedSession socialExchange(SocialExchangeRequest request) {
         AuthProviderType requestedProvider = parseSocialProvider(request.provider());
         SocialIdentity identity = socialIdentityVerifier.verify(requestedProvider, request.accessToken());
         if (identity.provider() != requestedProvider) {
-            throw new IllegalArgumentException("지원하지 않는 소셜 로그인 공급자입니다.");
+            throw new IllegalArgumentException("\uC9C0\uC6D0\uD558\uC9C0 \uC54A\uB294 \uC18C\uC15C \uB85C\uADF8\uC778 \uACF5\uAE09\uC790\uC785\uB2C8\uB2E4.");
         }
 
         String normalizedEmail = requireSocialEmail(identity.email(), identity.emailVerified());
@@ -131,6 +157,11 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
+    public boolean canBootstrapAdmin() {
+        return userRepository.countByRoleNot(UserRole.CUSTOMER) == 0;
+    }
+
+    @Transactional(readOnly = true)
     public Long resolveAuthenticatedUserId(String rawSessionToken) {
         return resolveUser(rawSessionToken).map(User::getId).orElse(null);
     }
@@ -151,10 +182,10 @@ public class AuthService {
     private User authenticateUser(LoginRequest request) {
         String normalizedEmail = normalizeEmail(request.email());
         User user = userRepository.findByEmailIgnoreCase(normalizedEmail)
-            .orElseThrow(() -> new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다."));
+            .orElseThrow(() -> new IllegalArgumentException("\uC774\uBA54\uC77C \uB610\uB294 \uBE44\uBC00\uBC88\uD638\uAC00 \uC62C\uBC14\uB974\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4."));
 
         if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
-            throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
+            throw new IllegalArgumentException("\uC774\uBA54\uC77C \uB610\uB294 \uBE44\uBC00\uBC88\uD638\uAC00 \uC62C\uBC14\uB974\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.");
         }
 
         ensureAccountCanAuthenticate(user);
@@ -164,14 +195,14 @@ public class AuthService {
     private User authenticateAdminUser(LoginRequest request) {
         String normalizedEmail = normalizeEmail(request.email());
         User user = userRepository.findByEmailIgnoreCase(normalizedEmail)
-            .orElseThrow(() -> new IllegalArgumentException("관리자 이메일 또는 비밀번호가 올바르지 않습니다."));
+            .orElseThrow(() -> new IllegalArgumentException("\uAD00\uB9AC\uC790 \uC774\uBA54\uC77C \uB610\uB294 \uBE44\uBC00\uBC88\uD638\uAC00 \uC62C\uBC14\uB974\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4."));
 
         if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
-            throw new IllegalArgumentException("관리자 이메일 또는 비밀번호가 올바르지 않습니다.");
+            throw new IllegalArgumentException("\uAD00\uB9AC\uC790 \uC774\uBA54\uC77C \uB610\uB294 \uBE44\uBC00\uBC88\uD638\uAC00 \uC62C\uBC14\uB974\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.");
         }
 
         if (!user.isAdmin()) {
-            throw new IllegalArgumentException("관리자 권한이 없습니다.");
+            throw new IllegalArgumentException("\uAD00\uB9AC\uC790 \uAD8C\uD55C\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.");
         }
 
         ensureAccountCanAuthenticate(user);
@@ -186,7 +217,7 @@ public class AuthService {
         if ("KAKAO".equals(normalizedProvider)) {
             return AuthProviderType.KAKAO;
         }
-        throw new IllegalArgumentException("지원하지 않는 소셜 로그인 공급자입니다.");
+        throw new IllegalArgumentException("\uC9C0\uC6D0\uD558\uC9C0 \uC54A\uB294 \uC18C\uC15C \uB85C\uADF8\uC778 \uACF5\uAE09\uC790\uC785\uB2C8\uB2E4.");
     }
 
     private String buildSyntheticSocialPassword(AuthProviderType provider, String providerUserId) {
@@ -211,7 +242,7 @@ public class AuthService {
 
     private void ensureAccountCanAuthenticate(User user) {
         if (user.isBlocked()) {
-            throw new IllegalArgumentException("차단된 계정입니다. 관리자에게 문의해 주세요.");
+            throw new IllegalArgumentException("\uCC28\uB2E8\uB41C \uACC4\uC815\uC785\uB2C8\uB2E4. \uAD00\uB9AC\uC790\uC5D0\uAC8C \uBB38\uC758\uD574 \uC8FC\uC138\uC694.");
         }
     }
 
@@ -221,10 +252,10 @@ public class AuthService {
 
     private String requireSocialEmail(String email, boolean emailVerified) {
         if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("이메일 제공 동의가 필요합니다. 공급자 동의 화면에서 이메일 권한을 허용해 주세요.");
+            throw new IllegalArgumentException("\uC774\uBA54\uC77C \uC81C\uACF5 \uB3D9\uC758\uAC00 \uD544\uC694\uD569\uB2C8\uB2E4. \uACF5\uAE09\uC790 \uB3D9\uC758 \uD654\uBA74\uC5D0\uC11C \uC774\uBA54\uC77C \uAD8C\uD55C\uC744 \uD5C8\uC6A9\uD574 \uC8FC\uC138\uC694.");
         }
         if (!emailVerified) {
-            throw new IllegalArgumentException("이메일 검증이 완료되지 않은 소셜 계정입니다.");
+            throw new IllegalArgumentException("\uC774\uBA54\uC77C \uAC80\uC99D\uC774 \uC644\uB8CC\uB418\uC9C0 \uC54A\uC740 \uC18C\uC15C \uACC4\uC815\uC785\uB2C8\uB2E4.");
         }
         return normalizeEmail(email);
     }
