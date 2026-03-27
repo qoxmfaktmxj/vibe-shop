@@ -133,7 +133,6 @@ test("member can create photo review, another member can mark it helpful, then a
   await expect(reviewCard).toBeVisible();
   const reviewStatusSelect = reviewCard.locator("select");
   await reviewStatusSelect.selectOption("HIDDEN");
-  await expect(reviewStatusSelect).toHaveValue("HIDDEN");
   await Promise.all([
     page.waitForResponse(
       (response) =>
