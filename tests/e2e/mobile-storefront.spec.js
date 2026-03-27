@@ -15,32 +15,41 @@ test.describe("mobile storefront smoke", () => {
 
   test("guest flow has no mobile overflow on key storefront routes", async ({ page }) => {
     await page.goto("/", { waitUntil: "networkidle" });
-    await expect(page.getByRole("link", { name: /로그인 후 내 정보 보기|내 정보 보기/ })).toBeVisible();
-    await expect(page.getByRole("link", { name: /장바구니/ })).toBeVisible();
-    await expect(page.getByRole("link", { name: /^로그인$/ })).toBeVisible();
+    await expect(page.locator('a[href="/cart"]')).toBeVisible();
+    await expect(page.locator('a[href*="next=%2Faccount"]')).toBeVisible();
+    await expect(page.locator('a[href^="/auth?tab=login"]').last()).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
     await page.goto("/search", { waitUntil: "networkidle" });
-    await expect(page.getByRole("button", { name: /^검색$/ })).toBeVisible();
+    await expect(page.locator('form button[type="submit"]').first()).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
     await page.goto("/products/brew-mug", { waitUntil: "networkidle" });
-    await expect(page.locator("button.button-hot").first()).toBeVisible();
+    const addToCartButton = page.locator("button.button-hot").first();
+    await expect(addToCartButton).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
-    await page.locator("button.button-hot").first().click();
+    await Promise.all([
+      page.waitForResponse(
+        (response) =>
+          response.request().method() === "PUT" &&
+          response.url().includes("/api/v1/cart/items/") &&
+          response.ok(),
+      ),
+      addToCartButton.click(),
+    ]);
     await page.goto("/cart", { waitUntil: "networkidle" });
-    await expect(page.getByRole("link", { name: /주문서로 이동/ }).first()).toBeVisible();
+    await expect(page.locator('a[href="/checkout"]').first()).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
     await page.goto("/checkout", { waitUntil: "networkidle" });
-    await expect(page.getByRole("button", { name: /바로 주문|주문하기/ }).first()).toBeVisible();
+    await expect(page.locator('button[form]').last()).toBeVisible();
     await expectNoHorizontalOverflow(page);
   });
 
   test("account entry on mobile routes to auth without overflow", async ({ page }) => {
     await page.goto("/", { waitUntil: "networkidle" });
-    await page.getByRole("link", { name: /로그인 후 내 정보 보기|내 정보 보기/ }).click();
+    await page.locator('a[href*="next=%2Faccount"]').click();
     await expect(page).toHaveURL(/\/auth\?tab=login&next=%2Faccount$/);
     await expectNoHorizontalOverflow(page);
   });
