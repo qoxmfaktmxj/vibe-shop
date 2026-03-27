@@ -7,8 +7,14 @@ const OUTPUT_DIR = path.join(process.cwd(), "output", "playwright");
 const storefrontUrl = process.env.E2E_STOREFRONT_URL ?? "http://127.0.0.1:4100";
 const adminUrl = `${storefrontUrl}/admin`;
 const apiBaseUrl = process.env.API_BASE_URL ?? "http://127.0.0.1:8180";
-const adminEmail = process.env.E2E_ADMIN_EMAIL ?? process.env.APP_DEMO_ADMIN_EMAIL ?? "admin@maru.local";
-const adminPassword = process.env.E2E_ADMIN_PASSWORD ?? process.env.APP_DEMO_ADMIN_PASSWORD ?? "admin1234!";
+const adminEmail =
+  process.env.E2E_ADMIN_EMAIL ??
+  process.env.APP_DEMO_ADMIN_EMAIL ??
+  "admin@maru.local";
+const adminPassword =
+  process.env.E2E_ADMIN_PASSWORD ??
+  process.env.APP_DEMO_ADMIN_PASSWORD ??
+  "admin1234!";
 
 test("member can create photo review, another member can mark it helpful, then admin can moderate it", async ({ page, browser }) => {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -85,12 +91,15 @@ test("member can create photo review, another member can mark it helpful, then a
         throw new Error("Failed to create review");
       }
 
-      return reviewResponse.json();
+      return {
+        product: await product,
+        review: await reviewResponse.json(),
+      };
     },
     { apiBaseUrl, photoUrl, reviewTitle, uniqueId },
   );
 
-  expect(orderAndReviewResult.title).toBe(reviewTitle);
+  expect(orderAndReviewResult.review.title).toBe(reviewTitle);
 
   await page.goto("/products/brew-mug", { waitUntil: "domcontentloaded" });
   await expect(page.getByText(reviewTitle)).toBeVisible();
@@ -123,9 +132,33 @@ test("member can create photo review, another member can mark it helpful, then a
   const reviewCard = page.locator('[data-review-id]').filter({ hasText: reviewTitle });
   await expect(reviewCard).toBeVisible();
   await reviewCard.locator("select").selectOption("HIDDEN");
-  await reviewCard.getByRole("button").click();
+  await Promise.all([
+    page.waitForResponse(
+      (response) =>
+        response.request().method() === "PUT" &&
+        response.url().includes("/api/v1/admin/reviews/") &&
+        response.ok(),
+    ),
+    reviewCard.getByRole("button").click(),
+  ]);
+  await expect(reviewCard.locator("select")).toHaveValue("HIDDEN");
 
-  await helperPage.goto("/products/brew-mug", { waitUntil: "domcontentloaded" });
+  const hiddenReviews = await helperPage.evaluate(
+    async ({ apiBaseUrl, productId, reviewTitle }) => {
+      const response = await fetch(`${apiBaseUrl}/api/v1/products/${productId}/reviews`, {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to load product reviews");
+      }
+      const payload = await response.json();
+      return payload.reviews.filter((review) => review.title === reviewTitle).length;
+    },
+    { apiBaseUrl, productId: orderAndReviewResult.review.productId, reviewTitle },
+  );
+  expect(hiddenReviews).toBe(0);
+
+  await helperPage.goto("/products/brew-mug", { waitUntil: "networkidle" });
   await expect(helperPage.getByText(reviewTitle)).toHaveCount(0);
 
   await helperPage.screenshot({

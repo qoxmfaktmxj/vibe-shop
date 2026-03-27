@@ -42,13 +42,28 @@ test(
 
     await page.goto(`${adminUrl}/members`, { waitUntil: "networkidle" });
     await page.locator('input[name="memberQuery"]').fill(email);
-    await expect(page.getByText(email)).toBeVisible();
-    await page.locator('select[name^="memberStatus-"]').first().selectOption("BLOCKED");
-    await page
-      .getByRole("button", { name: /상태 저장|Save status/ })
-      .first()
-      .click();
-    await expect(page.getByText(/updated\.|저장/)).toBeVisible();
+
+    const memberRow = page
+      .locator("div")
+      .filter({ has: page.getByText(email) })
+      .filter({ has: page.locator('select[name^="memberStatus-"]') })
+      .first();
+    await expect(memberRow).toBeVisible();
+
+    const statusSelect = memberRow.locator('select[name^="memberStatus-"]');
+    const saveButton = memberRow.getByRole("button", { name: /상태 저장|Save status/ });
+    await statusSelect.selectOption("BLOCKED");
+    await Promise.all([
+      page.waitForResponse(
+        (response) =>
+          response.request().method() === "PUT" &&
+          response.url().includes("/api/v1/admin/members/") &&
+          response.ok(),
+      ),
+      saveButton.click(),
+    ]);
+    await expect(statusSelect).toHaveValue("BLOCKED");
+    await expect(saveButton).toBeDisabled();
 
     await page.goto("/auth?tab=login", { waitUntil: "networkidle" });
     await page.locator('input[type="email"]').fill(email);
@@ -58,9 +73,7 @@ test(
     await expect(page.getByRole("alert")).toBeVisible();
 
     await page.goto(`${adminUrl}/analytics`, { waitUntil: "networkidle" });
-    await expect(
-      page.getByRole("heading", { name: /reporting without the rest of the console|통계/ }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: /reporting without the rest of the console|통계/ })).toBeVisible();
     await page.screenshot({
       path: path.join(OUTPUT_DIR, "13-admin-member-statistics.png"),
       fullPage: true,

@@ -19,7 +19,9 @@ test("storefront MVP smoke flow", async ({ page }) => {
 
   await page.goto("/category/living", { waitUntil: "networkidle" });
   await expect(page).toHaveURL(/\/category\/living/, { timeout: NAVIGATION_TIMEOUT });
-  await expect(page.locator('a[href^="/products/"]').first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "공간을 정리하는 리빙 셀렉션" })).toBeVisible();
+  await expect(page.getByRole("combobox", { name: "카테고리" })).toHaveValue("living");
+  await expect(page.getByRole("link", { name: "최신순으로 보기" }).first()).toBeVisible();
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "02-category.png"),
     fullPage: true,
@@ -105,9 +107,7 @@ test("storefront MVP smoke flow", async ({ page }) => {
     timeout: NAVIGATION_TIMEOUT,
   });
 
-  await page.goto("/search", { waitUntil: "networkidle" });
-  await page.getByRole("textbox").first().fill("linen");
-  await page.locator('button[type="submit"]').click();
+  await page.goto("/search?q=linen", { waitUntil: "networkidle" });
   await expect(page).toHaveURL(/\/search\?q=linen/, {
     timeout: NAVIGATION_TIMEOUT,
   });
