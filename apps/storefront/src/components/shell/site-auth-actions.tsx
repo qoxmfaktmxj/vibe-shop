@@ -32,7 +32,7 @@ export function SiteAuthActions() {
           });
         }}
         aria-label="로그아웃"
-        className="inline-flex min-h-11 items-center rounded-full border border-[var(--chrome-border)] bg-[var(--chrome-hover)] px-4 py-2 text-sm font-semibold text-[var(--chrome-fg)] transition hover:-translate-y-[1px] hover:border-white/30 hover:bg-white/18 focus-visible:outline-[var(--focus-warm)] disabled:cursor-wait disabled:opacity-60"
+        className="inline-flex min-h-11 items-center rounded-full border border-[var(--chrome-border)] bg-[var(--chrome-hover)] px-4 py-2 text-sm font-semibold !text-white transition hover:-translate-y-[1px] hover:border-white/30 hover:bg-white/18 focus-visible:outline-[var(--focus-warm)] disabled:cursor-wait disabled:opacity-60"
       >
         {isPending ? "로그아웃 중..." : "로그아웃"}
       </button>
