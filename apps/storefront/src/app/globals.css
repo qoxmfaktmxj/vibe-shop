@@ -53,6 +53,12 @@
   --footer-surface: #f0ece6;
   --footer-border: #ddd8d0;
 
+  /* ── Status ── */
+  --error: #b54040;
+  --error-soft: #fdf0f0;
+  --success: #3d7c5e;
+  --success-soft: #eef5f0;
+
   /* ── Badge ── */
   --badge-best: #c4703f;
   --badge-new: #7c8a6e;

@@ -7,9 +7,9 @@ export const metadata: Metadata = {
   title: "MARU | Digital Atelier",
   description: "공간에 어울리는 디지털 아뜰리에, MARU",
   icons: {
-    icon: "/vibe-shop-favicon.svg",
-    shortcut: "/vibe-shop-favicon.svg",
-    apple: "/vibe-shop-favicon.svg",
+    icon: "/maru-favicon.svg",
+    shortcut: "/maru-favicon.svg",
+    apple: "/maru-favicon.svg",
   },
 };
 

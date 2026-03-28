@@ -68,7 +68,7 @@ export function LoginForm({
 
         {error ? (
           <p
-            className="rounded-[18px] border border-[rgba(211,89,89,0.18)] bg-[rgba(255,244,244,0.96)] px-4 py-3 text-sm text-[#9b4040]"
+            className="rounded-[var(--radius-lg)] border border-[var(--error)]/15 bg-[var(--error-soft)] px-4 py-3 text-sm text-[var(--error)]"
             role="alert"
           >
             {error}

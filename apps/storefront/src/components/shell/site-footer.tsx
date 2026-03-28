@@ -9,6 +9,7 @@ export function SiteFooter() {
           <p className="text-lg font-bold tracking-tight text-[var(--ink)]">
             MARU
           </p>
+          <p className="text-xs text-[var(--ink-muted)]">Digital Atelier</p>
           <p className="max-w-sm leading-relaxed text-[var(--ink-soft)]">
             공간에 어울리는 리빙 셀렉션을 제안합니다.
             리빙, 인테리어, 키친 아이템을 MARU에서 만나보세요.
