@@ -201,7 +201,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── Featured Categories ── */}
-      {featuredCategorySection?.visible !== false ? (
+      {featuredCategorySection?.visible !== false && categoryCards.length > 0 ? (
         <section className="animate-entrance-delay-1 space-y-5">
           <div className="flex items-end justify-between gap-4">
             <div>
@@ -246,7 +246,7 @@ export default async function HomePage() {
       ) : null}
 
       {/* ── Curated Picks ── */}
-      {curatedSection?.visible !== false ? (
+      {curatedSection?.visible !== false && home.curatedPicks.length > 0 ? (
         <section className="animate-entrance-delay-2 space-y-5">
           <div>
             <h2 className="text-xl font-bold text-[var(--ink)] sm:text-2xl">
@@ -307,7 +307,7 @@ export default async function HomePage() {
       ) : null}
 
       {/* ── New Arrivals ── */}
-      {newestSection?.visible !== false ? (
+      {newestSection?.visible !== false && home.newArrivals.length > 0 ? (
         <section className="space-y-5">
           <div className="flex items-end justify-between gap-4">
             <h2 className="text-xl font-bold text-[var(--ink)] sm:text-2xl">
@@ -326,7 +326,7 @@ export default async function HomePage() {
       ) : null}
 
       {/* ── Best Sellers ── */}
-      {bestSellerSection?.visible !== false ? (
+      {bestSellerSection?.visible !== false && home.bestSellers.length > 0 ? (
         <section className="space-y-5">
           <div>
             <h2 className="text-xl font-bold text-[var(--ink)] sm:text-2xl">
