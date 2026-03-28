@@ -218,15 +218,24 @@ input::placeholder, textarea::placeholder {
   transform: translateY(0);
 }
 
-.button-primary,
-.button-ink {
+.button-primary {
   background: var(--primary);
-  color: #fff;
+  color: var(--ink);
 }
 
-.button-primary:hover,
+.button-primary:hover {
+  background: var(--primary);
+  color: var(--ink);
+}
+
+.button-ink {
+  background: var(--ink);
+  color: var(--surface);
+}
+
 .button-ink:hover {
-  background: var(--primary-hover);
+  background: #2c2c2c;
+  color: var(--surface);
 }
 
 .button-secondary {
@@ -348,6 +357,41 @@ input::placeholder, textarea::placeholder {
 
 .link-cta:hover {
   text-decoration: underline;
+}
+
+.overlay-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.overlay-cta:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+.overlay-cta:active {
+  transform: translateY(0);
+}
+
+.pagination-page-current {
+  border: 1px solid var(--line-strong);
+  background: var(--ink);
+  color: var(--surface);
+  box-shadow: 0 10px 24px rgba(24, 23, 21, 0.12);
+}
+
+.pagination-page-current:hover {
+  color: var(--surface);
 }
 
 /* ══════════════════════════════════════════

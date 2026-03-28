@@ -84,16 +84,16 @@ export function Pagination({ page, totalPages, baseParams, basePath }: Paginatio
               &hellip;
             </span>
           ) : (
-            <Link
-              key={item}
-              href={buildHref(basePath, baseParams, item)}
-              className={`inline-flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium transition ${
-                item === page
-                  ? "border border-[var(--line-strong)] bg-[var(--ink)] text-white shadow-[0_10px_24px_rgba(24,23,21,0.12)]"
-                  : "border border-[var(--line)] bg-[rgba(255,255,255,0.84)] text-[var(--ink-soft)] hover:border-[var(--ink)] hover:text-[var(--ink)]"
-              }`}
-              aria-current={item === page ? "page" : undefined}
-            >
+              <Link
+                key={item}
+                href={buildHref(basePath, baseParams, item)}
+                className={`inline-flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium transition ${
+                  item === page
+                    ? "pagination-page-current"
+                    : "border border-[var(--line)] bg-[rgba(255,255,255,0.84)] text-[var(--ink-soft)] hover:border-[var(--ink)] hover:text-[var(--ink)]"
+                }`}
+                aria-current={item === page ? "page" : undefined}
+              >
               {item}
             </Link>
           ),

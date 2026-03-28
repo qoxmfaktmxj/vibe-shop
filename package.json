@@ -8,9 +8,11 @@
   "scripts": {
     "infra:up": "docker compose up -d postgres",
     "infra:down": "docker compose down",
-    "dev:storefront": "node scripts/run-storefront-tool.mjs next dev --hostname 127.0.0.1 --port 3200",
+    "dev:storefront": "node scripts/run-storefront-tool.mjs next dev --hostname 0.0.0.0 --port 3200",
     "dev:api": "node scripts/run-api-gradle.mjs bootRun",
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:storefront\"",
+    "demo:start": "node scripts/start-demo-stack.mjs",
+    "demo:stop": "node scripts/stop-demo-stack.mjs",
     "lint:storefront": "node scripts/run-storefront-tool.mjs eslint .",
     "typecheck:storefront": "npm --prefix apps/storefront run typecheck",
     "typecheck": "npm run typecheck:storefront",

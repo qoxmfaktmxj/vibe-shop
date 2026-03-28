@@ -144,7 +144,7 @@ export default async function HomePage() {
                 <div className="mt-6 flex flex-wrap items-center gap-3">
                   <Link
                     href={heroBanner?.href ?? `/products/${heroProduct?.slug ?? ""}`}
-                    className="inline-flex items-center justify-center rounded-[var(--radius)] bg-white px-6 py-3 text-sm font-bold text-[var(--ink)] transition hover:bg-white/90"
+                    className="overlay-cta px-6 py-3"
                   >
                     {normalizeCopy((heroBanner?.ctaLabel || home.heroCtaLabel || "").trim(), "둘러보기")}
                   </Link>
@@ -180,7 +180,7 @@ export default async function HomePage() {
                 placeholder="상품명, 카테고리, 키워드로 검색"
                 className="min-w-0 flex-1 bg-transparent text-sm text-[var(--ink)] outline-none placeholder:text-[var(--ink-muted)]"
               />
-              <button type="submit" className="rounded-[var(--radius-sm)] bg-[var(--primary)] px-4 py-2 text-xs font-bold text-white transition hover:bg-[var(--primary-hover)]">
+              <button type="submit" className="button-primary rounded-[var(--radius-sm)] px-4 py-2 text-xs">
                 검색
               </button>
             </div>
@@ -295,7 +295,7 @@ export default async function HomePage() {
                   <div className="absolute inset-x-0 bottom-0 p-5 text-white sm:p-7">
                     <h3 className="text-xl font-bold sm:text-2xl">{item.title}</h3>
                     <p className="mt-2 max-w-md text-sm leading-relaxed text-white/80">{item.subtitle}</p>
-                    <span className="mt-4 inline-flex rounded-[var(--radius-sm)] bg-white px-4 py-2.5 text-sm font-bold text-[var(--ink)]">
+                    <span className="overlay-cta mt-4 rounded-[var(--radius-sm)] px-4 py-2.5 text-sm">
                       {item.ctaLabel}
                     </span>
                   </div>
