@@ -12,14 +12,14 @@ export const SOCIAL_PROVIDERS: Array<{
     label: "Google로 계속하기",
     iconSrc: "/images/social/google-login.png",
     iconAlt: "Google 로그인 아이콘",
-    accentClassName: "border-[rgba(66,133,244,0.18)] bg-white text-[var(--ink)]",
+    accentClassName: "border-[rgba(66,133,244,0.4)] bg-white text-[var(--ink)] hover:border-[rgba(66,133,244,0.7)] hover:shadow-sm",
   },
   {
     provider: "kakao",
     label: "카카오로 계속하기",
     iconSrc: "/images/social/kakao-login.png",
     iconAlt: "카카오 로그인 아이콘",
-    accentClassName: "border-[rgba(254,229,0,0.3)] bg-[#FEE500] text-[#191600]",
+    accentClassName: "border-[rgba(190,170,0,0.5)] bg-[#FEE500] text-[#191600]",
   },
 ];
 

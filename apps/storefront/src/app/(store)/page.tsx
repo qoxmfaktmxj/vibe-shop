@@ -191,7 +191,7 @@ export default async function HomePage() {
               <Link
                 key={chip}
                 href={`/search?q=${encodeURIComponent(chip)}`}
-                className="rounded-full border border-[var(--line)] bg-white px-3.5 py-2 text-xs font-medium text-[var(--ink-soft)] transition hover:border-[var(--primary)] hover:text-[var(--primary)]"
+                className="inline-flex min-h-[44px] items-center rounded-full border border-[var(--line)] bg-white px-4 text-xs font-medium text-[var(--ink-soft)] transition hover:border-[var(--primary)] hover:text-[var(--primary)]"
               >
                 {chip}
               </Link>

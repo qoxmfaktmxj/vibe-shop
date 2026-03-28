@@ -37,9 +37,9 @@ export function AccountHeaderButton() {
       title={label}
       aria-current={isActive ? "page" : undefined}
       className={[
-        "relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--chrome-border)] bg-[var(--chrome-hover)] text-[var(--chrome-fg)] transition hover:-translate-y-[1px] hover:border-white/30 hover:bg-white/18 focus-visible:outline-[var(--focus-warm)]",
+        "relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--chrome-border)] bg-[var(--chrome-hover)] text-[var(--chrome-fg)] transition hover:-translate-y-[1px] hover:border-[var(--line-strong)] hover:bg-[var(--surface-low)] focus-visible:outline-[var(--focus)]",
         isActive
-          ? "border-white/30 bg-white/18"
+          ? "border-[var(--primary)] bg-[var(--primary-soft)] text-[var(--primary)]"
           : "",
       ].join(" ")}
     >
