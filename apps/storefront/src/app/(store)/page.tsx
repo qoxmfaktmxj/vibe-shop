@@ -1,4 +1,4 @@
-﻿import Image from "next/image";
+import Image from "next/image";
 import Link from "next/link";
 
 import { ProductCard } from "@/components/catalog/product-card";
@@ -6,7 +6,6 @@ import { RecommendationShelf } from "@/components/recommendation/recommendation-
 import { RecentlyViewedShelf } from "@/components/recommendation/recently-viewed-shelf";
 import type { HomeDisplaySection } from "@/lib/contracts";
 import { formatPrice } from "@/lib/currency";
-import { productGradient } from "@/lib/gradient";
 import {
   getHomeData,
   getHomeRecommendations,
@@ -16,8 +15,8 @@ import {
 
 const SEARCH_CHIPS = ["여름", "리빙", "키친", "웰니스", "신상품", "베스트"];
 
-const MAIN_DISPLAY_TITLE = "지금 머무는 공간에 어울리는 셀렉션";
-const MAIN_DISPLAY_SUBTITLE = "취향에 맞는 오브제로 시작하는 쇼핑, 한 번에 둘러보세요.";
+const MAIN_DISPLAY_TITLE = "공간에 어울리는 오브제를 만나보세요";
+const MAIN_DISPLAY_SUBTITLE = "취향에 맞는 인테리어 아이템, MARU에서 쉽고 편하게 찾아보세요.";
 
 const MAIN_BAD_COPY_PATTERNS = [
   "운영자가 직접 수정한 메인 카피입니다.",
@@ -25,8 +24,8 @@ const MAIN_BAD_COPY_PATTERNS = [
   "Ops Edit 1774402391338",
 ];
 
-const FEATURED_CATEGORY_TITLE = "카테고리 셀렉션";
-const FEATURED_CATEGORY_SUBTITLE = "운영 중인 주요 카테고리를 편하게 살펴볼 수 있도록 구성했습니다.";
+const FEATURED_CATEGORY_TITLE = "카테고리";
+const FEATURED_CATEGORY_SUBTITLE = "관심 있는 공간을 골라보세요.";
 
 const DEFAULT_EYEBROW_BAD_COPY = ["추천 상품", "실시간 인기"];
 
@@ -100,66 +99,19 @@ export default async function HomePage() {
 
   return (
     <div className="grid-shell pb-8 sm:pb-10">
-      <section className="grid gap-5 pt-2 sm:pt-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)]">
-        <div className="surface-card editorial-shadow rounded-[28px] border border-[var(--line)] p-6 sm:rounded-[34px] sm:p-8 lg:rounded-[40px] lg:p-12">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ink-soft)]">
-              큐레이션 홈
-            </span>
-            <span className="rounded-full bg-[var(--secondary-soft)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--secondary)]">
-              리빙 아틀리에
-            </span>
-          </div>
-
-          <h1 className="display-heading mt-8 max-w-4xl text-[clamp(3.2rem,8vw,6rem)] text-[var(--ink)]">
-            {heroTitle}
-          </h1>
-          <p className="mt-5 max-w-2xl text-sm leading-7 text-[var(--ink-soft)] sm:text-base sm:leading-8">
-            {heroSubtitle}
-          </p>
-
-          <form action="/search" method="GET" className="mt-7 max-w-2xl">
-            <div className="flex flex-col gap-3 rounded-[24px] border border-[var(--line)] bg-white px-4 py-4 shadow-[var(--shadow-soft)] sm:rounded-[28px] sm:px-5 sm:py-5 sm:flex-row sm:items-center">
-              <input
-                name="q"
-                type="text"
-                placeholder="상품명, 카테고리, 키워드로 검색"
-                className="min-w-0 flex-1 bg-transparent text-[15px] text-[var(--ink)] outline-none placeholder:text-[var(--ink-muted)] sm:text-base"
-              />
-              <button type="submit" className="button-primary w-full px-6 py-4 sm:w-auto">
-                검색
-              </button>
-            </div>
-          </form>
-
-          <div className="mt-5 flex flex-wrap gap-2">
-            {SEARCH_CHIPS.map((chip) => (
-              <Link
-                key={chip}
-                href={`/search?q=${encodeURIComponent(chip)}`}
-                className="rounded-full border border-[var(--line)] bg-[var(--surface-card)] px-4 py-2 text-xs font-medium text-[var(--ink)] transition hover:-translate-y-[1px] hover:border-[var(--ink)]"
-              >
-                {chip}
-              </Link>
-            ))}
-          </div>
-        </div>
-
+      {/* ── Hero Section ── */}
+      <section className="animate-entrance">
+        {/* Hero Banner (full-width image) */}
         {(heroBanner || heroProduct) ? (
-          <div
-            className="relative overflow-hidden rounded-[28px] border border-[var(--line)] text-white editorial-shadow sm:rounded-[34px] lg:rounded-[40px]"
-            style={{
-              background: productGradient(heroBanner?.accentColor ?? heroProduct?.accentColor ?? "#C2956A"),
-              minHeight: "30rem",
-            }}
-          >
+          <div className="relative overflow-hidden rounded-[var(--radius-xl)] sm:rounded-[24px]" style={{ minHeight: "420px" }}>
             <div className="absolute inset-0">
               {heroBanner ? (
                 <Image
                   src={heroBanner.imageUrl}
                   alt={heroBanner.imageAlt}
                   fill
-                  sizes="(min-width: 1280px) 40vw, 100vw"
+                  sizes="100vw"
+                  priority
                   className="object-cover"
                 />
               ) : heroProduct ? (
@@ -167,48 +119,37 @@ export default async function HomePage() {
                   src={heroProduct.imageUrl}
                   alt={heroProduct.imageAlt}
                   fill
-                  sizes="(min-width: 1280px) 40vw, 100vw"
+                  sizes="100vw"
+                  priority
                   className="object-cover"
                 />
               ) : null}
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(12,16,20,0.08),rgba(12,16,20,0.74))]" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
             </div>
 
-            <div className="relative flex h-full min-h-[30rem] flex-col justify-between p-6 sm:min-h-[36rem] sm:p-8 lg:min-h-[40rem] lg:p-12">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="display-eyebrow text-white/70">{heroBanner ? "기획전" : "큐레이션"}</p>
-                  <p className="mt-3 max-w-xs text-sm leading-7 text-white/72">
-                    오늘의 하이라이트를 한눈에 살펴보세요.
-                  </p>
-                </div>
-                <div className="rounded-full border border-white/16 bg-white/8 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-white backdrop-blur-sm">
-                  마루 셀렉트
-                </div>
-              </div>
-
-              <div className="max-w-lg">
-                <p className="display-eyebrow text-white/60">
+            <div className="relative flex min-h-[420px] flex-col justify-end p-6 text-white sm:min-h-[480px] sm:p-10 lg:min-h-[540px] lg:p-14">
+              <div className="max-w-xl">
+                <p className="text-xs font-medium uppercase tracking-widest text-white/70">
                   {sectionValue(heroSection, "title", heroBanner ? "기획전" : "큐레이션")}
                 </p>
-                <h2 className="mt-4 text-[clamp(2rem,9vw,4rem)] font-light leading-[0.96]">
+                <h1 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
                   {normalizeCopy(heroBanner?.title || heroProduct?.name || "", "오늘의 추천")}
-                </h2>
-                <p className="mt-4 text-sm leading-7 text-white/78">
+                </h1>
+                <p className="mt-3 text-sm leading-relaxed text-white/80 sm:text-base">
                   {normalizeCopy(
                     heroBanner?.subtitle || heroProduct?.summary || "",
-                    "매일 사용하는 공간에 자연스럽게 어울리는 구성을 제안합니다.",
+                    "매일 사용하는 공간에 어울리는 구성을 제안합니다.",
                   )}
                 </p>
-                <div className="mt-7 flex flex-wrap items-center gap-3 sm:mt-8 sm:gap-4">
+                <div className="mt-6 flex flex-wrap items-center gap-3">
                   <Link
                     href={heroBanner?.href ?? `/products/${heroProduct?.slug ?? ""}`}
-                    className="inline-flex w-full items-center justify-center rounded-full bg-white px-6 py-4 text-sm font-semibold !text-black transition hover:-translate-y-[1px] hover:!text-black sm:w-auto"
+                    className="inline-flex items-center justify-center rounded-[var(--radius)] bg-white px-6 py-3 text-sm font-bold text-[var(--ink)] transition hover:bg-white/90"
                   >
                     {normalizeCopy((heroBanner?.ctaLabel || home.heroCtaLabel || "").trim(), "둘러보기")}
                   </Link>
                   {heroProduct ? (
-                    <p className="text-base font-semibold text-white/88">
+                    <p className="text-lg font-bold text-white/90">
                       {formatPrice(heroProduct.price)}원
                     </p>
                   ) : null}
@@ -217,50 +158,85 @@ export default async function HomePage() {
             </div>
           </div>
         ) : null}
+
+        {/* Headline + Search area */}
+        <div className="mt-8 sm:mt-10">
+          <h2 className="text-2xl font-bold leading-snug text-[var(--ink)] sm:text-3xl">
+            {heroTitle}
+          </h2>
+          <p className="mt-2 max-w-lg text-sm leading-relaxed text-[var(--ink-soft)] sm:text-base">
+            {heroSubtitle}
+          </p>
+
+          <form action="/search" method="GET" className="mt-5 max-w-lg">
+            <div className="flex items-center gap-2 rounded-[var(--radius)] border border-[var(--line)] bg-white px-4 py-2.5 shadow-[var(--shadow-sm)] transition focus-within:border-[var(--primary)] focus-within:shadow-[0_0_0_3px_var(--primary-soft)]">
+              <svg className="h-4 w-4 shrink-0 text-[var(--ink-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" strokeLinecap="round" />
+              </svg>
+              <input
+                name="q"
+                type="text"
+                placeholder="상품명, 카테고리, 키워드로 검색"
+                className="min-w-0 flex-1 bg-transparent text-sm text-[var(--ink)] outline-none placeholder:text-[var(--ink-muted)]"
+              />
+              <button type="submit" className="rounded-[var(--radius-sm)] bg-[var(--primary)] px-4 py-2 text-xs font-bold text-white transition hover:bg-[var(--primary-hover)]">
+                검색
+              </button>
+            </div>
+          </form>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            {SEARCH_CHIPS.map((chip) => (
+              <Link
+                key={chip}
+                href={`/search?q=${encodeURIComponent(chip)}`}
+                className="rounded-full border border-[var(--line)] bg-white px-3.5 py-2 text-xs font-medium text-[var(--ink-soft)] transition hover:border-[var(--primary)] hover:text-[var(--primary)]"
+              >
+                {chip}
+              </Link>
+            ))}
+          </div>
+        </div>
       </section>
 
+      {/* ── Featured Categories ── */}
       {featuredCategorySection?.visible !== false ? (
-        <section className="space-y-6">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <section className="animate-entrance-delay-1 space-y-5">
+          <div className="flex items-end justify-between gap-4">
             <div>
-              <p className="display-eyebrow">카테고리</p>
-              <h2 className="display-heading mt-3 text-4xl">
+              <h2 className="text-xl font-bold text-[var(--ink)] sm:text-2xl">
                 {sectionValue(featuredCategorySection, "title", FEATURED_CATEGORY_TITLE)}
               </h2>
+              <p className="mt-1 text-sm text-[var(--ink-soft)]">
+                {sectionValue(featuredCategorySection, "subtitle", FEATURED_CATEGORY_SUBTITLE)}
+              </p>
             </div>
-            <p className="max-w-xl text-sm leading-7 text-[var(--ink-soft)]">
-              {sectionValue(featuredCategorySection, "subtitle", FEATURED_CATEGORY_SUBTITLE)}
-            </p>
           </div>
 
-          <div className="grid gap-4 sm:gap-5 lg:grid-cols-3">
+          <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {categoryCards.map((category) => (
               <Link
                 key={category.id}
                 href={`/category/${category.slug}`}
-                className="group relative overflow-hidden rounded-[26px] border border-[var(--line)] sm:rounded-[32px]"
+                className="group relative overflow-hidden rounded-[var(--radius-lg)] sm:rounded-[var(--radius-xl)]"
               >
-                <div className="relative aspect-[4/5]">
+                <div className="relative aspect-[3/4] sm:aspect-[4/5]">
                   <Image
                     src={category.coverImageUrl}
                     alt={category.coverImageAlt}
                     fill
-                    sizes="(min-width: 1024px) 33vw, 100vw"
-                    className="object-cover transition duration-700 group-hover:scale-105"
+                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                    className="object-cover transition duration-500 group-hover:scale-[1.03]"
                   />
-                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,12,18,0.1),rgba(8,12,18,0.72))]" />
-                  <div className="absolute inset-x-0 bottom-0 p-6 text-white sm:p-8">
-                    <p className="display-eyebrow text-white/68">카테고리</p>
-                    <h3 className="mt-3 text-[1.75rem] font-light leading-tight sm:text-3xl">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-5 text-white sm:p-6">
+                    <h3 className="text-lg font-bold sm:text-xl">
                       {category.heroTitle || category.name}
                     </h3>
-                    <p className="mt-3 text-sm leading-7 text-white/78">
+                    <p className="mt-1.5 text-sm leading-relaxed text-white/75">
                       {category.heroSubtitle || category.description}
                     </p>
-                    <span className="mt-5 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/84">
-                      자세히 보기
-                      <span aria-hidden>+</span>
-                    </span>
                   </div>
                 </div>
               </Link>
@@ -269,17 +245,15 @@ export default async function HomePage() {
         </section>
       ) : null}
 
+      {/* ── Curated Picks ── */}
       {curatedSection?.visible !== false ? (
-        <section className="space-y-6">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="display-eyebrow">추천 상품</p>
-              <h2 className="display-heading mt-3 text-4xl">
-                {sectionValue(curatedSection, "title", "추천 상품")}
-              </h2>
-            </div>
+        <section className="animate-entrance-delay-2 space-y-5">
+          <div>
+            <h2 className="text-xl font-bold text-[var(--ink)] sm:text-2xl">
+              {sectionValue(curatedSection, "title", "추천 상품")}
+            </h2>
           </div>
-          <div className="grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {home.curatedPicks.slice(0, 4).map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -290,43 +264,38 @@ export default async function HomePage() {
       <RecentlyViewedShelf recentlyViewed={recentlyViewed} />
       <RecommendationShelf
         collection={recentlyViewed.items.length > 0 ? recentlyViewedRecommendations : homeRecommendations}
-        eyebrow={recentlyViewed.items.length > 0 ? "다시 보기" : "추천 상품"}
+        eyebrow={recentlyViewed.items.length > 0 ? "다시 보기" : "추천"}
       />
 
+      {/* ── Promotions ── */}
       {promotionSection?.visible && promotionSection.items.length > 0 ? (
-        <section className="space-y-6">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="display-eyebrow">기획전</p>
-              <h2 className="display-heading mt-3 text-4xl">
-                {sectionValue(promotionSection, "title", "진행 중인 기획전")}
-              </h2>
-            </div>
+        <section className="space-y-5">
+          <div>
+            <h2 className="text-xl font-bold text-[var(--ink)] sm:text-2xl">
+              {sectionValue(promotionSection, "title", "진행 중인 기획전")}
+            </h2>
           </div>
 
-          <div className="grid gap-4 sm:gap-5 lg:grid-cols-2">
+          <div className="grid gap-4 lg:grid-cols-2">
             {promotionSection.items.map((item) => (
               <Link
                 key={item.id}
                 href={item.href}
-                className="group relative overflow-hidden rounded-[26px] border border-[var(--line)] sm:rounded-[32px]"
+                className="group relative overflow-hidden rounded-[var(--radius-lg)]"
               >
-                <div className="relative min-h-[260px] sm:min-h-[320px]">
+                <div className="relative min-h-[240px] sm:min-h-[300px]">
                   <Image
                     src={item.imageUrl}
                     alt={item.imageAlt}
                     fill
                     sizes="(min-width: 1024px) 50vw, 100vw"
-                    className="object-cover transition duration-700 group-hover:scale-[1.03]"
+                    className="object-cover transition duration-500 group-hover:scale-[1.02]"
                   />
-                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(12,16,20,0.06),rgba(12,16,20,0.76))]" />
-                  <div className="absolute inset-x-0 bottom-0 p-6 text-white sm:p-8">
-                    <p className="display-eyebrow text-white/68">
-                      {sectionValue(promotionSection, "title", "기획전")}
-                    </p>
-                    <h3 className="mt-3 text-[1.75rem] font-light leading-tight sm:text-3xl">{item.title}</h3>
-                    <p className="mt-3 max-w-xl text-sm leading-7 text-white/76">{item.subtitle}</p>
-                    <span className="mt-6 inline-flex rounded-full bg-white px-5 py-3 text-sm font-semibold text-black">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-5 text-white sm:p-7">
+                    <h3 className="text-xl font-bold sm:text-2xl">{item.title}</h3>
+                    <p className="mt-2 max-w-md text-sm leading-relaxed text-white/80">{item.subtitle}</p>
+                    <span className="mt-4 inline-flex rounded-[var(--radius-sm)] bg-white px-4 py-2.5 text-sm font-bold text-[var(--ink)]">
                       {item.ctaLabel}
                     </span>
                   </div>
@@ -337,20 +306,18 @@ export default async function HomePage() {
         </section>
       ) : null}
 
+      {/* ── New Arrivals ── */}
       {newestSection?.visible !== false ? (
-        <section className="space-y-6">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="display-eyebrow">새로 들어온 상품</p>
-              <h2 className="display-heading mt-3 text-4xl">
-                {sectionValue(newestSection, "title", "신상품")}
-              </h2>
-            </div>
-            <p className="max-w-xl text-sm leading-7 text-[var(--ink-soft)]">
-              {sectionValue(newestSection, "subtitle", "지금 막 들어온 상품들을 편하게 둘러보세요.")}
+        <section className="space-y-5">
+          <div className="flex items-end justify-between gap-4">
+            <h2 className="text-xl font-bold text-[var(--ink)] sm:text-2xl">
+              {sectionValue(newestSection, "title", "신상품")}
+            </h2>
+            <p className="hidden text-sm text-[var(--ink-soft)] sm:block">
+              {sectionValue(newestSection, "subtitle", "지금 막 들어온 상품들을 둘러보세요.")}
             </p>
           </div>
-          <div className="grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {home.newArrivals.slice(0, 4).map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -358,17 +325,15 @@ export default async function HomePage() {
         </section>
       ) : null}
 
+      {/* ── Best Sellers ── */}
       {bestSellerSection?.visible !== false ? (
-        <section className="space-y-6">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="display-eyebrow">인기 상품</p>
-              <h2 className="display-heading mt-3 text-4xl">
-                {sectionValue(bestSellerSection, "title", "베스트셀러")}
-              </h2>
-            </div>
+        <section className="space-y-5">
+          <div>
+            <h2 className="text-xl font-bold text-[var(--ink)] sm:text-2xl">
+              {sectionValue(bestSellerSection, "title", "베스트셀러")}
+            </h2>
           </div>
-          <div className="grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {home.bestSellers.slice(0, 4).map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

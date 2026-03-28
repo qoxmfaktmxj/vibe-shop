@@ -1,23 +1,15 @@
-import localFont from "next/font/local";
+import { Noto_Sans_KR, Inter } from "next/font/google";
 
-export const displayFont = localFont({
-  src: [
-    {
-      path: "./GmarketSansTTFLight.ttf",
-      weight: "300",
-      style: "normal",
-    },
-    {
-      path: "./GmarketSansTTFMedium.ttf",
-      weight: "500",
-      style: "normal",
-    },
-    {
-      path: "./GmarketSansTTFBold.ttf",
-      weight: "700",
-      style: "normal",
-    },
-  ],
+export const notoSansKR = Noto_Sans_KR({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-body",
+  display: "swap",
+});
+
+export const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-display",
   display: "swap",
 });

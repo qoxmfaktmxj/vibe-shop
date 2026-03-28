@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 
 import "./globals.css";
-import { displayFont } from "@/lib/fonts";
+import { notoSansKR, inter } from "@/lib/fonts";
 
 export const metadata: Metadata = {
-  title: "Maru | Digital Atelier",
-  description: "Digital Atelier storefront for discovery, checkout, and account journeys.",
+  title: "MARU | Digital Atelier",
+  description: "공간에 어울리는 디지털 아뜰리에, MARU",
   icons: {
     icon: "/vibe-shop-favicon.svg",
     shortcut: "/vibe-shop-favicon.svg",
@@ -20,7 +20,7 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className={`${displayFont.variable} antialiased`}>
+      <body className={`${notoSansKR.variable} ${inter.variable} antialiased`}>
         {children}
       </body>
     </html>

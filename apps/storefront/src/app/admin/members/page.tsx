@@ -7,7 +7,7 @@ export default async function AdminMembersPage() {
   const session = await requireAdminSession();
   const members = await getAdminMembers();
   const managedAccounts =
-    session.user.role === "OWNER" ? await getAdminManagedAccounts().catch(() => []) : [];
+    session.user?.role === "OWNER" ? await getAdminManagedAccounts().catch(() => []) : [];
 
   return (
     <AdminShell
@@ -18,7 +18,7 @@ export default async function AdminMembersPage() {
       <AdminMemberManager
         initialMembers={members}
         initialManagedAccounts={managedAccounts}
-        currentAdminRole={session.user.role}
+        currentAdminRole={session.user?.role ?? "ADMIN"}
       />
     </AdminShell>
   );
