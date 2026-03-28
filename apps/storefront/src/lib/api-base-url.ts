@@ -12,5 +12,5 @@ export function resolveApiBaseUrl() {
     return "";
   }
 
-  return normalizeBaseUrl(process.env.API_BASE_URL ?? "http://localhost:8080");
+  return normalizeBaseUrl(process.env.API_BASE_URL ?? "http://localhost:8085");
 }
