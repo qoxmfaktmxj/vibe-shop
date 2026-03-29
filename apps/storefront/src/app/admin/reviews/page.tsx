@@ -10,8 +10,8 @@ export default async function AdminReviewsPage() {
   return (
     <AdminShell
       eyebrow="리뷰"
-      title="리뷰 검토와 노출 상태를 관리하는 전용 공간"
-      description="카탈로그와 주문 데이터에서 분리해 리뷰 운영만 빠르게 확인하고 처리할 수 있습니다."
+      title="리뷰 운영"
+      description="공개 상태, 품질 이슈, 상품별 반응을 확인하고 필요한 리뷰만 빠르게 조정합니다."
     >
       <AdminReviewManager reviews={reviews} />
     </AdminShell>

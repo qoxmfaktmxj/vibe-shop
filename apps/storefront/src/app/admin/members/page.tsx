@@ -7,13 +7,15 @@ export default async function AdminMembersPage() {
   const session = await requireAdminSession();
   const members = await getAdminMembers();
   const managedAccounts =
-    session.user?.role === "OWNER" ? await getAdminManagedAccounts().catch(() => []) : [];
+    session.user?.role === "OWNER"
+      ? await getAdminManagedAccounts().catch(() => [])
+      : [];
 
   return (
     <AdminShell
       eyebrow="회원"
-      title="회원 상태와 운영 메모를 확인하는 전용 공간"
-      description="회원 상태 변경을 별도 화면에서 처리해 대시보드와 다른 운영 화면을 가볍게 유지합니다."
+      title="회원 운영"
+      description="회원 상태, 관리자 계정, 로그인 이력과 구매 규모를 함께 확인하는 운영 화면입니다."
     >
       <AdminMemberManager
         initialMembers={members}

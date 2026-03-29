@@ -135,3 +135,27 @@ select {
   border: 1px solid rgba(255, 255, 255, 0.18);
   color: rgba(237, 244, 239, 0.86);
 }
+
+.admin-nav-pill {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(237, 244, 239, 0.78);
+  background: transparent;
+}
+
+.admin-nav-pill:hover {
+  border-color: rgba(255, 255, 255, 0.28);
+  color: rgba(237, 244, 239, 0.94);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.admin-nav-pill-active {
+  border-color: rgba(255, 255, 255, 0.92);
+  background: #ffffff;
+  color: var(--panel-strong);
+  box-shadow: 0 10px 24px rgba(255, 255, 255, 0.12);
+}
+
+.admin-nav-pill-active:hover {
+  color: var(--panel-strong);
+  background: #ffffff;
+}

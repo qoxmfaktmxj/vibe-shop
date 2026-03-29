@@ -44,10 +44,12 @@ async function saveShot(page, suffix) {
 }
 
 async function resolveBaseUrl(context) {
+  logStep(`Checking demo storefront candidates: ${DEFAULT_BASE_URLS.join(", ")}`);
   for (const baseUrl of DEFAULT_BASE_URLS) {
     try {
-      const response = await context.request.get(`${baseUrl}/`);
+      const response = await context.request.get(`${baseUrl}/`, { timeout: 5000 });
       if (response.ok()) {
+        logStep(`Using storefront: ${baseUrl}`);
         return baseUrl;
       }
     } catch {
@@ -55,6 +57,7 @@ async function resolveBaseUrl(context) {
     }
   }
 
+  logStep("Storefront not reachable. Bootstrapping demo stack.");
   execFileSync(process.execPath, [path.join(process.cwd(), "scripts", "start-demo-stack.mjs")], {
     cwd: process.cwd(),
     stdio: "inherit",
@@ -62,8 +65,9 @@ async function resolveBaseUrl(context) {
 
   for (const baseUrl of DEFAULT_BASE_URLS) {
     try {
-      const response = await context.request.get(`${baseUrl}/`);
+      const response = await context.request.get(`${baseUrl}/`, { timeout: 5000 });
       if (response.ok()) {
+        logStep(`Using storefront after bootstrap: ${baseUrl}`);
         return baseUrl;
       }
     } catch {
@@ -85,8 +89,10 @@ function resolveApiBaseUrl(baseUrl) {
 }
 
 async function createMemberSession(context, baseUrl) {
+  logStep("Creating member session");
   const email = `executive-demo-${Date.now()}@example.com`;
   const response = await context.request.post(`${resolveApiBaseUrl(baseUrl)}/api/v1/auth/signup`, {
+    timeout: 10000,
     data: {
       name: "Executive Demo",
       email,
@@ -98,6 +104,7 @@ async function createMemberSession(context, baseUrl) {
     throw new Error(`Failed to create demo member session (${response.status()}): ${await response.text()}`);
   }
 
+  logStep(`Created member session for ${email}`);
   return { email };
 }
 
@@ -112,12 +119,20 @@ async function adminLogin(page, baseUrl) {
 
 async function openTargetProduct(page) {
   const preferredProduct = page.locator('a[href="/products/linen-bed-set"]').first();
-  if (await preferredProduct.isVisible().catch(() => false)) {
+  if (await preferredProduct.isVisible({ timeout: 3000 }).catch(() => false)) {
     await preferredProduct.click();
     return;
   }
 
-  await page.locator('a[href^="/products/"]').first().click();
+  const firstVisibleProduct = page.locator('a[href^="/products/"]').first();
+  if (await firstVisibleProduct.isVisible({ timeout: 3000 }).catch(() => false)) {
+    await firstVisibleProduct.click();
+    return;
+  }
+
+  await page.goto(`${page.url().startsWith("http") ? new URL(page.url()).origin : ""}/products/linen-bed-set`, {
+    waitUntil: "networkidle",
+  });
 }
 
 async function fillCheckout(page) {
@@ -228,8 +243,8 @@ async function main() {
     logStep("Admin products");
     await page.getByRole("link", { name: "상품" }).first().click();
     await page.waitForURL(/\/admin\/products$/, { timeout: 15_000 });
-    await page.getByRole("button", { name: "New product" }).first().click();
-    await page.getByText("New product").first().waitFor({ state: "visible", timeout: 10_000 });
+    await page.getByRole("button", { name: "새 상품 등록" }).first().click();
+    await page.getByText("새 상품을 만드는 중입니다.").first().waitFor({ state: "visible", timeout: 10_000 });
     await saveShot(page, "09-admin-products");
     await pause(page);
 

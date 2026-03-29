@@ -11,7 +11,6 @@ import type {
   PagedProductResponse,
   ProductDetail,
   ProductSearchResponse,
-  ProductSummary,
   RecommendationCollection,
   RecentlyViewedResponse,
   ShippingAddress,

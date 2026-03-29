@@ -10,8 +10,8 @@ export default async function AdminAnalyticsPage() {
   return (
     <AdminShell
       eyebrow="통계"
-      title="운영 콘솔과 분리된 보고용 통계 화면"
-      description="통계 조회를 별도 경로에서 처리해 메인 대시보드와 다른 작업 화면의 응답성을 유지합니다."
+      title="운영 통계"
+      description="주문, 회원, 카테고리별 추이를 메인 대시보드와 분리해서 보는 분석 화면입니다."
     >
       <AdminStatisticsPanel statistics={statistics} />
     </AdminShell>

@@ -122,8 +122,11 @@ async function main() {
 
   if (!(await waitForAny(storefrontCandidates, 1000))) {
     pids.storefront = spawnDetached(
-      process.execPath,
-      [path.join(storefrontDir, "node_modules", "next", "dist", "bin", "next"), "start", "--hostname", "0.0.0.0", "--port", "4100"],
+      "cmd.exe",
+      [
+        "/c",
+        "npx next start --hostname 0.0.0.0 --port 4100",
+      ],
       {
         cwd: storefrontDir,
         env: storefrontEnv,

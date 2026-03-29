@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -16,6 +16,10 @@ type AdminShellProps = {
 };
 
 function isActivePath(currentPath: string, href: string) {
+  if (href === "/admin") {
+    return currentPath === "/admin";
+  }
+
   return currentPath === href || currentPath.startsWith(`${href}/`);
 }
 
@@ -30,17 +34,40 @@ export function AdminShell({
   const router = useRouter();
   const { session, signOut } = useAdminAuth();
   const [isLoggingOut, startLoggingOut] = useTransition();
+  const isDashboard = pathname === "/admin";
 
   return (
     <main className="mx-auto flex w-full max-w-[1480px] flex-col gap-6 px-6 py-6 sm:px-8 lg:px-10">
-      <section className="admin-dark rounded-[40px] p-8 shadow-[0_28px_60px_rgba(16,33,39,0.18)] sm:p-10">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-          <div className="max-w-4xl">
+      <section
+        className={`admin-dark rounded-[36px] shadow-[0_28px_60px_rgba(16,33,39,0.18)] ${
+          isDashboard ? "p-8 sm:p-10" : "p-6 sm:p-8"
+        }`}
+      >
+        <div
+          className={`flex flex-col gap-5 ${
+            isDashboard
+              ? "xl:flex-row xl:items-end xl:justify-between"
+              : "lg:flex-row lg:items-start lg:justify-between"
+          }`}
+        >
+          <div className={isDashboard ? "max-w-4xl" : "max-w-3xl"}>
             <p className="eyebrow text-[rgba(237,244,239,0.64)]">{eyebrow}</p>
-            <h1 className="display mt-5 text-5xl font-semibold leading-[0.92] sm:text-6xl">
+            <h1
+              className={`display mt-4 font-semibold tracking-[-0.04em] ${
+                isDashboard
+                  ? "text-5xl leading-[0.92] sm:text-6xl"
+                  : "text-3xl leading-[1.02] sm:text-4xl"
+              }`}
+            >
               {title}
             </h1>
-            <p className="mt-5 max-w-3xl text-base leading-8 text-[rgba(237,244,239,0.72)]">
+            <p
+              className={`mt-4 text-[rgba(237,244,239,0.72)] ${
+                isDashboard
+                  ? "max-w-3xl text-base leading-8"
+                  : "max-w-2xl text-sm leading-7"
+              }`}
+            >
               {description}
             </p>
           </div>
@@ -67,7 +94,10 @@ export function AdminShell({
           </div>
         </div>
 
-        <nav className="mt-8 flex flex-wrap gap-3" aria-label="관리자 주요 메뉴">
+        <nav
+          className={`${isDashboard ? "mt-8" : "mt-6"} flex flex-wrap gap-3`}
+          aria-label="관리자 주요 메뉴"
+        >
           {ADMIN_NAV_ITEMS.map((item) => {
             const active = isActivePath(pathname, item.href);
 
@@ -75,10 +105,8 @@ export function AdminShell({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  active
-                    ? "bg-white text-[var(--panel-strong)] shadow-[0_10px_24px_rgba(255,255,255,0.12)]"
-                    : "border border-white/12 text-[rgba(237,244,239,0.78)] hover:border-white/28"
+                className={`admin-nav-pill rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  active ? "admin-nav-pill-active" : ""
                 }`}
               >
                 {item.label}
