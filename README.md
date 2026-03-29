@@ -1,98 +1,96 @@
 # Maru
 
-Maru is a commerce monorepo with a single Next.js storefront/admin app and a Spring Boot API.
-The current product shape is simple: customers browse and order on the storefront, and operators manage display, products, and orders from `/admin`.
+Maru는 사용자 스토어프런트와 관리자 화면을 하나의 Next.js 앱에서 제공하고,
+Spring Boot API가 뒤에서 주문, 카탈로그, 계정, 관리자 기능을 담당하는 커머스 모노레포입니다.
 
-## At A Glance
+## 한눈에 보기
 
-- Frontend: `apps/storefront` (`/` for storefront, `/admin` for admin)
-- Backend: `apps/api`
-- Database: PostgreSQL
-- Tests: lint, typecheck, build, API tests, Playwright E2E
+- 프런트엔드: `apps/storefront`
+- 백엔드: `apps/api`
+- 데이터베이스: PostgreSQL
+- 검증: lint, typecheck, build, API 테스트, Playwright E2E
 
-## Main Screens
+## 주요 화면
 
-These screenshots are intentionally cropped to a compact 1280-wide viewport so the README stays readable.
+아래 이미지는 로컬에서 정상 연결 상태를 확인한 뒤, 1280 폭 기준으로 짧게 잘라 캡처한 화면입니다.
 
-### 1. Storefront home
+### 1. 메인 홈
 
-The home screen focuses on quick search and mood-based entry points.
+첫 화면은 메인 배너와 카테고리 진입을 중심으로, 바로 탐색을 시작하게 만드는 구조입니다.
 
-![Storefront home](docs/readme-screenshots/01-home-hero.jpg)
+![메인 홈](docs/readme-screenshots/01-home-hero.jpg)
 
-### 2. Search and filtering
+### 2. 검색 결과
 
-Search keeps the first decision simple: keyword, category, and sort options in one flow.
+검색어, 카테고리, 정렬을 한 화면에 묶어서 원하는 상품군을 빠르게 좁힐 수 있습니다.
 
-![Search results](docs/readme-screenshots/02-search-results.jpg)
+![검색 결과](docs/readme-screenshots/02-search-results.jpg)
 
-### 3. Mobile-first checkout
+### 3. 상품 상세
 
-Checkout is condensed into a single page with recipient info on the left and the final order summary on the right.
+대표 상품 화면에서는 가격, 리뷰 밀도, 구매 요약이 한 번에 보이고 바로 장바구니로 이어집니다.
 
-![Checkout](docs/readme-screenshots/03-checkout.jpg)
+![상품 상세](docs/readme-screenshots/03-product-detail.jpg)
 
-### 4. Admin entry
+### 4. 관리자 진입
 
-The admin side is positioned as an operations panel for display, products, orders, members, and reviews.
+관리자 화면은 상품, 주문, 전시 운영을 분리된 작업 공간으로 다루는 구조입니다.
 
-![Admin login](docs/readme-screenshots/04-admin-login.jpg)
+![관리자 로그인](docs/readme-screenshots/04-admin-login.jpg)
 
-## Quick Start
+## 빠른 시작
 
-### Install
+### 1. 의존성 설치
 
 ```bash
 npm ci
 npm ci --prefix apps/storefront
 ```
 
-### Start local infra
+### 2. 로컬 인프라 실행
 
 ```bash
 npm run infra:up
 ```
 
-### Run in dev mode
+### 3. 개발 서버 실행
 
 ```bash
 npm run dev:api
 npm run dev:storefront
 ```
 
-Typical local endpoints:
+기본 개발 주소:
 
 - storefront: `http://127.0.0.1:3200`
 - admin: `http://127.0.0.1:3200/admin`
 - api: `http://127.0.0.1:8080`
 
-### Run the demo stack
+### 4. 데모/캡처 스택 실행
 
 ```bash
 node scripts/start-demo-stack.mjs
 ```
 
-This starts the README/demo capture stack on fixed local URLs:
+README 캡처에 사용한 고정 주소:
 
 - storefront: `http://127.0.0.1:4100`
 - api health: `http://127.0.0.1:8180/actuator/health`
 
-Stop it with:
+종료:
 
 ```bash
 node scripts/stop-demo-stack.mjs
 ```
 
-## Verification
+## 검증 명령
 
 ```bash
 npm run qa
 npm run qa:e2e
 ```
 
-`npm run qa` runs the main non-E2E verification path. `npm run qa:e2e` runs the browser suite with the local stack.
-
-## More Docs
+## 추가 문서
 
 - `docs/api-contract-v1.md`
 - `docs/erd-v1.md`
