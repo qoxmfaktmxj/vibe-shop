@@ -253,6 +253,10 @@ async function exportArtifacts(videoPath, timestamp, subtitleSegments) {
       videoPath,
       "-c:v",
       "libx264",
+      "-preset",
+      process.env.DEMO_FFMPEG_PRESET ?? "slow",
+      "-crf",
+      process.env.DEMO_FFMPEG_CRF ?? "18",
       "-pix_fmt",
       "yuv420p",
       "-movflags",
@@ -351,47 +355,16 @@ async function runDemoFlow(options = {}) {
     await page.locator('button[type="submit"]').click();
     await page.waitForURL(/\/account$/, { timeout: 30_000 });
     await setSubtitle(page, "가입 직후 계정 대시보드로 연결됩니다.");
-    await sleep(page, 2_000);
-    step(subtitleSegments, "가입 직후 계정 대시보드로 연결됩니다.", 2000);
-
-    logStep("Logout after signup");
-    await page.goto(`${baseUrl}/`, { waitUntil: "networkidle" });
-    await setSubtitle(page, "로그아웃 후 같은 계정으로 다시 로그인해 구매 흐름을 이어갑니다.");
-    await sleep(page, 1_200);
-    step(subtitleSegments, "로그아웃 후 같은 계정으로 다시 로그인해 구매 흐름을 이어갑니다.", 1200);
-    await page.getByRole("banner").locator("button").first().click();
-    await page.waitForFunction(() =>
-      Array.from(document.querySelectorAll("a")).some((anchor) =>
-        anchor.getAttribute("href")?.includes("/auth?tab=login"),
-      ),
-    );
-    await sleep(page, 800);
-    step(subtitleSegments, "고객 세션을 종료합니다.", 800);
-
-    logStep("Login");
-    await page.goto(`${baseUrl}/auth?tab=login&next=%2Faccount`, {
-      waitUntil: "networkidle",
-    });
-    await setSubtitle(page, "방금 만든 계정으로 다시 로그인합니다.");
-    await sleep(page, 1_400);
-    step(subtitleSegments, "방금 만든 계정으로 다시 로그인합니다.", 1400);
-    const loginInputs = page.locator("form input");
-    await typeSlow(loginInputs.nth(0), candidateEmail);
-    await typeSlow(loginInputs.nth(1), candidatePassword);
-    await sleep(page, 500);
-    step(subtitleSegments, "로그인 폼에 동일한 계정 정보를 입력합니다.", 500);
-    await page.locator('button[type="submit"]').click();
-    await page.waitForURL(/\/account$/, { timeout: 30_000 });
-    await sleep(page, 1_200);
-    step(subtitleSegments, "로그인 후 다시 계정 화면으로 복귀합니다.", 1200);
+    await sleep(page, 1_700);
+    step(subtitleSegments, "가입 직후 계정 대시보드로 연결됩니다.", 1700);
 
     logStep("Open product");
     await page.goto(`${baseUrl}/products/${productSlug}`, {
       waitUntil: "networkidle",
     });
-    await setSubtitle(page, "대표 상품 상세 화면에서 장바구니에 상품을 담습니다.");
-    await sleep(page, 1_800);
-    step(subtitleSegments, "대표 상품 상세 화면에서 장바구니에 상품을 담습니다.", 1800);
+    await setSubtitle(page, "가입된 고객 상태 그대로 대표 상품을 장바구니에 담습니다.");
+    await sleep(page, 1_700);
+    step(subtitleSegments, "가입된 고객 상태 그대로 대표 상품을 장바구니에 담습니다.", 1700);
     await page.locator("button.button-hot").first().click();
     await sleep(page, 1_200);
     step(subtitleSegments, "상품을 장바구니에 추가합니다.", 1200);
@@ -399,15 +372,15 @@ async function runDemoFlow(options = {}) {
     logStep("Go to cart");
     await page.goto(`${baseUrl}/cart`, { waitUntil: "networkidle" });
     await setSubtitle(page, "장바구니에서 주문 단계로 이동합니다.");
-    await sleep(page, 1_600);
-    step(subtitleSegments, "장바구니에서 주문 단계로 이동합니다.", 1600);
+    await sleep(page, 1_400);
+    step(subtitleSegments, "장바구니에서 주문 단계로 이동합니다.", 1400);
     await page.locator('a[href="/checkout"]').first().click();
     await page.waitForURL(/\/checkout$/, { timeout: 30_000 });
 
     logStep("Fill checkout");
     await setSubtitle(page, "배송 정보와 결제 수단을 입력하고 주문을 완료합니다.");
-    await sleep(page, 1_000);
-    step(subtitleSegments, "배송 정보와 결제 수단을 입력하고 주문을 완료합니다.", 1000);
+    await sleep(page, 900);
+    step(subtitleSegments, "배송 정보와 결제 수단을 입력하고 주문을 완료합니다.", 900);
     const checkoutInputs = page.locator("form input");
     const existingName = await checkoutInputs.nth(0).inputValue();
     if (!existingName) {
@@ -421,8 +394,8 @@ async function runDemoFlow(options = {}) {
     await page.locator('input[name="paymentMethod"][value="CARD"]').check({
       force: true,
     });
-    await sleep(page, 1_000);
-    step(subtitleSegments, "주문서 필드를 모두 채우고 카드 결제를 선택합니다.", 1000);
+    await sleep(page, 900);
+    step(subtitleSegments, "주문서 필드를 모두 채우고 카드 결제를 선택합니다.", 900);
     await page.locator('button[form="checkout-form"]').first().click();
     await page.waitForURL(/\/orders\/[A-Z0-9]+$/, { timeout: 30_000 });
     const orderNumber = new URL(page.url()).pathname.split("/").at(-1);
@@ -430,18 +403,18 @@ async function runDemoFlow(options = {}) {
       throw new Error("Order number was not captured.");
     }
     await setSubtitle(page, `주문이 생성되고 주문번호 ${orderNumber}를 확인합니다.`);
-    await sleep(page, 2_400);
+    await sleep(page, 2_200);
     step(
       subtitleSegments,
       `주문이 생성되고 주문번호 ${orderNumber}를 확인합니다.`,
-      2400,
+      2200,
     );
 
     logStep("Customer logout");
     await page.goto(`${baseUrl}/`, { waitUntil: "networkidle" });
     await setSubtitle(page, "고객 세션을 종료하고 관리자 화면으로 전환합니다.");
-    await sleep(page, 1_100);
-    step(subtitleSegments, "고객 세션을 종료하고 관리자 화면으로 전환합니다.", 1100);
+    await sleep(page, 1000);
+    step(subtitleSegments, "고객 세션을 종료하고 관리자 화면으로 전환합니다.", 1000);
     await page.getByRole("banner").locator("button").first().click();
     await page.waitForFunction(() =>
       Array.from(document.querySelectorAll("a")).some((anchor) =>
@@ -454,16 +427,16 @@ async function runDemoFlow(options = {}) {
     logStep("Admin login");
     await page.goto(`${baseUrl}/admin/login`, { waitUntil: "networkidle" });
     await setSubtitle(page, "관리자 계정으로 로그인해 운영 콘솔로 들어갑니다.");
-    await sleep(page, 1_600);
-    step(subtitleSegments, "관리자 계정으로 로그인해 운영 콘솔로 들어갑니다.", 1600);
+    await sleep(page, 1400);
+    step(subtitleSegments, "관리자 계정으로 로그인해 운영 콘솔로 들어갑니다.", 1400);
     await typeSlow(page.locator('input[type="email"]'), ADMIN_EMAIL);
     await typeSlow(page.locator('input[type="password"]'), ADMIN_PASSWORD);
     await sleep(page, 400);
     step(subtitleSegments, "관리자 이메일과 비밀번호를 입력합니다.", 400);
     await page.locator('form button[type="submit"]').click();
     await page.waitForURL(/\/admin$/, { timeout: 30_000 });
-    await sleep(page, 1_000);
-    step(subtitleSegments, "운영 콘솔 메인 화면이 열립니다.", 1000);
+    await sleep(page, 900);
+    step(subtitleSegments, "운영 콘솔 메인 화면이 열립니다.", 900);
 
     logStep("Admin orders");
     await page.goto(`${baseUrl}/admin/orders`, { waitUntil: "networkidle" });
@@ -472,23 +445,26 @@ async function runDemoFlow(options = {}) {
       timeout: 30_000,
     });
     await setSubtitle(page, "관리자는 주문 목록에서 방금 생성된 주문을 바로 확인합니다.");
-    await sleep(page, 2_400);
+    await sleep(page, 2_100);
     step(
       subtitleSegments,
       "관리자는 주문 목록에서 방금 생성된 주문을 바로 확인합니다.",
-      2400,
+      2100,
     );
 
     logStep("Create product");
     await page.goto(`${baseUrl}/admin/products`, { waitUntil: "networkidle" });
     await setSubtitle(page, "같은 콘솔에서 새 상품을 추가 등록해 운영 확장성을 보여줍니다.");
-    await sleep(page, 1_600);
+    await sleep(page, 1_500);
     step(
       subtitleSegments,
       "같은 콘솔에서 새 상품을 추가 등록해 운영 확장성을 보여줍니다.",
-      1600,
+      1500,
     );
     await page.getByRole("button", { name: "새 상품 등록" }).click();
+    await page
+      .getByRole("heading", { name: "새 상품을 만드는 중입니다" })
+      .waitFor({ state: "visible", timeout: 30_000 });
     await page.locator('select[name="productCategorySlug"]').selectOption({
       index: 0,
     });
@@ -505,11 +481,11 @@ async function runDemoFlow(options = {}) {
     await page.locator('input[name="productStock"]').fill("12");
     await page.locator('input[name="productPopularityScore"]').fill("25");
     await page.locator('input[name="productImageAlt"]').fill(`${newProductName} 이미지`);
-    await sleep(page, 800);
+    await sleep(page, 700);
     step(
       subtitleSegments,
       "카테고리, 슬러그, 이름, 요약, 가격, 재고를 입력해 신규 상품을 준비합니다.",
-      800,
+      700,
     );
     await page.getByRole("button", { name: "상품 등록", exact: true }).click();
     await page.getByText("상품을 등록했습니다.").waitFor({
@@ -517,8 +493,8 @@ async function runDemoFlow(options = {}) {
       timeout: 30_000,
     });
     await setSubtitle(page, "신규 상품 등록이 완료되면서 데모를 마칩니다.");
-    await sleep(page, 2_600);
-    step(subtitleSegments, "신규 상품 등록이 완료되면서 데모를 마칩니다.", 2600);
+    await sleep(page, 2_300);
+    step(subtitleSegments, "신규 상품 등록이 완료되면서 데모를 마칩니다.", 2300);
 
     await clearSubtitle(page);
 
