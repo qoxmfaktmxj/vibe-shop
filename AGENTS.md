@@ -1,3 +1,61 @@
+<!-- Generated: 2026-03-30 | Updated: 2026-03-30 -->
+
+# vibe-shop
+
+## Purpose
+Korean e-commerce monorepo: Next.js 16 storefront + Spring Boot 4 API + PostgreSQL. Includes customer-facing shop, admin dashboard, and shared contract types. Demo-ready with 300 product images across kitchen/living/wellness categories.
+
+## Key Files
+
+| File | Description |
+|------|-------------|
+| `package.json` | Root workspace scripts: dev, build, QA, E2E |
+| `compose.yaml` | Docker Compose for PostgreSQL 17 (port 55432) |
+| `compose.deploy.yaml` | Production deployment compose |
+| `playwright.config.js` | E2E test configuration |
+| `redesign_shop.pen` | UI design file (Pencil format) |
+| `.env.deploy.example` | Deployment env template |
+
+## Subdirectories
+
+| Directory | Purpose |
+|-----------|---------|
+| `apps/` | Application code — API and Storefront (see `apps/AGENTS.md`) |
+| `docs/` | Design docs, ERD, demo runbooks (see `docs/AGENTS.md`) |
+| `packages/` | Shared TypeScript contract types (see `packages/AGENTS.md`) |
+| `scripts/` | Build, dev, and demo utility scripts (see `scripts/AGENTS.md`) |
+| `tests/` | E2E Playwright test suites (see `tests/AGENTS.md`) |
+| `images/` | Project screenshots for README |
+
+## For AI Agents
+
+### Working In This Directory
+- Run `npm run infra:up` to start PostgreSQL before any dev work
+- Use `npm run dev` to start both API (port 8081) and storefront (port 3200) concurrently
+- Run `npm run qa` for full lint + typecheck + build + API tests
+- Run `npm run qa:e2e` for browser-based end-to-end tests
+- Node >= 22, npm >= 10, Java 21 required
+
+### Testing Requirements
+- `npm run qa` must pass before any PR
+- E2E tests via Playwright in `tests/e2e/`
+- API unit tests via Gradle: `npm run test:api`
+
+### Common Patterns
+- Frontend communicates with backend only through API client layer (`client-api.ts`, `server-api.ts`)
+- Shared types live in `packages/contracts/` — never duplicate type definitions
+- DB schema changes require explicit Flyway migrations (`V{n}__description.sql`)
+
+## Dependencies
+
+### External
+- Node.js 22+, npm 10+
+- Java 21 (Gradle toolchain)
+- Docker (for PostgreSQL 17)
+- Playwright (E2E testing)
+
+---
+
 # AGENTS.md
 
 이 저장소의 기본 개발 방식은 `신규 구축` 기준이다.

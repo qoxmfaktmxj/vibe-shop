@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostEditFile": [
+      {
+        "matcher": "apps/storefront/**/*.{ts,tsx}",
+        "command": "npm run typecheck:storefront",
+        "description": "TypeScript strict check after storefront edit"
+      }
+    ],
+    "PreCommit": [
+      {
+        "command": "npm run qa",
+        "description": "Full QA gate: lint + typecheck + build + API tests"
+      }
+    ]
+  }
+}
