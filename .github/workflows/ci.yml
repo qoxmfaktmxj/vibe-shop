@@ -74,8 +74,8 @@ jobs:
       - name: Test API
         run: npm run test:api
 
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium webkit
 
       - name: Run Playwright smoke
         run: npm run qa:e2e
