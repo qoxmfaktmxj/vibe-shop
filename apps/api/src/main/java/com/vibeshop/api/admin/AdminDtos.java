@@ -8,6 +8,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public final class AdminDtos {
@@ -209,6 +210,7 @@ public final class AdminDtos {
         String categoryName,
         String name,
         String summary,
+        String description,
         BigDecimal price,
         String badge,
         boolean featured,
@@ -234,6 +236,7 @@ public final class AdminDtos {
         @NotBlank(message = "배지 문구를 입력해 주세요.")
         @Size(max = 50, message = "배지 문구는 50자 이하여야 합니다.") String badge,
         @NotBlank(message = "강조 색상을 입력해 주세요.")
+        @Pattern(regexp = "^#[0-9A-Fa-f]{6}$", message = "강조 색상은 #RRGGBB 형식이어야 합니다.")
         @Size(max = 20, message = "강조 색상은 20자 이하여야 합니다.") String accentColor,
         @NotBlank(message = "이미지 경로를 입력해 주세요.")
         @Size(max = 255, message = "이미지 경로는 255자 이하여야 합니다.") String imageUrl,
@@ -250,6 +253,8 @@ public final class AdminDtos {
         @Size(max = 120, message = "상품명은 120자 이하로 입력해 주세요.") String name,
         @NotBlank(message = "상품 요약을 입력해 주세요.")
         @Size(max = 255, message = "상품 요약은 255자 이하로 입력해 주세요.") String summary,
+        @NotBlank(message = "상품 설명을 입력해 주세요.")
+        @Size(max = 5000, message = "상품 설명은 5000자 이하로 입력해 주세요.") String description,
         @NotBlank(message = "배지 문구를 입력해 주세요.")
         @Size(max = 50, message = "배지 문구는 50자 이하로 입력해 주세요.") String badge,
         @DecimalMin(value = "0", message = "가격은 0 이상이어야 합니다.") BigDecimal price,

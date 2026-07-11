@@ -30,7 +30,7 @@ public class CustomerOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "order_number", nullable = false, unique = true, length = 30)
+    @Column(name = "order_number", nullable = false, unique = true, length = 40)
     private String orderNumber;
 
     @Column(name = "idempotency_key", nullable = false, unique = true, length = 64)

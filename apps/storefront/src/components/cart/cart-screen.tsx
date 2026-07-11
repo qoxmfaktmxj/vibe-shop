@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useEffectEvent, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { RecommendationShelf } from "@/components/recommendation/recommendation-shelf";
 import { getCartRecommendations, previewOrder } from "@/lib/client-api";
@@ -11,52 +11,93 @@ import { useCart } from "@/lib/cart-store";
 import { formatPrice } from "@/lib/currency";
 
 export function CartScreen() {
-  const { items, hydrated, removeItem, updateQuantity } = useCart();
+  const {
+    items,
+    hydrated,
+    mutating,
+    mutationError,
+    removeItem,
+    updateQuantity,
+  } = useCart();
   const [preview, setPreview] = useState<CheckoutPreview | null>(null);
   const [recommendations, setRecommendations] = useState<RecommendationCollection | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const requestPreview = useEffectEvent(async () => {
-    if (items.length === 0) {
-      setPreview(null);
-      setRecommendations(null);
-      setError("");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const [nextPreview, nextRecommendations] = await Promise.all([
-        previewOrder(items),
-        getCartRecommendations(),
-      ]);
-      setPreview(nextPreview);
-      setRecommendations(nextRecommendations);
-      setError("");
-    } catch (previewError) {
-      setError(
-        previewError instanceof Error ? previewError.message : "주문 예상 금액을 계산하지 못했습니다.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  });
-
   useEffect(() => {
     if (!hydrated) {
       return;
     }
-    void requestPreview();
+
+    let cancelled = false;
+    if (items.length === 0) {
+      void Promise.resolve().then(() => {
+        if (!cancelled) {
+          setPreview(null);
+          setRecommendations(null);
+          setError("");
+        }
+      });
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    void Promise.resolve().then(() => {
+      if (!cancelled) {
+        setPreview(null);
+        setRecommendations(null);
+        setError("");
+        setLoading(true);
+      }
+    });
+    void previewOrder(items)
+      .then((nextPreview) => {
+        if (!cancelled) {
+          setPreview(nextPreview);
+        }
+      })
+      .catch((previewError) => {
+        if (!cancelled) {
+          setError(
+            previewError instanceof Error
+              ? previewError.message
+              : "주문 예상 금액을 계산하지 못했습니다.",
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+
+    void getCartRecommendations()
+      .then((nextRecommendations) => {
+        if (!cancelled) {
+          setRecommendations(nextRecommendations);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setRecommendations(null);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [hydrated, items]);
 
+  const canCheckout = preview !== null && !loading && !error;
+
   if (!hydrated) {
-    return <div className="surface-card rounded-[24px] p-8">장바구니를 불러오는 중입니다.</div>;
+    return <div className="border-y border-[var(--line)] py-14 text-center text-sm text-[var(--ink-soft)]">장바구니를 불러오는 중입니다.</div>;
   }
 
   if (items.length === 0) {
     return (
-      <div className="surface-card rounded-[24px] p-8 text-center sm:p-10">
+      <div className="border-y border-[var(--line)] py-16 text-center sm:py-20">
         <p className="display-eyebrow">장바구니</p>
         <h1 className="display-heading mt-4 text-4xl text-[var(--ink)]">아직 담긴 상품이 없습니다.</h1>
         <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-[var(--ink-soft)]">
@@ -75,7 +116,7 @@ export function CartScreen() {
         <section className="min-w-0">
           <header className="mb-8 sm:mb-10">
             <p className="display-eyebrow">장바구니</p>
-            <h1 className="display-heading mt-4 text-4xl font-light tracking-tight text-[var(--ink)]">
+            <h1 className="display-heading mt-4 text-4xl tracking-tight text-[var(--ink)] sm:text-5xl">
               이어 담은 상품
             </h1>
             <p className="mt-2 text-[11px] font-semibold tracking-[0.2em] text-[var(--ink-soft)]">
@@ -84,19 +125,18 @@ export function CartScreen() {
           </header>
 
           <div className="space-y-8 sm:space-y-10">
+            {mutationError ? (
+              <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                {mutationError}
+              </p>
+            ) : null}
             {items.map((item) => (
               <article
                 key={item.productId}
-                className="grid gap-5 border-b border-black/6 pb-8 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-6 sm:pb-10"
+                className="grid gap-5 border-b border-[var(--line)] pb-8 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-6 sm:pb-10"
               >
-                <div className="relative aspect-[4/5] overflow-hidden rounded-[20px] sm:rounded-xl">
+                <div className="relative aspect-[4/5] overflow-hidden bg-[var(--surface-low)]">
                   <Image src={item.imageUrl} alt={item.imageAlt} fill sizes="10rem" className="object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[rgba(11,14,22,0.35)] to-transparent" />
-                  <div className="absolute inset-x-0 top-0 p-3 sm:p-4">
-                    <span className="rounded-lg bg-white/82 px-3 py-1 text-[10px] font-semibold tracking-[0.18em] text-[var(--ink-soft)]">
-                      선택 상품
-                    </span>
-                  </div>
                 </div>
 
                 <div className="flex min-w-0 flex-col">
@@ -107,23 +147,27 @@ export function CartScreen() {
                         담아 둔 상품의 수량과 예상 결제 금액을 바로 확인할 수 있습니다.
                       </p>
                     </div>
-                    <p className="text-lg font-semibold text-[var(--primary)]">{formatPrice(item.price)}원</p>
+                    <p className="text-lg font-semibold text-[var(--ink)]">{formatPrice(item.price)}원</p>
                   </div>
 
                   <div className="mt-6 flex flex-col items-start gap-3 sm:mt-8 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-2 rounded-xl bg-[var(--surface-card)] px-2 py-2 shadow-[var(--shadow-soft)]">
+                    <div className="flex items-center gap-2 border border-[var(--line)] bg-[var(--surface)] px-1 py-1">
                       <button
                         type="button"
-                        onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[var(--ink-soft)] transition hover:bg-[var(--surface-low)] hover:text-[var(--ink)]"
+                        onClick={() => void updateQuantity(item.productId, item.quantity - 1)}
+                        disabled={mutating}
+                        aria-label={`${item.name} 수량 감소`}
+                        className="inline-flex h-11 w-11 items-center justify-center text-[var(--ink-soft)] transition hover:bg-[var(--surface-low)] hover:text-[var(--ink)] disabled:cursor-wait disabled:opacity-50"
                       >
                         -
                       </button>
                       <span className="w-8 text-center text-sm font-semibold">{item.quantity}</span>
                       <button
                         type="button"
-                        onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[var(--ink-soft)] transition hover:bg-[var(--surface-low)] hover:text-[var(--ink)]"
+                        onClick={() => void updateQuantity(item.productId, item.quantity + 1)}
+                        disabled={mutating}
+                        aria-label={`${item.name} 수량 증가`}
+                        className="inline-flex h-11 w-11 items-center justify-center text-[var(--ink-soft)] transition hover:bg-[var(--surface-low)] hover:text-[var(--ink)] disabled:cursor-wait disabled:opacity-50"
                       >
                         +
                       </button>
@@ -131,7 +175,8 @@ export function CartScreen() {
 
                     <button
                       type="button"
-                      onClick={() => removeItem(item.productId)}
+                      onClick={() => void removeItem(item.productId)}
+                      disabled={mutating}
                       className="text-sm font-medium text-[var(--ink-soft)] transition hover:text-red-600"
                     >
                       삭제
@@ -153,7 +198,7 @@ export function CartScreen() {
           </div>
         </section>
 
-        <aside className="surface-card rounded-[24px] p-6 lg:sticky lg:top-28">
+        <aside className="border-y border-[var(--line)] bg-[var(--surface-low)] p-6 lg:sticky lg:top-44">
           <p className="display-eyebrow">결제 요약</p>
           <h2 className="display-heading mt-4 text-3xl font-light text-[var(--ink)]">주문 요약</h2>
           <div className="mt-8 space-y-4 text-sm">
@@ -172,7 +217,7 @@ export function CartScreen() {
             <div className="stat-divider flex items-end justify-between pt-5">
               <span className="text-lg font-medium text-[var(--ink)]">총 결제 금액</span>
               <div className="text-right">
-                <p className="text-3xl font-bold tracking-tight text-[var(--primary)]">
+                <p className="text-3xl font-semibold tracking-tight text-[var(--ink)]">
                   {formatPrice(preview?.total ?? 0)}원
                 </p>
                 <p className="mt-1 text-[10px] font-semibold tracking-[0.18em] text-[var(--ink-soft)]">
@@ -185,26 +230,38 @@ export function CartScreen() {
           {loading ? <p className="mt-4 text-sm text-[var(--ink-soft)]">금액을 계산하는 중입니다.</p> : null}
           {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
 
-          <Link href="/checkout" className="button-hot mt-8 w-full px-5 py-5">
-            주문서로 이동
-          </Link>
+          {canCheckout ? (
+            <Link href="/checkout" className="button-primary mt-8 w-full px-5 py-5">
+              주문서로 이동
+            </Link>
+          ) : (
+            <span aria-disabled="true" className="button-primary mt-8 w-full cursor-not-allowed px-5 py-5 opacity-50">
+              금액 확인 후 이동
+            </span>
+          )}
 
-          <div className="mt-4 rounded-[20px] bg-[var(--surface-low)] p-4 text-[11px] leading-6 text-[var(--ink-soft)]">
+          <div className="mt-4 border-t border-[var(--line)] pt-4 text-[11px] leading-6 text-[var(--ink-soft)]">
             배송비는 총액과 현재 장바구니 기준으로 즉시 다시 계산됩니다.
           </div>
         </aside>
       </div>
 
       <div className="fixed inset-x-4 bottom-[max(16px,env(safe-area-inset-bottom))] z-40 lg:hidden">
-        <div className="rounded-[22px] border border-[var(--line)] bg-[rgba(255,255,255,0.96)] p-4 shadow-[0_24px_60px_rgba(12,16,24,0.18)] backdrop-blur">
+        <div className="border border-[var(--line)] bg-[var(--surface)] p-4 shadow-[var(--shadow)]">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-[10px] font-semibold tracking-[0.18em] text-[var(--ink-soft)]">총 결제 금액</p>
               <p className="mt-1 text-xl font-semibold text-[var(--ink)]">{formatPrice(preview?.total ?? 0)}원</p>
             </div>
-            <Link href="/checkout" className="button-hot w-full min-w-0 px-5 py-4 sm:w-auto sm:min-w-[10rem]">
-              주문서로 이동
-            </Link>
+            {canCheckout ? (
+              <Link href="/checkout" className="button-primary w-full min-w-0 px-5 py-4 sm:w-auto sm:min-w-[10rem]">
+                주문서로 이동
+              </Link>
+            ) : (
+              <span aria-disabled="true" className="button-primary w-full min-w-0 cursor-not-allowed px-5 py-4 opacity-50 sm:w-auto sm:min-w-[10rem]">
+                금액 확인 중
+              </span>
+            )}
           </div>
         </div>
       </div>

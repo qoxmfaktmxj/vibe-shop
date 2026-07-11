@@ -1,127 +1,67 @@
 Status: current
 Owner: frontend
-Last reviewed: 2026-03-24
+Last reviewed: 2026-07-11
 
-# Design System Baseline
+# MARU Design System
 
-This document promotes the current token and UX rules out of scattered CSS files and audit notes into a versioned baseline.
-
-## Scope
-
-This is the active design source of truth for:
-
-- `apps/storefront/src/app/globals.css`
-- `apps/storefront/src/app/admin/admin.css`
-- `docs/screen-inventory-and-ux-audit-2026-03-24.md`
-
-It does not replace a future component library, but it defines the rules the current apps should follow.
+The durable brand and experience context lives in .impeccable.md. This document records the implementation rules used by the current storefront and admin UI.
 
 ## Product Direction
 
-- Storefront is a search-first commerce experience, not a pure editorial landing page.
-- Admin is an operations tool served under `/admin` and should keep a distinct tone without becoming a separate app.
-- Search, category browsing, recommendation, cart, checkout, account, and admin workflows must feel like one product family without sharing identical layouts.
+- Storefront: a quiet, material-led luxury retail experience for considered living.
+- Admin: a neutral, precise operations workspace under /admin.
+- Brand qualities: tailored, hushed, tactile.
+- Experience principle: scene before SKU, then progressively increase information density as the customer moves from discovery to purchase.
 
-## Brand Rules
+## Storefront Foundations
 
-- Product name: `Maru`
-- Customer app title: `Maru`
-- Admin app title: `Maru Admin`
-- Avoid introducing alternate product names in metadata, nav, or headers.
+Source: apps/storefront/src/app/globals.css
 
-## Storefront Tokens
+- Colors use OKLCH semantic tokens.
+- Canvas is warm ivory, text is softened ink, and decisive actions use deep oxblood.
+- Pure black, pure white, text gradients, glass effects, and decorative gold are not part of the system.
+- Storefront display type is Gowun Batang through --font-display.
+- Storefront interface and body type is Noto Sans KR through --font-body.
+- Radius is restrained: 3px controls, 5px panels, 8–12px only for large media.
+- Borders and whitespace establish hierarchy before shadows.
 
-Source: `apps/storefront/src/app/globals.css`
+## Storefront Composition
 
-- Backgrounds
-  - `--background`, `--surface`, `--surface-low`, `--surface-high`, `--surface-card`
-- Text
-  - `--ink`, `--ink-soft`, `--ink-muted`
-- Brand accents
-  - `--primary`, `--primary-dim`, `--secondary`, `--secondary-soft`
-- Border and elevation
-  - `--line`, `--line-strong`, `--shadow`, `--shadow-soft`
-- Editorial accents
-  - `--accent-caramel`, `--accent-sienna`, `--accent-taupe`
+- Home follows brand world → ways to live → curated edit → material story → new arrivals → service.
+- Search and category pages are cardless collection grids with underlined sorting controls.
+- Product detail uses an image-led split layout with a sticky purchase panel.
+- Cart, checkout, account, and order screens prioritize price, fulfillment, support, and state clarity.
+- Product cards show category, name, concise context, price, wishlist, stock state, and add-to-cart without decorative containers.
 
-## Admin Surface Rules
+## Admin Foundations
 
-Source: `apps/storefront/src/app/admin/admin.css`
+Source: apps/storefront/src/app/admin/admin.css
 
-- Admin routes inherit the storefront token set and fonts from the shared app root.
-- Admin-only styling should stay in prefixed `admin-*` classes.
-- Do not redefine a second global token system for admin after the merge.
+- Admin has its own neutral OKLCH token set and uses Noto Sans KR only.
+- Desktop layout uses a persistent 240px workspace navigation and compact page header.
+- Mobile layout converts navigation to a horizontally scrollable workspace list.
+- KPI panels, queues, forms, and tables use 3–4px corners, thin borders, and minimal elevation.
+- Dashboard order data is tabular; campaign-style hero sections are prohibited.
+- Mutation actions use admin-button; secondary navigation and low-risk actions use admin-button-secondary.
 
-## Typography
+## Shared Interaction Rules
 
-- Storefront display type uses `--font-display` for editorial headings and eyebrow labels.
-- Storefront body copy uses `--font-body`.
-- Admin display type uses `--font-space` for high-signal labels and headings.
-- Avoid default browser typography for hero, CTA, and admin section headings.
+- Controls have at least a 44px touch target.
+- Visible keyboard focus uses semantic focus tokens.
+- Motion is limited to short 140–240ms state transitions and subtle image scale.
+- Hover cannot be the only way to access information or actions.
+- prefers-reduced-motion disables entrance and lift behavior.
+- Contrast targets WCAG AA for body text and controls.
 
-## Core Component Rules
+## Content Rules
 
-### Buttons
-
-- Storefront
-  - `button-primary` is the primary conversion action
-  - `button-secondary` is the neutral fallback action
-  - `button-hot` is reserved for heightened commerce emphasis
-- Admin
-  - `admin-button` is the primary mutation action
-  - `admin-button-secondary` is the low-risk secondary action
-  - `admin-button-ghost` is for actions placed on dark admin surfaces
-
-### Inputs
-
-- Storefront inputs use `soft-input` and should preserve low-chrome editorial styling.
-- Admin inputs use `admin-input` and should prioritize clarity, density, and fast scanning.
-
-### Cards and Surfaces
-
-- Storefront cards should preserve whitespace and editorial pacing.
-- Admin cards should preserve scannability, quick comparison, and action density.
-- Do not use the same card hierarchy interchangeably between storefront and admin.
-
-## UX Rules
-
-### Storefront
-
-- Home must let users start search directly.
-- Search entry points should not be duplicated across the same navigation level.
-- Category browsing and search browsing must have different jobs:
-  - home starts discovery
-  - search refines results
-  - category pages anchor collection browsing
-- Account, checkout, and order pages should favor clarity and trust over editorial flourish.
-
-### Admin
-
-- The admin root route is a dashboard summary, not the full workspace.
-- Heavy data editors belong to dedicated routes.
-- Navigation should expose the major workspaces directly:
-  - dashboard
-  - display
-  - products
-  - orders
-  - members
-  - reviews
-  - analytics
-  - operations
-
-## Content and Labeling
-
-- Prefer explicit labels over ambiguous product-language shortcuts.
-- Avoid labels like `Journal`, `Lookup`, or other internal shorthand unless the user-facing meaning is obvious.
-- Use action-oriented labels in admin for state changes and editing flows.
-
-## States
-
-- Every app-level route should have a loading state.
-- Every app-level route should have an error recovery state.
-- Empty states must explain what the user can do next instead of showing a blank panel.
+- Customer language describes rooms, materials, comfort, care, and service.
+- Avoid urgency tactics except truthful stock information.
+- Avoid internal product-development language in customer UI.
+- Admin labels are direct, task-oriented, and state-specific.
 
 ## Change Management
 
-- Update this file whenever token names, global layout behavior, or navigation rules change.
-- If a new UI pattern becomes shared across more than one route, document it here before it drifts into ad hoc duplication.
+- Update .impeccable.md when brand context, users, emotional goals, or aesthetic direction changes.
+- Update this file when tokens, typography, global layout, navigation, or shared component behavior changes.
+- A new shared pattern must prove reuse across at least two routes before becoming a global utility.

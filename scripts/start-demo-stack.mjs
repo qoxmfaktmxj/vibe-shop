@@ -85,6 +85,8 @@ async function main() {
     APP_DEMO_SEED_ENABLED: "true",
     APP_DEMO_SEED_NORMALIZE_E2E_STOCK: "true",
     APP_DEMO_ADMIN_PASSWORD: process.env.DEMO_ADMIN_PASSWORD ?? "admin1234!",
+    APP_RUNTIME_MODE: "demo",
+    APP_PAYMENT_MOCK_ENABLED: "true",
     CORS_ALLOWED_ORIGINS:
       process.env.CORS_ALLOWED_ORIGINS ??
       "http://127.0.0.1:4100,http://localhost:4100,http://127.0.0.1:3000,http://localhost:3000",
@@ -96,6 +98,7 @@ async function main() {
     NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8180",
     NEXT_PUBLIC_APP_URL: "http://127.0.0.1:4100",
     APP_ORIGIN: "http://127.0.0.1:4100",
+    NEXT_PUBLIC_DEMO_MODE: "true",
   };
 
   const pids = {};

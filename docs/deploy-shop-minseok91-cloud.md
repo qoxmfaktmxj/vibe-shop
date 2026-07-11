@@ -1,6 +1,6 @@
 Status: current
 Owner: deploy
-Last reviewed: 2026-03-24
+Last reviewed: 2026-07-11
 
 # shop.minseok91.cloud Deployment Guide
 
@@ -25,8 +25,23 @@ At minimum, set these values in `.env.deploy`:
 - `CORS_ALLOWED_ORIGINS`
 - `APP_SESSION_COOKIE_SECURE`
 - `APP_DEMO_SEED_ENABLED`
+- `APP_RUNTIME_MODE`
+- `APP_PAYMENT_MOCK_ENABLED`
+- `NEXT_PUBLIC_DEMO_MODE`
 - `MANAGEMENT_HEALTH_SHOW_DETAILS`
 - host ports if your server already uses the defaults
+
+이 저장소에는 실제 PG 어댑터가 아직 없으므로 데모 배포는 다음 조합을 명시적으로 사용한다.
+
+```dotenv
+APP_RUNTIME_MODE=demo
+APP_PAYMENT_MOCK_ENABLED=true
+NEXT_PUBLIC_DEMO_MODE=true
+```
+
+이 조합에서는 모든 스토어 화면 상단에 실제 주문·결제가 발생하지 않는다는 안내가 표시된다. 실제 개인정보를 입력하면 안 된다.
+
+실서비스 배포는 `APP_RUNTIME_MODE=production`, `APP_PAYMENT_MOCK_ENABLED=false`, `NEXT_PUBLIC_DEMO_MODE=false`를 사용하고 실제 `PaymentGatewayAdapter` 구현을 먼저 설치해야 한다. production 모드에서 mock 결제를 활성화하면 API는 의도적으로 시작에 실패한다.
 
 ## 2. Build and start the stack
 

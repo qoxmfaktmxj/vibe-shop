@@ -1,6 +1,6 @@
 Status: current
 Owner: repo maintainers
-Last reviewed: 2026-03-24
+Last reviewed: 2026-07-11
 
 # Documentation Status Map
 
@@ -8,11 +8,17 @@ This file defines which documents are current sources of truth and which are his
 
 ## Current
 
+- `.impeccable.md`
 - `docs/design-system.md`
 - `docs/screen-inventory-and-ux-audit-2026-03-24.md`
 - `docs/api-contract-v1.md`
 - `docs/erd-v1.md`
 - `docs/deploy-shop-minseok91-cloud.md`
+- `docs/production-readiness-review-2026-07-11.md`
+
+## Draft
+
+- `docs/design-modernization-audit-2026-07-11.md`
 
 ## Reference
 

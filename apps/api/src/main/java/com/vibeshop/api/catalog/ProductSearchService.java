@@ -231,6 +231,7 @@ public class ProductSearchService {
                 product.getAccentColor(),
                 product.getImageUrl(),
                 product.getImageAlt(),
+                product.getStock(),
                 wishlistedProductIds.contains(product.getId())
             ))
             .toList());

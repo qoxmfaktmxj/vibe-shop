@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { AdminShell } from "@/components/admin-shell";
 import { requireAdminSession } from "@/lib/admin-require-session";
 import { getAdminDashboard } from "@/lib/admin-server-api";
@@ -13,93 +15,109 @@ function formatDateTime(value: string) {
 export default async function AdminPage() {
   await requireAdminSession();
   const dashboard = await getAdminDashboard();
+  const metrics = [
+    { label: "전체 상품", value: dashboard.productCount, detail: "메인 노출 " + dashboard.featuredProductCount + "개" },
+    { label: "저재고", value: dashboard.lowStockCount, detail: "재고 확인 필요" },
+    { label: "전체 회원", value: dashboard.memberCount, detail: "활성 " + dashboard.activeMemberCount + "명" },
+    { label: "전체 주문", value: dashboard.totalOrderCount, detail: "결제 완료 " + dashboard.paidOrderCount + "건" },
+  ];
 
   return (
     <AdminShell
-      eyebrow="대시보드"
-      title="오늘 운영 지표를 빠르게 확인하는 메인 보드"
-      description="핵심 KPI 요약과 최근 주문 흐름만 남겨, 첫 화면에서 오늘 봐야 할 숫자와 상태를 바로 읽을 수 있도록 정리했습니다."
+      eyebrow="Overview"
+      title="운영 대시보드"
+      description="오늘 확인할 지표, 처리 대기 상태, 최근 주문 흐름을 한 화면에 모았습니다."
+      actions={
+        <>
+          <Link href="/admin/orders" className="admin-button-secondary px-4 py-2.5">주문 관리</Link>
+          <Link href="/admin/products" className="admin-button px-4 py-2.5">상품 관리</Link>
+        </>
+      }
     >
-      <div className="grid gap-6">
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <article className="admin-card rounded-[28px] p-6">
-            <p className="eyebrow text-[var(--ink-soft)]">상품</p>
-            <p className="mt-4 text-4xl font-semibold">{dashboard.productCount}</p>
-            <p className="mt-2 text-sm text-[var(--ink-soft)]">
-              메인 노출 {dashboard.featuredProductCount} / 저재고 주의 {dashboard.lowStockCount}
-            </p>
+      <section aria-label="핵심 지표" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {metrics.map((metric) => (
+          <article key={metric.label} className="admin-card p-5">
+            <p className="text-xs font-medium text-[var(--ink-soft)]">{metric.label}</p>
+            <p className="mt-3 text-3xl font-semibold tracking-[-0.03em]">{metric.value}</p>
+            <p className="mt-2 text-xs text-[var(--ink-soft)]">{metric.detail}</p>
           </article>
-          <article className="admin-card rounded-[28px] p-6">
-            <p className="eyebrow text-[var(--ink-soft)]">회원</p>
-            <p className="mt-4 text-4xl font-semibold">{dashboard.memberCount}</p>
-            <p className="mt-2 text-sm text-[var(--ink-soft)]">
-              활성 {dashboard.activeMemberCount} / 휴면 {dashboard.dormantMemberCount}
-            </p>
-          </article>
-          <article className="admin-card rounded-[28px] p-6">
-            <p className="eyebrow text-[var(--ink-soft)]">주문</p>
-            <p className="mt-4 text-4xl font-semibold">{dashboard.totalOrderCount}</p>
-            <p className="mt-2 text-sm text-[var(--ink-soft)]">
-              결제 완료 {dashboard.paidOrderCount} / 결제 대기 {dashboard.pendingOrderCount}
-            </p>
-          </article>
-          <article className="admin-card rounded-[28px] p-6">
-            <p className="eyebrow text-[var(--ink-soft)]">메인 히어로</p>
-            <p className="mt-4 text-2xl font-semibold">{dashboard.display.heroTitle}</p>
-            <p className="mt-2 text-sm text-[var(--ink-soft)]">
-              CTA {dashboard.display.heroCtaLabel}
-            </p>
-          </article>
-        </section>
+        ))}
+      </section>
 
-        <section className="grid gap-6 xl:grid-cols-[0.78fr_1.22fr]">
-          <article className="admin-card rounded-[36px] p-8">
-            <p className="eyebrow text-[var(--ink-soft)]">오늘 체크</p>
-            <h2 className="display mt-4 text-3xl font-semibold">운영 메모</h2>
-            <div className="mt-8 grid gap-4">
-              <div className="rounded-[24px] border border-[var(--line)] bg-white/72 p-5">
-                <p className="text-base font-semibold text-[var(--ink)]">상품 운영</p>
-                <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">
-                  저재고 상품 {dashboard.lowStockCount}개가 있어 상품 탭에서 재고와 노출 상태를 함께 보는 편이 좋습니다.
-                </p>
+      <section className="grid gap-5 xl:grid-cols-[0.72fr_1.28fr]">
+        <article className="admin-card">
+          <header className="border-b border-[var(--line)] px-5 py-4">
+            <p className="text-xs font-semibold">처리 대기</p>
+            <p className="mt-1 text-xs text-[var(--ink-soft)]">우선순위가 높은 운영 항목입니다.</p>
+          </header>
+          <div className="divide-y divide-[var(--line)]">
+            <Link href="/admin/products" className="flex items-center justify-between gap-4 px-5 py-5 transition-colors hover:bg-[var(--background)]">
+              <div>
+                <p className="text-sm font-semibold">저재고 상품</p>
+                <p className="mt-1 text-xs text-[var(--ink-soft)]">판매 가능 수량을 확인하세요.</p>
               </div>
-              <div className="rounded-[24px] border border-[var(--line)] bg-white/72 p-5">
-                <p className="text-base font-semibold text-[var(--ink)]">회원 상태</p>
-                <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">
-                  휴면 회원 {dashboard.dormantMemberCount}명, 차단 회원 {dashboard.blockedMemberCount}명을 회원 탭에서 바로 확인할 수 있습니다.
-                </p>
+              <strong className="text-2xl font-semibold text-[var(--accent)]">{dashboard.lowStockCount}</strong>
+            </Link>
+            <Link href="/admin/orders" className="flex items-center justify-between gap-4 px-5 py-5 transition-colors hover:bg-[var(--background)]">
+              <div>
+                <p className="text-sm font-semibold">결제 대기 주문</p>
+                <p className="mt-1 text-xs text-[var(--ink-soft)]">입금과 상태 변경을 확인하세요.</p>
               </div>
-              <div className="rounded-[24px] border border-[var(--line)] bg-white/72 p-5">
-                <p className="text-base font-semibold text-[var(--ink)]">주문 흐름</p>
-                <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">
-                  결제 대기 주문 {dashboard.pendingOrderCount}건은 주문 탭에서 바로 상태 변경까지 이어집니다.
-                </p>
+              <strong className="text-2xl font-semibold text-[var(--accent)]">{dashboard.pendingOrderCount}</strong>
+            </Link>
+            <Link href="/admin/members" className="flex items-center justify-between gap-4 px-5 py-5 transition-colors hover:bg-[var(--background)]">
+              <div>
+                <p className="text-sm font-semibold">휴면·차단 회원</p>
+                <p className="mt-1 text-xs text-[var(--ink-soft)]">계정 상태 검토가 필요합니다.</p>
               </div>
-            </div>
-          </article>
+              <strong className="text-2xl font-semibold">{dashboard.dormantMemberCount + dashboard.blockedMemberCount}</strong>
+            </Link>
+          </div>
+        </article>
 
-          <article className="admin-card rounded-[36px] p-8">
-            <p className="eyebrow text-[var(--ink-soft)]">최근 주문</p>
-            <h2 className="display mt-4 text-3xl font-semibold">실시간 흐름</h2>
-            <div className="mt-8 space-y-4">
-              {dashboard.recentOrders.map((order) => (
-                <div key={order.orderNumber} className="rounded-[24px] border border-[var(--line)] bg-white/72 p-5">
-                  <div className="flex flex-col gap-2">
-                    <p className="text-lg font-semibold">{order.orderNumber}</p>
-                    <p className="text-sm text-[var(--ink-soft)]">
-                      {order.customerName} / {order.customerType}
-                    </p>
-                    <p className="text-sm text-[var(--ink-soft)]">{formatDateTime(order.createdAt)}</p>
-                    <p className="text-sm font-semibold">
-                      {order.status} / {formatPrice(order.total)}원
-                    </p>
-                  </div>
-                </div>
-              ))}
+        <article className="admin-card min-w-0">
+          <header className="flex items-center justify-between gap-4 border-b border-[var(--line)] px-5 py-4">
+            <div>
+              <p className="text-xs font-semibold">최근 주문</p>
+              <p className="mt-1 text-xs text-[var(--ink-soft)]">가장 최근 생성된 주문입니다.</p>
             </div>
-          </article>
-        </section>
-      </div>
+            <Link href="/admin/orders" className="text-xs font-semibold text-[var(--accent)]">전체 보기</Link>
+          </header>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[680px] border-collapse text-left text-sm">
+              <thead className="bg-[var(--background)] text-[11px] uppercase tracking-[0.06em] text-[var(--ink-soft)]">
+                <tr>
+                  <th className="px-5 py-3 font-medium">주문번호</th>
+                  <th className="px-5 py-3 font-medium">고객</th>
+                  <th className="px-5 py-3 font-medium">상태</th>
+                  <th className="px-5 py-3 font-medium">금액</th>
+                  <th className="px-5 py-3 font-medium">생성일</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--line)]">
+                {dashboard.recentOrders.map((order) => (
+                  <tr key={order.orderNumber} className="hover:bg-[var(--background)]">
+                    <td className="px-5 py-4 font-semibold">{order.orderNumber}</td>
+                    <td className="px-5 py-4">{order.customerName}</td>
+                    <td className="px-5 py-4 text-[var(--ink-soft)]">{order.status}</td>
+                    <td className="px-5 py-4">{formatPrice(order.total)}원</td>
+                    <td className="px-5 py-4 text-xs text-[var(--ink-soft)]">{formatDateTime(order.createdAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section className="admin-card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold">현재 메인 전시</p>
+          <p className="mt-2 text-lg font-semibold">{dashboard.display.heroTitle}</p>
+          <p className="mt-1 text-xs text-[var(--ink-soft)]">CTA: {dashboard.display.heroCtaLabel}</p>
+        </div>
+        <Link href="/admin/display" className="admin-button-secondary px-4 py-2.5">전시 편집</Link>
+      </section>
     </AdminShell>
   );
 }

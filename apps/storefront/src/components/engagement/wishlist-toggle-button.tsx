@@ -41,7 +41,7 @@ export function WishlistToggleButton({
   const classes =
     size === "detail"
       ? "button-secondary inline-flex items-center gap-2 px-4 py-3"
-      : "inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-[rgba(255,255,255,0.94)] text-[var(--ink)] shadow-[var(--shadow-soft)] backdrop-blur-sm";
+      : "inline-flex h-10 w-10 items-center justify-center border border-[oklch(0.92_0.01_80/0.7)] bg-[oklch(0.98_0.008_80/0.9)] text-[var(--ink)] backdrop-blur-sm";
 
   return (
     <div className="grid gap-2">

@@ -1,18 +1,23 @@
 package com.vibeshop.api.order;
 
 import java.math.BigDecimal;
+import java.security.SecureRandom;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import com.vibeshop.api.catalog.Product;
 import com.vibeshop.api.catalog.ProductRepository;
@@ -35,23 +40,29 @@ public class OrderService {
     private static final BigDecimal SHIPPING_FEE = BigDecimal.valueOf(3000);
     private static final BigDecimal FREE_SHIPPING_THRESHOLD = BigDecimal.valueOf(150000);
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
-    private static final DateTimeFormatter ORDER_FORMAT = DateTimeFormatter.ofPattern("yyMMddHHmmss");
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private final ProductRepository productRepository;
     private final CustomerOrderRepository customerOrderRepository;
     private final OrderPaymentRepository orderPaymentRepository;
     private final PaymentGatewayAdapter paymentGatewayAdapter;
+    private final GuestOrderAccessService guestOrderAccessService;
+    private final TransactionTemplate transactionTemplate;
 
     public OrderService(
         ProductRepository productRepository,
         CustomerOrderRepository customerOrderRepository,
         OrderPaymentRepository orderPaymentRepository,
-        PaymentGatewayAdapter paymentGatewayAdapter
+        PaymentGatewayAdapter paymentGatewayAdapter,
+        GuestOrderAccessService guestOrderAccessService,
+        PlatformTransactionManager transactionManager
     ) {
         this.productRepository = productRepository;
         this.customerOrderRepository = customerOrderRepository;
         this.orderPaymentRepository = orderPaymentRepository;
         this.paymentGatewayAdapter = paymentGatewayAdapter;
+        this.guestOrderAccessService = guestOrderAccessService;
+        this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
 
     @Transactional(readOnly = true)
@@ -60,14 +71,33 @@ public class OrderService {
         return resolvedOrder.preview();
     }
 
-    @Transactional
     public CreateOrderResponse create(CreateOrderRequest request) {
         return create(request, null);
     }
 
-    @Transactional
     public CreateOrderResponse create(CreateOrderRequest request, Long userId) {
         String idempotencyKey = request.idempotencyKey().trim();
+        try {
+            return Objects.requireNonNull(transactionTemplate.execute(
+                status -> createInTransaction(request, userId, idempotencyKey)
+            ));
+        } catch (DataIntegrityViolationException exception) {
+            CreateOrderResponse existing = transactionTemplate.execute(status -> customerOrderRepository
+                .findByIdempotencyKey(idempotencyKey)
+                .map(order -> toCreateResponse(order, findPayment(order)))
+                .orElse(null));
+            if (existing != null) {
+                return existing;
+            }
+            throw exception;
+        }
+    }
+
+    private CreateOrderResponse createInTransaction(
+        CreateOrderRequest request,
+        Long userId,
+        String idempotencyKey
+    ) {
         CustomerOrder existingOrder = customerOrderRepository.findByIdempotencyKey(idempotencyKey).orElse(null);
         if (existingOrder != null) {
             return toCreateResponse(existingOrder, findPayment(existingOrder));
@@ -105,7 +135,7 @@ public class OrderService {
             ));
         }
 
-        customerOrderRepository.save(order);
+        customerOrderRepository.saveAndFlush(order);
 
         PaymentGatewayAdapter.AuthorizationResult paymentResult = paymentGatewayAdapter.authorize(
             order,
@@ -120,7 +150,7 @@ public class OrderService {
             now
         );
         applyAuthorizationResult(order, payment, paymentResult);
-        orderPaymentRepository.save(payment);
+        orderPaymentRepository.saveAndFlush(payment);
 
         return toCreateResponse(order, payment);
     }
@@ -138,45 +168,40 @@ public class OrderService {
         return toOrderResponse(order, findPayment(order));
     }
 
-    @Transactional(readOnly = true)
-    public OrderResponse getGuest(String orderNumber, String phone) {
-        CustomerOrder order = findGuestOrder(orderNumber, phone);
-        return toOrderResponse(order, findPayment(order));
+    public OrderResponse getGuest(String orderNumber, String accessToken) {
+        Long orderId = guestOrderAccessService.authorize("DETAIL", orderNumber, accessToken);
+        CustomerOrder order = customerOrderRepository.findWithLinesById(orderId)
+            .orElseThrow(() -> new ResourceNotFoundException("주문 정보를 찾을 수 없습니다."));
+        return toOrderResponse(order, findPayment(order), true);
     }
 
-    @Transactional(readOnly = true)
-    public GuestOrderLookupResponse lookup(GuestOrderLookupRequest request) {
-        CustomerOrder order = findGuestOrder(request.orderNumber(), request.phone());
-        return new GuestOrderLookupResponse(order.getOrderNumber());
+    public GuestOrderAccessService.AccessGrant lookup(GuestOrderLookupRequest request) {
+        return guestOrderAccessService.lookup(request);
+    }
+
+    public GuestOrderAccessService.AccessGrant issueGuestAccessForCreatedOrder(String orderNumber, String phone) {
+        return guestOrderAccessService.issueForCreatedOrder(orderNumber, phone);
     }
 
     @Transactional
     public CancelOrderResponse cancel(String orderNumber) {
-        CustomerOrder order = customerOrderRepository.findByOrderNumber(orderNumber.trim())
+        CustomerOrder order = customerOrderRepository.findByOrderNumberForUpdate(orderNumber.trim())
             .orElseThrow(() -> new ResourceNotFoundException("주문 정보를 찾을 수 없습니다."));
         return cancel(order);
     }
 
     @Transactional
     public CancelOrderResponse cancelForUser(String orderNumber, Long userId) {
-        return cancel(findMemberOrder(orderNumber, userId));
+        return cancel(findMemberOrderForUpdate(orderNumber, userId));
     }
 
-    @Transactional
-    public CancelOrderResponse cancelGuest(String orderNumber, String phone) {
-        return cancel(findGuestOrder(orderNumber, phone));
-    }
-
-    @Transactional(readOnly = true)
-    public List<OrderSummaryResponse> listByPhone(String phone) {
-        if (phone == null || phone.isBlank()) {
-            throw new IllegalArgumentException("연락처를 입력해 주세요.");
-        }
-
-        return customerOrderRepository.findByPhoneOrderByCreatedAtDesc(phone.trim()).stream()
-            .filter(order -> order.getCustomerType() == CustomerType.GUEST)
-            .map(this::toSummaryResponse)
-            .toList();
+    public CancelOrderResponse cancelGuest(String orderNumber, String accessToken) {
+        Long orderId = guestOrderAccessService.authorize("CANCEL", orderNumber, accessToken);
+        return Objects.requireNonNull(transactionTemplate.execute(status -> {
+            CustomerOrder order = customerOrderRepository.findByIdForUpdate(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("주문 정보를 찾을 수 없습니다."));
+            return cancel(order);
+        }));
     }
 
     @Transactional(readOnly = true)
@@ -193,7 +218,7 @@ public class OrderService {
 
     @Transactional
     public OrderResponse updateStatusForAdmin(String orderNumber, OrderStatus nextStatus) {
-        CustomerOrder order = customerOrderRepository.findByOrderNumber(orderNumber.trim())
+        CustomerOrder order = customerOrderRepository.findByOrderNumberForUpdate(orderNumber.trim())
             .orElseThrow(() -> new ResourceNotFoundException("주문 정보를 찾을 수 없습니다."));
         OrderPayment payment = findPayment(order);
         OffsetDateTime now = OffsetDateTime.now(SEOUL);
@@ -225,6 +250,10 @@ public class OrderService {
     }
 
     private OrderResponse toOrderResponse(CustomerOrder order, OrderPayment payment) {
+        return toOrderResponse(order, payment, false);
+    }
+
+    private OrderResponse toOrderResponse(CustomerOrder order, OrderPayment payment, boolean maskPersonalData) {
         return new OrderResponse(
             order.getOrderNumber(),
             order.getStatus().name(),
@@ -232,12 +261,12 @@ public class OrderService {
             payment.getPaymentStatus().name(),
             payment.getPaymentMethod().name(),
             payment.getMessage(),
-            order.getCustomerName(),
-            order.getPhone(),
-            order.getPostalCode(),
-            order.getAddress1(),
-            order.getAddress2(),
-            order.getNote(),
+            maskPersonalData ? maskName(order.getCustomerName()) : order.getCustomerName(),
+            maskPersonalData ? maskPhone(order.getPhone()) : order.getPhone(),
+            maskPersonalData ? "*****" : order.getPostalCode(),
+            maskPersonalData ? maskAddress(order.getAddress1()) : order.getAddress1(),
+            maskPersonalData ? "" : order.getAddress2(),
+            maskPersonalData ? "" : order.getNote(),
             order.getLines().stream()
                 .map(line -> new CheckoutLineResponse(
                     line.getProductId(),
@@ -360,18 +389,16 @@ public class OrderService {
             .orElseThrow(() -> new ResourceNotFoundException("주문 정보를 찾을 수 없습니다."));
     }
 
-    private CustomerOrder findGuestOrder(String orderNumber, String phone) {
-        if (phone == null || phone.isBlank()) {
-            throw new IllegalArgumentException("비회원 주문 조회에는 연락처가 필요합니다.");
+    private CustomerOrder findMemberOrderForUpdate(String orderNumber, Long userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("로그인 정보가 필요합니다.");
         }
 
-        CustomerOrder order = customerOrderRepository.findByOrderNumber(orderNumber.trim())
+        CustomerOrder order = customerOrderRepository.findByOrderNumberForUpdate(orderNumber.trim())
             .orElseThrow(() -> new ResourceNotFoundException("주문 정보를 찾을 수 없습니다."));
-
-        if (order.getCustomerType() != CustomerType.GUEST || !order.getPhone().equals(phone.trim())) {
+        if (order.getCustomerType() != CustomerType.MEMBER || !userId.equals(order.getUserId())) {
             throw new ResourceNotFoundException("주문 정보를 찾을 수 없습니다.");
         }
-
         return order;
     }
 
@@ -422,34 +449,58 @@ public class OrderService {
     }
 
     private String generateOrderNumber() {
-        return "VS" + OffsetDateTime.now(SEOUL).format(ORDER_FORMAT) + ThreadLocalRandom.current().nextInt(100, 999);
+        long timestamp = System.currentTimeMillis() & 0xFFFFFFFFFFFFL;
+        long mostSignificantBits = (timestamp << 16)
+            | 0x7000L
+            | SECURE_RANDOM.nextInt(1 << 12);
+        long leastSignificantBits = (SECURE_RANDOM.nextLong() & 0x3FFFFFFFFFFFFFFFL)
+            | 0x8000000000000000L;
+        return "VS-" + new UUID(mostSignificantBits, leastSignificantBits).toString().toUpperCase(Locale.ROOT);
     }
 
     private void reserveStock(List<CheckoutLineResponse> lines) {
-        Map<Long, Product> products = productRepository.findAllByIdIn(
-            lines.stream().map(CheckoutLineResponse::productId).toList()
-        ).stream().collect(Collectors.toMap(Product::getId, Function.identity()));
-
         for (CheckoutLineResponse line : lines) {
-            Product product = products.get(line.productId());
-            if (product == null) {
-                throw new ResourceNotFoundException("상품을 찾을 수 없습니다.");
+            int updatedRows = productRepository.decreaseStockIfAvailable(line.productId(), line.quantity());
+            if (updatedRows != 1) {
+                throw new IllegalArgumentException(line.productName() + " 재고가 부족합니다.");
             }
-            product.decreaseStock(line.quantity());
         }
     }
 
     private void restoreStock(CustomerOrder order) {
-        Map<Long, Product> products = productRepository.findAllByIdIn(
-            order.getLines().stream().map(CustomerOrderLine::getProductId).toList()
-        ).stream().collect(Collectors.toMap(Product::getId, Function.identity()));
-
         for (CustomerOrderLine line : order.getLines()) {
-            Product product = products.get(line.getProductId());
-            if (product != null) {
-                product.increaseStock(line.getQuantity());
+            int updatedRows = productRepository.increaseStock(line.getProductId(), line.getQuantity());
+            if (updatedRows != 1) {
+                throw new ResourceNotFoundException("재고를 복구할 상품을 찾을 수 없습니다.");
             }
         }
+    }
+
+    private String maskName(String name) {
+        if (name == null || name.isBlank()) {
+            return "***";
+        }
+        if (name.length() == 1) {
+            return "*";
+        }
+        return name.substring(0, 1) + "*".repeat(Math.max(1, name.length() - 1));
+    }
+
+    private String maskPhone(String phone) {
+        String digits = phone == null ? "" : phone.replaceAll("\\D", "");
+        if (digits.length() < 7) {
+            return "***-****";
+        }
+        return digits.substring(0, 3) + "-****-" + digits.substring(digits.length() - 4);
+    }
+
+    private String maskAddress(String address) {
+        if (address == null || address.isBlank()) {
+            return "배송지 비공개";
+        }
+        String[] parts = address.trim().split("\\s+");
+        int visibleParts = Math.min(2, parts.length);
+        return String.join(" ", java.util.Arrays.copyOf(parts, visibleParts)) + " 이하 비공개";
     }
 
     private record ResolvedOrder(

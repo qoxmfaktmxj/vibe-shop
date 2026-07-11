@@ -1,7 +1,7 @@
 export default function Loading() {
   return (
     <main className="mx-auto flex w-full max-w-[1480px] flex-col gap-6 px-6 py-8 sm:px-8 lg:px-10">
-      <section className="admin-dark rounded-[40px] p-8 sm:p-10">
+      <section className="admin-dark p-8 sm:p-10">
         <div className="grid gap-4">
           <p className="eyebrow text-white/60">로딩 중</p>
           <h1 className="display text-4xl font-semibold leading-[0.94] sm:text-5xl">
@@ -17,7 +17,7 @@ export default function Loading() {
       </section>
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="admin-card h-40 animate-pulse rounded-[28px]" />
+          <div key={index} className="admin-card h-40 animate-pulse" />
         ))}
       </section>
     </main>

@@ -26,63 +26,52 @@ export default async function SearchPage({
   const productsResponse = !keyword && currentCategory
     ? await getProducts(currentCategory, currentSort, currentPage - 1, 20)
     : null;
-
-  const products = keyword
-    ? searchResult?.items ?? []
-    : productsResponse?.items ?? [];
-
-  const totalItems = keyword
-    ? searchResult?.totalItems ?? 0
-    : productsResponse?.totalItems ?? 0;
-
-  const totalPages = keyword
-    ? searchResult?.totalPages ?? 0
-    : productsResponse?.totalPages ?? 0;
-
+  const products = keyword ? searchResult?.items ?? [] : productsResponse?.items ?? [];
+  const totalItems = keyword ? searchResult?.totalItems ?? 0 : productsResponse?.totalItems ?? 0;
+  const totalPages = keyword ? searchResult?.totalPages ?? 0 : productsResponse?.totalPages ?? 0;
   const baseParams: Record<string, string> = {};
   if (keyword) baseParams.q = keyword;
   if (currentSort !== "recommended") baseParams.sort = currentSort;
   if (currentCategory) baseParams.category = currentCategory;
 
   return (
-    <div className="grid-shell space-y-6 sm:space-y-8">
-      <section className="space-y-4">
-        <div className="max-w-3xl">
-          <p className="display-eyebrow">상품 검색</p>
-          <h1 className="display-heading mt-3 text-4xl">원하는 무드의 상품만 빠르게 골라보세요.</h1>
-          <p className="mt-4 text-sm leading-7 text-[var(--ink-soft)]">
-            검색어와 카테고리를 함께 조합해서 지금 보고 싶은 상품군만 정확하게 좁혀볼 수 있습니다.
-          </p>
+    <div className="grid-shell pb-6 sm:pb-10">
+      <section className="grid gap-10 pt-6 lg:grid-cols-[0.75fr_1.25fr] lg:items-end lg:pt-12">
+        <div>
+          <p className="display-eyebrow">Search the collection</p>
+          <h1 className="display-heading mt-4 text-4xl sm:text-5xl">찾고 싶은 장면을 들려주세요.</h1>
         </div>
-        <SearchForm categories={categories} initialCategory={currentCategory} />
+        <div>
+          <p className="max-w-2xl text-sm leading-7 text-[var(--ink-soft)]">
+            상품 이름뿐 아니라 소재, 공간, 선물의 순간으로도 MARU의 셀렉션을 살펴볼 수 있습니다.
+          </p>
+          <div className="mt-7">
+            <SearchForm categories={categories} initialKeyword={keyword} initialCategory={currentCategory} />
+          </div>
+        </div>
       </section>
 
       {shouldRenderResults ? (
-        <section className="surface-card rounded-[28px] p-5 sm:rounded-[32px] sm:p-8">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <section>
+          <div className="grid gap-5 border-b border-[var(--line)] pb-7 lg:grid-cols-[1fr_auto] lg:items-end">
             <div>
-              <p className="display-eyebrow">검색 결과</p>
-              <h2 className="display-heading mt-3 text-3xl">
-                {keyword ? `"${keyword}" 검색 결과` : `${selectedCategory?.name ?? "카테고리"} 전시 결과`}
+              <p className="display-eyebrow">Search results</p>
+              <h2 className="display-heading mt-3 text-3xl sm:text-4xl">
+                {keyword ? `“${keyword}” 검색 결과` : `${selectedCategory?.name ?? "카테고리"} 셀렉션`}
               </h2>
               <p className="mt-3 text-sm text-[var(--ink-soft)]">
-                {selectedCategory
-                  ? `${selectedCategory.name} 카테고리만 표시 중입니다.`
-                  : "전체 카테고리를 기준으로 결과를 보여줍니다."}
+                {selectedCategory ? `${selectedCategory.name} 카테고리에서 찾았습니다.` : "전체 컬렉션에서 찾았습니다."}
               </p>
             </div>
-            <p className="status-pill self-start lg:self-auto">
-              {totalItems > 0 ? `총 ${totalItems}개 중 ${products.length}개 표시` : `${products.length}개 상품`}
+            <p className="text-xs tracking-[0.06em] text-[var(--ink-muted)]">
+              총 {totalItems}개 · {products.length}개 표시
             </p>
           </div>
 
           {searchResult?.appliedFilters?.length ? (
-            <div className="mt-5 flex flex-wrap gap-2 sm:mt-6">
+            <div className="mt-5 flex flex-wrap gap-2">
               {searchResult.appliedFilters.map((filter) => (
-                <span
-                  key={`${filter.type}-${filter.value}`}
-                  className="chip-link rounded-full text-[var(--ink-soft)]"
-                >
+                <span key={`${filter.type}-${filter.value}`} className="border border-[var(--line)] px-3 py-2 text-[11px] text-[var(--ink-soft)]">
                   {filter.label}
                 </span>
               ))}
@@ -90,58 +79,55 @@ export default async function SearchPage({
           ) : null}
 
           {searchResult?.fallback?.applied ? (
-            <div className="mt-4 rounded-[20px] border border-[var(--line)] bg-[rgba(255,255,255,0.76)] p-4 text-sm leading-7 text-[var(--ink-soft)] sm:mt-5 sm:rounded-[24px]">
-              <p className="font-semibold text-[var(--ink)]">검색 조건을 조금 넓혀서 결과를 보여드리고 있습니다.</p>
-              <p className="mt-2">{searchResult.fallback.reason}</p>
+            <div className="mt-6 border-l-2 border-[var(--primary)] bg-[var(--primary-soft)] p-5 text-sm leading-7 text-[var(--ink-soft)]">
+              <p className="font-semibold text-[var(--ink)]">검색 범위를 조금 넓혀 결과를 보여드립니다.</p>
+              <p className="mt-1">{searchResult.fallback.reason}</p>
             </div>
           ) : null}
 
-          <div className="mt-5 flex flex-col gap-4 lg:mt-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="mt-7 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <ProductSortTabs
               pathname="/search"
               searchParams={{ q: keyword || undefined, sort, category: currentCategory || undefined }}
               currentSort={currentSort}
             />
-            {currentCategory ? (
-              <Link href="/search" className="text-sm font-medium text-[var(--primary)]">
-                필터 초기화
-              </Link>
-            ) : null}
+            {currentCategory ? <Link href="/search" className="text-xs font-semibold text-[var(--primary)]">필터 초기화</Link> : null}
           </div>
 
           {products.length > 0 ? (
-            <div className="mt-6 grid gap-4 sm:mt-8 sm:gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+            <div className="mt-9 grid grid-cols-2 gap-x-4 gap-y-12 lg:grid-cols-4 lg:gap-x-6 lg:gap-y-16">
+              {products.map((product) => <ProductCard key={product.id} product={product} />)}
             </div>
           ) : (
-            <div className="mt-6 rounded-[20px] border border-dashed border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5 text-sm leading-7 text-[var(--ink-soft)] sm:mt-8 sm:rounded-[24px] sm:p-6">
-              결과가 없습니다. 다른 검색어를 입력하거나 카테고리 필터를 바꿔서 다시 시도해 보세요.
+            <div className="mt-9 border-y border-[var(--line)] py-14 text-center text-sm leading-7 text-[var(--ink-soft)]">
+              결과가 없습니다. 다른 검색어나 카테고리로 다시 찾아보세요.
             </div>
           )}
 
-          {totalPages > 1 && (
-            <Pagination
-              page={currentPage}
-              totalPages={totalPages}
-              basePath="/search"
-              baseParams={baseParams}
-            />
-          )}
+          {totalPages > 1 ? (
+            <Pagination page={currentPage} totalPages={totalPages} basePath="/search" baseParams={baseParams} />
+          ) : null}
         </section>
       ) : (
-        <section className="grid gap-4 sm:gap-5 md:grid-cols-3">
-          {categories.map((item) => (
-            <Link
-              key={item.id}
-              href={`/search?category=${item.slug}`}
-              className="surface-card hover-lift rounded-[24px] p-5 transition sm:rounded-[28px] sm:p-6"
-            >
-              <p className="display-eyebrow">{item.name}</p>
-              <p className="display-heading mt-4 text-2xl text-[var(--ink)]">{item.description}</p>
-            </Link>
-          ))}
+        <section>
+          <div className="mb-7">
+            <p className="display-eyebrow">Browse by room</p>
+            <h2 className="display-heading mt-3 text-3xl sm:text-4xl">공간부터 둘러보기</h2>
+          </div>
+          <div className="grid border-t border-[var(--line)] md:grid-cols-3">
+            {categories.map((item, index) => (
+              <Link
+                key={item.id}
+                href={`/search?category=${item.slug}`}
+                className={`group border-b border-[var(--line)] py-8 md:px-7 ${index > 0 ? "md:border-l" : ""}`}
+              >
+                <p className="text-[10px] uppercase tracking-[0.16em] text-[var(--ink-muted)]">0{index + 1}</p>
+                <h3 className="mt-4 font-[var(--font-display)] text-2xl">{item.name}</h3>
+                <p className="mt-3 text-sm leading-7 text-[var(--ink-soft)]">{item.description}</p>
+                <span className="mt-6 inline-block text-xs font-semibold text-[var(--primary)] group-hover:underline">살펴보기 →</span>
+              </Link>
+            ))}
+          </div>
         </section>
       )}
     </div>

@@ -37,9 +37,9 @@ export function AccountHeaderButton() {
       title={label}
       aria-current={isActive ? "page" : undefined}
       className={[
-        "relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--chrome-border)] bg-[var(--chrome-hover)] text-[var(--chrome-fg)] transition hover:-translate-y-[1px] hover:border-[var(--line-strong)] hover:bg-[var(--surface-low)] focus-visible:outline-[var(--focus)]",
+        "relative inline-flex h-11 w-10 items-center justify-center border-b border-transparent text-[var(--chrome-fg)] transition-colors hover:border-[var(--chrome-fg)] focus-visible:outline-[var(--focus)]",
         isActive
-          ? "border-[var(--primary)] bg-[var(--primary-soft)] text-[var(--primary)]"
+          ? "border-[var(--primary)] text-[var(--primary)]"
           : "",
       ].join(" ")}
     >
@@ -47,7 +47,7 @@ export function AccountHeaderButton() {
       {session.authenticated ? (
         <span
           aria-hidden="true"
-          className="absolute right-2.5 top-2.5 h-2.5 w-2.5 rounded-full border border-[var(--chrome-bg)] bg-[var(--chrome-fg)]"
+          className="absolute right-1.5 top-2 h-1.5 w-1.5 rounded-full bg-[var(--primary)]"
         />
       ) : null}
     </Link>

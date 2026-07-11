@@ -175,7 +175,7 @@ export function ProductReviewSection({
               onClick={() => loadReviews({ photoOnly: !photoOnly })}
               className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
                 photoOnly
-                  ? "bg-[var(--primary)] text-white"
+                  ? "bg-[var(--primary)] text-[var(--ink)]"
                   : "border border-[var(--line)] bg-white/80 text-[var(--ink)]"
               }`}
             >
@@ -225,7 +225,7 @@ export function ProductReviewSection({
                     onClick={() => loadReviews({ rating: item.value })}
                     className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
                       active
-                        ? "bg-[var(--primary)] text-white"
+                        ? "bg-[var(--primary)] text-[var(--ink)]"
                         : "border border-[var(--line)] bg-white/80 text-[var(--ink)]"
                     }`}
                   >
@@ -381,7 +381,7 @@ export function ProductReviewSection({
                       }}
                       className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
                         review.helpfulVoted
-                          ? "bg-[var(--primary)] text-white"
+                          ? "bg-[var(--primary)] text-[var(--ink)]"
                           : "border border-[var(--line)] bg-white/80 text-[var(--ink)]"
                       }`}
                     >

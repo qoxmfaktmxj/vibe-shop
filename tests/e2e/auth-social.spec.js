@@ -18,21 +18,21 @@ test("login page exposes social login buttons and storefront favicon", async ({ 
     return icon?.getAttribute("href") ?? "";
   });
   expect(faviconHref).toMatch(/icon|vibe-shop-favicon/i);
-  const faviconResponse = await page.request.get("/vibe-shop-favicon.svg");
+  const faviconResponse = await page.request.get("/maru-favicon.svg");
   expect(faviconResponse.ok()).toBeTruthy();
 
   await page.getByRole("link", { name: "Google로 계속하기" }).click();
-  await expect(page).toHaveURL(/\/login\?error=social_google_unavailable/);
+  await expect(page).toHaveURL(/\/auth\?tab=login.*error=social_google_unavailable/);
   await page.goto(page.url(), { waitUntil: "networkidle" });
   await expect(
-    page.getByText("Google 로그인은 아직 연결되지 않았습니다", { exact: false }),
+    page.getByText("Google 로그인 설정이 아직 연결되지 않았습니다", { exact: false }),
   ).toBeVisible();
 
   await page.getByRole("link", { name: "카카오로 계속하기" }).click();
-  await expect(page).toHaveURL(/\/login\?error=social_kakao_unavailable/);
+  await expect(page).toHaveURL(/\/auth\?tab=login.*error=social_kakao_unavailable/);
   await page.goto(page.url(), { waitUntil: "networkidle" });
   await expect(
-    page.getByText("카카오 로그인은 아직 연결되지 않았습니다", { exact: false }),
+    page.getByText("카카오 로그인 설정이 아직 연결되지 않았습니다", { exact: false }),
   ).toBeVisible();
 
   await page.screenshot({

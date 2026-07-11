@@ -17,7 +17,6 @@ import com.vibeshop.api.order.OrderDtos.CheckoutItemRequest;
 import com.vibeshop.api.order.OrderDtos.CreateOrderRequest;
 import com.vibeshop.api.order.OrderDtos.CreateOrderResponse;
 import com.vibeshop.api.order.OrderDtos.GuestOrderLookupRequest;
-import com.vibeshop.api.order.OrderDtos.GuestOrderLookupResponse;
 import com.vibeshop.api.order.OrderDtos.OrderResponse;
 import com.vibeshop.api.order.OrderDtos.OrderSummaryResponse;
 
@@ -37,6 +36,8 @@ class OrderServiceTest {
         jdbcClient.sql("DELETE FROM shopping_cart_items").update();
         jdbcClient.sql("DELETE FROM customer_order_lines").update();
         jdbcClient.sql("DELETE FROM order_payments").update();
+        jdbcClient.sql("DELETE FROM guest_order_access_tokens").update();
+        jdbcClient.sql("DELETE FROM guest_order_access_audit_logs").update();
         jdbcClient.sql("DELETE FROM customer_orders").update();
         jdbcClient.sql("DELETE FROM shipping_addresses").update();
         jdbcClient.sql("DELETE FROM user_sessions").update();
@@ -157,16 +158,20 @@ class OrderServiceTest {
             List.of(new CheckoutItemRequest(10L, 1))
         ));
 
-        GuestOrderLookupResponse found = orderService.lookup(new GuestOrderLookupRequest(
+        GuestOrderAccessService.AccessGrant found = orderService.lookup(new GuestOrderLookupRequest(
             created.orderNumber(),
             "01012345678"
         ));
-        OrderResponse order = orderService.getGuest(found.orderNumber(), "01012345678");
+        OrderResponse order = orderService.getGuest(found.response().orderNumber(), found.rawToken());
 
-        assertThat(found.orderNumber()).isEqualTo(created.orderNumber());
+        assertThat(found.response().orderNumber()).isEqualTo(created.orderNumber());
         assertThat(order.status()).isEqualTo("PENDING_PAYMENT");
         assertThat(order.paymentStatus()).isEqualTo("PENDING");
         assertThat(order.paymentMethod()).isEqualTo("BANK_TRANSFER");
+        assertThat(order.phone()).isEqualTo("010-****-5678");
+        assertThat(order.address1()).endsWith("이하 비공개");
+        assertThat(order.address2()).isEmpty();
+        assertThat(order.note()).isEmpty();
     }
 
     @Test
@@ -216,7 +221,11 @@ class OrderServiceTest {
             List.of(new CheckoutItemRequest(10L, 2))
         ));
 
-        OrderResponse order = orderService.getGuest(created.orderNumber(), "01012345678");
+        GuestOrderAccessService.AccessGrant accessGrant = orderService.issueGuestAccessForCreatedOrder(
+            created.orderNumber(),
+            "01012345678"
+        );
+        OrderResponse order = orderService.getGuest(created.orderNumber(), accessGrant.rawToken());
         Integer stockAfterFailure = jdbcClient.sql("SELECT stock FROM products WHERE id = 10")
             .query(Integer.class)
             .single();
@@ -226,40 +235,6 @@ class OrderServiceTest {
         assertThat(order.status()).isEqualTo("CANCELLED");
         assertThat(order.paymentStatus()).isEqualTo("FAILED");
         assertThat(stockAfterFailure).isEqualTo(10);
-    }
-
-    @Test
-    void listByPhoneReturnsLatestGuestOrdersFirst() {
-        orderService.create(new CreateOrderRequest(
-            "idem-order-list-1",
-            "Kim Minsu",
-            "01012345678",
-            "06236",
-            "Teheran-ro 123",
-            "8F",
-            "Leave at the door.",
-            PaymentMethod.CARD,
-            List.of(new CheckoutItemRequest(10L, 1))
-        ));
-
-        orderService.create(new CreateOrderRequest(
-            "idem-order-list-2",
-            "Kim Minsu",
-            "01012345678",
-            "06236",
-            "Teheran-ro 123",
-            "8F",
-            "Leave at the door.",
-            PaymentMethod.BANK_TRANSFER,
-            List.of(new CheckoutItemRequest(10L, 1))
-        ));
-
-        List<OrderSummaryResponse> orders = orderService.listByPhone("01012345678");
-
-        assertThat(orders).hasSize(2);
-        assertThat(orders.getFirst().createdAt()).isAfterOrEqualTo(orders.get(1).createdAt());
-        assertThat(orders.getFirst().customerType()).isEqualTo("GUEST");
-        assertThat(orders.getFirst().itemCount()).isEqualTo(1);
     }
 
     @Test
@@ -307,11 +282,8 @@ class OrderServiceTest {
         ));
 
         List<OrderSummaryResponse> memberOrders = orderService.listByUserId(301L);
-        List<OrderSummaryResponse> guestOrders = orderService.listByPhone("01012345678");
 
         assertThat(memberOrders).hasSize(1);
         assertThat(memberOrders.getFirst().customerType()).isEqualTo("MEMBER");
-        assertThat(guestOrders).hasSize(1);
-        assertThat(guestOrders.getFirst().customerType()).isEqualTo("GUEST");
     }
 }

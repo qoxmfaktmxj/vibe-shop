@@ -52,6 +52,8 @@ class AdminControllerTest {
         jdbcClient.sql("DELETE FROM product_view_events").update();
         jdbcClient.sql("DELETE FROM customer_order_lines").update();
         jdbcClient.sql("DELETE FROM order_payments").update();
+        jdbcClient.sql("DELETE FROM guest_order_access_tokens").update();
+        jdbcClient.sql("DELETE FROM guest_order_access_audit_logs").update();
         jdbcClient.sql("DELETE FROM customer_orders").update();
         jdbcClient.sql("DELETE FROM shipping_addresses").update();
         jdbcClient.sql("DELETE FROM display_items").update();
@@ -229,6 +231,7 @@ class AdminControllerTest {
                     {
                       "name": "Admin Updated Product",
                       "summary": "Updated summary",
+                      "description": "Updated detailed description",
                       "badge": "MD PICK",
                       "price": 99000,
                       "stock": 4,
@@ -282,6 +285,7 @@ class AdminControllerTest {
             .andExpect(jsonPath("$.slug").value("admin-new-product"))
             .andExpect(jsonPath("$.categorySlug").value("living"))
             .andExpect(jsonPath("$.name").value("Admin New Product"))
+            .andExpect(jsonPath("$.description").value("Detailed admin product description."))
             .andExpect(jsonPath("$.stock").value(12))
             .andExpect(jsonPath("$.price").value(129000));
 
@@ -289,6 +293,56 @@ class AdminControllerTest {
             .query(Integer.class)
             .single();
         assertThat(productCount).isEqualTo(1);
+
+        Long productId = jdbcClient.sql("SELECT id FROM products WHERE slug = 'admin-new-product'")
+            .query(Long.class)
+            .single();
+
+        mockMvc.perform(put("/api/v1/admin/products/{productId}", productId)
+                .cookie(adminCookie)
+                .contentType("application/json")
+                .content("""
+                    {
+                      "name": "Admin Updated Product",
+                      "summary": "Updated from admin.",
+                      "description": "Updated detailed description.",
+                      "price": 139000,
+                      "badge": "BEST",
+                      "featured": true,
+                      "stock": 9,
+                      "popularityScore": 88
+                    }
+                    """))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.description").value("Updated detailed description."));
+
+        String updatedDescription = jdbcClient.sql("SELECT description FROM products WHERE id = :id")
+            .param("id", productId)
+            .query(String.class)
+            .single();
+        assertThat(updatedDescription).isEqualTo("Updated detailed description.");
+
+        mockMvc.perform(post("/api/v1/admin/products")
+                .cookie(adminCookie)
+                .contentType("application/json")
+                .content("""
+                    {
+                      "categorySlug": "living",
+                      "slug": "invalid-accent-product",
+                      "name": "Invalid Accent Product",
+                      "summary": "Invalid accent should fail.",
+                      "description": "Invalid accent should fail.",
+                      "price": 119000,
+                      "badge": "NEW",
+                      "accentColor": "rgb(1,2,3)",
+                      "imageUrl": "/images/products/living-03.jpg",
+                      "imageAlt": "Invalid Accent Product image",
+                      "featured": false,
+                      "stock": 8,
+                      "popularityScore": 55
+                    }
+                    """))
+            .andExpect(status().isBadRequest());
 
         mockMvc.perform(post("/api/v1/admin/products")
                 .cookie(adminCookie)

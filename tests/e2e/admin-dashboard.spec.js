@@ -15,13 +15,8 @@ test("admin dashboard can manage display, products, and order status", async ({ 
   const heroTitle = `운영 메인 카피 ${uniqueId}`;
 
   await page.goto("/products/brew-mug", { waitUntil: "networkidle" });
-  await page
-    .getByRole("complementary")
-    .getByRole("button", { name: /장바구니 담기|Add to Bag/ })
-    .click();
-  await expect(
-    page.getByRole("complementary").getByRole("button", { name: /담기 완료|Added/ }),
-  ).toBeVisible();
+  await page.locator("button.button-hot").first().click();
+  await expect(page.getByRole("link", { name: /장바구니 1개 상품/ })).toBeVisible();
 
   await page.goto("/checkout", { waitUntil: "networkidle" });
   const checkoutInputs = page.locator("form input");
@@ -32,9 +27,10 @@ test("admin dashboard can manage display, products, and order status", async ({ 
   await checkoutInputs.nth(4).fill("15F");
   await page.locator("form textarea").fill("Admin dashboard test order.");
   await page.locator('input[name="paymentMethod"][value="CARD"]').check({ force: true });
+  await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: /주문하기|Place order|바로 주문/ }).click();
 
-  await expect(page).toHaveURL(/\/orders\/[A-Z0-9]+(?:\?phone=.*)?$/);
+  await expect(page).toHaveURL(/\/orders\/[^?]+$/);
 
   await page.goto(`${adminUrl}/login`, { waitUntil: "networkidle" });
   await page.locator('input[type="email"]').fill("admin@vibeshop.local");
@@ -76,7 +72,7 @@ test("admin dashboard can manage display, products, and order status", async ({ 
 
   await page.goto(`${adminUrl}/`, { waitUntil: "networkidle" });
   await expect(
-    page.getByRole("heading", { name: /핵심 운영 지표를 빠르게 확인하는 메인 보드/ }),
+    page.getByRole("heading", { name: /운영 대시보드/ }),
   ).toBeVisible();
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "12-admin-dashboard.png"),

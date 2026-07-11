@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 
 import "./globals.css";
-import { notoSansKR, inter } from "@/lib/fonts";
+import { gowunBatang, notoSansKR } from "@/lib/fonts";
 
 export const metadata: Metadata = {
-  title: "MARU | Digital Atelier",
-  description: "공간에 어울리는 디지털 아뜰리에, MARU",
+  title: "MARU | 조용한 일상을 위한 리빙 셀렉션",
+  description: "좋은 소재와 편안한 형태로 완성하는 프리미엄 리빙 셀렉션, MARU",
   icons: {
     icon: "/maru-favicon.svg",
     shortcut: "/maru-favicon.svg",
@@ -20,7 +20,7 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className={`${notoSansKR.variable} ${inter.variable} antialiased`}>
+      <body className={`${notoSansKR.variable} ${gowunBatang.variable} antialiased`}>
         {children}
       </body>
     </html>

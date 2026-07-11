@@ -30,6 +30,12 @@ public class ApiExceptionHandler {
             .body(new ApiErrorResponse("unauthorized", exception.getMessage()));
     }
 
+    @ExceptionHandler(TooManyRequestsException.class)
+    ResponseEntity<ApiErrorResponse> handleTooManyRequests(TooManyRequestsException exception) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+            .body(new ApiErrorResponse("too_many_requests", exception.getMessage()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ResponseEntity<ApiErrorResponse> handleValidation(MethodArgumentNotValidException exception) {
         FieldError fieldError = exception.getBindingResult().getFieldErrors().stream().findFirst().orElse(null);

@@ -44,26 +44,20 @@ function getOrderHeading(orderStatus: string, paymentStatus: string) {
 
 export default async function OrderPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ orderNumber: string }>;
-  searchParams: Promise<{ phone?: string }>;
 }) {
   const session = await getAuthSession().catch(() => ({ authenticated: false, user: null }));
   const { orderNumber } = await params;
-  const { phone } = await searchParams;
-  const guestPhone = phone?.trim() ?? "";
-
-  if (!session.authenticated && !guestPhone) {
-    redirect(`/lookup-order?orderNumber=${encodeURIComponent(orderNumber)}`);
-  }
-
   let order: Awaited<ReturnType<typeof getOrder>>;
 
   try {
-    order = await getOrder(orderNumber, session.authenticated ? undefined : guestPhone);
+    order = await getOrder(orderNumber);
   } catch (error) {
     if (error instanceof ApiNotFoundError) {
+      if (!session.authenticated) {
+        redirect(`/lookup-order?orderNumber=${encodeURIComponent(orderNumber)}`);
+      }
       notFound();
     }
     throw error;
@@ -72,17 +66,17 @@ export default async function OrderPage({
   const heading = getOrderHeading(order.status, order.paymentStatus);
   const backHref = session.authenticated
     ? "/orders"
-    : `/orders?phone=${encodeURIComponent(guestPhone)}`;
+    : `/lookup-order?orderNumber=${encodeURIComponent(orderNumber)}`;
   const canCancel = order.status === "PAID" || order.status === "PENDING_PAYMENT";
 
   return (
     <div className="grid-shell lg:grid-cols-[1.2fr_0.8fr]">
-      <section className="surface-card rounded-[36px] p-8 sm:p-10">
+      <section className="border-y border-[var(--line)] py-10 sm:py-14">
         <p className="display-eyebrow">주문</p>
         <h1 className="display-heading mt-4 text-4xl">{heading.title}</h1>
         <p className="mt-4 text-base leading-8 text-[var(--ink-soft)]">{heading.description}</p>
 
-        <div className="mt-6 rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.78)] px-5 py-4">
+        <div className="mt-6 border-l-2 border-[var(--primary)] bg-[var(--primary-soft)] px-5 py-4">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--ink-soft)]">
             주문번호
           </p>
@@ -90,11 +84,11 @@ export default async function OrderPage({
             {order.orderNumber}
           </p>
           <p className="mt-2 text-sm leading-6 text-[var(--ink-soft)]">
-            주문번호와 연락처로 비회원 주문조회와 취소를 이어서 확인할 수 있습니다.
+            비회원 주문은 이 브라우저에 발급된 단기 조회 권한으로만 확인할 수 있습니다.
           </p>
         </div>
 
-        <div className="mt-8 rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.76)] p-6">
+        <div className="mt-8 border-y border-[var(--line)] py-6">
           <dl className="grid gap-4 text-sm sm:grid-cols-2">
             <div>
               <dt className="text-[var(--ink-soft)]">주문 상태</dt>
@@ -142,14 +136,11 @@ export default async function OrderPage({
         </div>
 
         {canCancel ? (
-          <CancelOrderButton
-            orderNumber={order.orderNumber}
-            phone={session.authenticated ? undefined : guestPhone}
-          />
+          <CancelOrderButton orderNumber={order.orderNumber} />
         ) : null}
       </section>
 
-      <aside className="surface-card rounded-[36px] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(241,239,233,0.76))] p-8 sm:p-10">
+      <aside className="border-y border-[var(--line)] bg-[var(--surface-low)] p-8 sm:p-10">
         <p className="display-eyebrow">주문 상품</p>
         <div className="mt-6 space-y-4 text-sm">
           {order.lines.map((line: { productId: number; productName: string; quantity: number; lineTotal: number }) => (

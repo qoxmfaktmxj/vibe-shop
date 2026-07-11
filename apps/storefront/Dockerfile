@@ -8,7 +8,9 @@ FROM node:22-alpine AS builder
 WORKDIR /workspace/apps/storefront
 
 ARG NEXT_PUBLIC_API_BASE_URL
+ARG NEXT_PUBLIC_DEMO_MODE
 ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+ENV NEXT_PUBLIC_DEMO_MODE=${NEXT_PUBLIC_DEMO_MODE}
 
 COPY --from=deps /workspace/apps/storefront/node_modules ./node_modules
 COPY apps/storefront ./

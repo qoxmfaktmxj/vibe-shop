@@ -3,13 +3,22 @@ package com.vibeshop.api.order;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(name = "app.payment.mock-enabled", havingValue = "true")
 public class MockPaymentGatewayAdapter implements PaymentGatewayAdapter {
 
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
     private static final String PROVIDER = "MOCK_PAY";
+
+    public MockPaymentGatewayAdapter(@Value("${app.runtime-mode:production}") String runtimeMode) {
+        if ("production".equalsIgnoreCase(runtimeMode.trim())) {
+            throw new IllegalStateException("Mock payment must not be enabled in production mode.");
+        }
+    }
 
     @Override
     public AuthorizationResult authorize(CustomerOrder order, PaymentMethod paymentMethod) {

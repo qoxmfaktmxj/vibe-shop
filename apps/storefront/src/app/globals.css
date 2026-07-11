@@ -1,73 +1,58 @@
 @import "tailwindcss";
 
-/* ══════════════════════════════════════════
-   MARU — Warm Scandinavian Interior Shop
-   Design tokens: light, airy, warm
-   ══════════════════════════════════════════ */
+/* MARU — tailored, hushed, tactile luxury retail */
 
 :root {
-  /* ── Surfaces ── */
-  --background: #faf8f5;
-  --surface: #ffffff;
-  --surface-low: #f5f2ee;
-  --surface-high: #efeae4;
-  --surface-card: #ffffff;
+  --background: oklch(0.976 0.012 82);
+  --surface: oklch(0.992 0.006 82);
+  --surface-low: oklch(0.951 0.016 78);
+  --surface-high: oklch(0.918 0.022 75);
+  --surface-card: oklch(0.992 0.006 82);
 
-  /* ── Ink (text) ── */
-  --ink: #1a1a1a;
-  --ink-soft: #5c5c5c;
-  --ink-muted: #9a9a9a;
+  --ink: oklch(0.205 0.018 47);
+  --ink-soft: oklch(0.405 0.018 51);
+  --ink-muted: oklch(0.515 0.014 56);
 
-  /* ── Primary (테라코타 – 따뜻한 인테리어 액센트) ── */
-  --primary: #c4703f;
-  --primary-hover: #b3622f;
-  --primary-soft: #fdf0e7;
+  --primary: oklch(0.405 0.105 28);
+  --primary-hover: oklch(0.345 0.098 28);
+  --primary-soft: oklch(0.938 0.026 31);
 
-  /* ── Secondary ── */
-  --secondary: #7c8a6e;
-  --secondary-soft: #eef2ea;
+  --secondary: oklch(0.48 0.043 112);
+  --secondary-soft: oklch(0.938 0.018 108);
 
-  /* ── Line & Border ── */
-  --line: #e8e5e0;
-  --line-strong: #d1ccc5;
+  --line: oklch(0.872 0.016 76);
+  --line-strong: oklch(0.77 0.02 72);
 
-  /* ── Shadows ── */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
-  --shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.08);
+  --shadow-sm: 0 1px 2px oklch(0.205 0.018 47 / 0.05);
+  --shadow: 0 8px 24px oklch(0.205 0.018 47 / 0.07);
+  --shadow-lg: 0 24px 60px oklch(0.205 0.018 47 / 0.1);
 
-  /* ── Header / Chrome ── */
-  --chrome-bg: #ffffff;
-  --chrome-bg-strong: rgba(255, 255, 255, 0.96);
-  --chrome-fg: #1a1a1a;
-  --chrome-fg-muted: #6b6b6b;
-  --chrome-fg-subtle: #9a9a9a;
-  --chrome-border: #e8e5e0;
-  --chrome-hover: rgba(0, 0, 0, 0.04);
+  --chrome-bg: oklch(0.985 0.008 82);
+  --chrome-bg-strong: oklch(0.985 0.008 82 / 0.94);
+  --chrome-fg: var(--ink);
+  --chrome-fg-muted: var(--ink-soft);
+  --chrome-fg-subtle: var(--ink-muted);
+  --chrome-border: var(--line);
+  --chrome-hover: oklch(0.205 0.018 47 / 0.045);
 
-  /* ── Focus ── */
-  --focus: #c4703f;
+  --focus: oklch(0.54 0.145 28);
 
-  /* ── Footer ── */
-  --footer-bg: #f0ece6;
-  --footer-surface: #f0ece6;
-  --footer-border: #ddd8d0;
+  --footer-bg: oklch(0.925 0.02 78);
+  --footer-surface: oklch(0.925 0.02 78);
+  --footer-border: oklch(0.79 0.022 75);
 
-  /* ── Status ── */
-  --error: #b54040;
-  --error-soft: #fdf0f0;
-  --success: #3d7c5e;
-  --success-soft: #eef5f0;
+  --error: oklch(0.47 0.14 24);
+  --error-soft: oklch(0.95 0.024 24);
+  --success: oklch(0.43 0.075 154);
+  --success-soft: oklch(0.95 0.02 154);
 
-  /* ── Badge ── */
-  --badge-best: #c4703f;
-  --badge-new: #7c8a6e;
+  --badge-best: var(--primary);
+  --badge-new: var(--secondary);
 
-  /* ── Radius tokens ── */
-  --radius-sm: 8px;
-  --radius: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
+  --radius-sm: 3px;
+  --radius: 5px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
 }
 
 @theme inline {
@@ -93,7 +78,7 @@ body {
   overflow-x: clip;
   background: var(--background);
   color: var(--ink);
-  font-family: var(--font-body), var(--font-display), -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-body), -apple-system, "Segoe UI", sans-serif;
   word-break: keep-all;
   -webkit-font-smoothing: antialiased;
 }
@@ -117,7 +102,7 @@ input::placeholder, textarea::placeholder {
 }
 
 ::selection {
-  background: rgba(196, 112, 63, 0.14);
+  background: var(--primary-soft);
 }
 
 /* ══════════════════════════════════════════
@@ -126,7 +111,7 @@ input::placeholder, textarea::placeholder {
 
 .page-container {
   width: 100%;
-  max-width: 1240px;
+  max-width: 1380px;
   margin-inline: auto;
   padding-inline: 16px;
 }
@@ -141,15 +126,15 @@ input::placeholder, textarea::placeholder {
 
 .grid-shell {
   display: grid;
-  gap: 3rem;
+  gap: 5rem;
 }
 
 @media (min-width: 640px) {
-  .grid-shell { gap: 3.5rem; }
+  .grid-shell { gap: 6rem; }
 }
 
 @media (min-width: 1024px) {
-  .grid-shell { gap: 4rem; }
+  .grid-shell { gap: 8rem; }
 }
 
 /* ══════════════════════════════════════════
@@ -165,9 +150,10 @@ input::placeholder, textarea::placeholder {
 }
 
 .display-heading {
-  font-weight: 700;
-  letter-spacing: -0.015em;
-  line-height: 1.15;
+  font-family: var(--font-display), serif;
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  line-height: 1.18;
   text-wrap: balance;
   word-break: keep-all;
 }
@@ -179,12 +165,11 @@ input::placeholder, textarea::placeholder {
 .surface-card {
   background: var(--surface-card);
   border: 1px solid var(--line);
-  box-shadow: var(--shadow-sm);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius);
 }
 
 /* ══════════════════════════════════════════
-   Buttons — consistent rounded pill style
+   Buttons
    ══════════════════════════════════════════ */
 
 .button-primary,
@@ -200,32 +185,24 @@ input::placeholder, textarea::placeholder {
   font-weight: 700;
   letter-spacing: 0.01em;
   line-height: 1;
-  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
 }
 
 .button-primary:hover,
 .button-secondary:hover,
 .button-ink:hover,
 .button-hot:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow);
-}
-
-.button-primary:active,
-.button-secondary:active,
-.button-ink:active,
-.button-hot:active {
-  transform: translateY(0);
+  box-shadow: none;
 }
 
 .button-primary {
   background: var(--primary);
-  color: var(--ink);
+  color: var(--surface);
 }
 
 .button-primary:hover {
-  background: var(--primary);
-  color: var(--ink);
+  background: var(--primary-hover);
+  color: var(--surface);
 }
 
 .button-ink {
@@ -234,7 +211,7 @@ input::placeholder, textarea::placeholder {
 }
 
 .button-ink:hover {
-  background: #2c2c2c;
+  background: var(--ink-soft);
   color: var(--surface);
 }
 
@@ -251,12 +228,12 @@ input::placeholder, textarea::placeholder {
 }
 
 .button-hot {
-  background: var(--secondary);
-  color: #fff;
+  background: var(--ink);
+  color: var(--surface);
 }
 
 .button-hot:hover {
-  background: #6d7b60;
+  background: var(--primary);
 }
 
 /* ══════════════════════════════════════════
@@ -303,7 +280,7 @@ input::placeholder, textarea::placeholder {
 }
 
 .hero-gradient {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+  background: var(--primary);
 }
 
 .surface-layer {
@@ -317,8 +294,7 @@ input::placeholder, textarea::placeholder {
 .section-frame {
   border: 1px solid var(--line);
   background: var(--surface);
-  box-shadow: var(--shadow-sm);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius);
 }
 
 .chip-link {
@@ -363,31 +339,25 @@ input::placeholder, textarea::placeholder {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--ink);
   font-size: 0.875rem;
   font-weight: 700;
   line-height: 1;
-  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+  transition: background-color 160ms ease, color 160ms ease;
 }
 
 .overlay-cta:hover {
-  transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--background);
   color: var(--ink);
-  box-shadow: var(--shadow);
-}
-
-.overlay-cta:active {
-  transform: translateY(0);
 }
 
 .pagination-page-current {
   border: 1px solid var(--line-strong);
   background: var(--ink);
   color: var(--surface);
-  box-shadow: 0 10px 24px rgba(24, 23, 21, 0.12);
+  box-shadow: none;
 }
 
 .pagination-page-current:hover {
@@ -499,6 +469,10 @@ select:focus-visible {
    ══════════════════════════════════════════ */
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   .animate-entrance,
   .animate-entrance-delay-1,
   .animate-entrance-delay-2,

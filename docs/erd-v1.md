@@ -1,6 +1,6 @@
 Status: current
 Owner: api
-Last reviewed: 2026-03-24
+Last reviewed: 2026-07-11
 
 # ERD v1
 
@@ -221,6 +221,8 @@ Maru의 데이터 모델 개요 문서다.
 - `customer_type` 으로 회원 주문과 비회원 주문을 구분한다.
 - `user_id` 는 회원 주문일 때만 연결된다.
 - `idempotency_key` 로 중복 제출을 방지한다.
+- `order_number` 는 UUIDv7 기반이며 내부 PK와 분리한다.
+- 동일 idempotency key 경합 시 unique 충돌 후 기존 주문을 재조회해 같은 결과를 반환한다.
 
 ### 5.2 `customer_order_lines`
 
@@ -255,10 +257,43 @@ Maru의 데이터 모델 개요 문서다.
 - 현재는 실제 PG 연동보다는 시뮬레이션 / 기본 흐름 저장 성격이 강하다.
 - 주문당 결제는 현재 `UNIQUE(order_id)` 구조로 사실상 1:1 모델이다.
 
+### 5.4 `guest_order_access_tokens`
+
+비회원 단일 주문 조회 권한을 저장한다.
+
+주요 컬럼:
+- `id`
+- `order_id`
+- `token_hash`
+- `expires_at`
+- `created_at`
+- `last_used_at`
+
+설명:
+- 브라우저에는 원문 토큰을 HttpOnly 쿠키로 전달하고 DB에는 SHA-256 해시만 저장한다.
+- 토큰은 한 주문에만 유효하며 발급 후 20분이 지나면 사용할 수 없다.
+
+### 5.5 `guest_order_access_audit_logs`
+
+비회원 주문 조회·상세·취소 시도를 저장한다.
+
+주요 컬럼:
+- `id`
+- `action`
+- `order_number`
+- `request_key_hash`
+- `succeeded`
+- `created_at`
+
+설명:
+- 연락처와 토큰 원문은 저장하지 않고 요청 식별 해시만 보관한다.
+- 최근 실패 로그를 조회해 15분 내 5회 실패 제한을 적용한다.
+
 관계:
 - `users 1 : N customer_orders`
 - `customer_orders 1 : N customer_order_lines`
 - `customer_orders 1 : 1 order_payments`
+- `customer_orders 1 : N guest_order_access_tokens`
 - `products 1 : N customer_order_lines`
 
 ---
@@ -423,6 +458,7 @@ erDiagram
 
   customer_orders ||--o{ customer_order_lines : contains
   customer_orders ||--|| order_payments : paid_by
+  customer_orders ||--o{ guest_order_access_tokens : grants
 
   display_sections ||--o{ display_items : contains
 ```
@@ -451,4 +487,4 @@ erDiagram
 Status: current
 Status: current
 Owner: api
-Last reviewed: 2026-03-24
+Last reviewed: 2026-07-11

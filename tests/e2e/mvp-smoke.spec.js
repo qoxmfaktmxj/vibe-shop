@@ -32,13 +32,8 @@ test("storefront MVP smoke flow", async ({ page }) => {
     fullPage: true,
   });
 
-  await page
-    .getByRole("complementary")
-    .getByRole("button", { name: /장바구니 담기|Add to Bag/ })
-    .click();
-  await expect(
-    page.getByRole("complementary").getByRole("button", { name: /담기 완료|Added/ }),
-  ).toBeVisible();
+  await page.locator("button.button-hot").first().click();
+  await expect(page.getByRole("link", { name: /장바구니 1개 상품/ })).toBeVisible();
   await page.goto("/cart", { waitUntil: "networkidle" });
   await expect(page.getByRole("button", { name: /삭제|제거|Remove/ })).toBeVisible();
   await page.screenshot({
@@ -57,16 +52,20 @@ test("storefront MVP smoke flow", async ({ page }) => {
   await page.locator('input[name="paymentMethod"][value="BANK_TRANSFER"]').check({
     force: true,
   });
+  await page.getByRole("checkbox").check();
+  await expect.poll(async () => page.evaluate(() => localStorage.getItem("vibe_shop_guest_checkout_draft"))).toBeNull();
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "05-checkout.png"),
     fullPage: true,
   });
 
   await page.getByRole("button", { name: /주문하기|Place order|바로 주문/ }).click();
-  await expect(page).toHaveURL(/\/orders\/[^?]+\?phone=01012345678$/, {
+  await expect(page).toHaveURL(/\/orders\/[^?]+$/, {
     timeout: NAVIGATION_TIMEOUT,
   });
   await expect(page.getByRole("heading").first()).toBeVisible();
+  await expect(page.getByText("010-****-5678")).toBeVisible();
+  await expect(page.getByText("01012345678")).toHaveCount(0);
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "06-order-complete.png"),
     fullPage: true,
@@ -94,27 +93,21 @@ test("storefront MVP smoke flow", async ({ page }) => {
   await lookupInputs.nth(0).fill(result.orderNumber);
   await lookupInputs.nth(1).fill("01012345678");
   await page.locator('button[type="submit"]').click();
-  await expect(
-    page,
-  ).toHaveURL(new RegExp(`/orders/${result.orderNumber}\\?phone=01012345678$`), {
+  await expect(page).toHaveURL(new RegExp(`/orders/${result.orderNumber}$`), {
     timeout: NAVIGATION_TIMEOUT,
   });
 
   await page.goto("/search", { waitUntil: "networkidle" });
   await page.getByRole("textbox").first().fill("linen");
   await page.locator('button[type="submit"]').click();
-  await expect(page).toHaveURL(/\/search\?q=linen/, {
+  await expect(page).toHaveURL(/\/search\?.*q=linen/, {
     timeout: NAVIGATION_TIMEOUT,
   });
   await expect(page.locator('a[href^="/products/"]').first()).toBeVisible();
 
   await page.goto("/orders", { waitUntil: "networkidle" });
-  await page.locator("form input").first().fill("01012345678");
-  await page.locator('button[type="submit"]').click();
-  await expect(page).toHaveURL(/\/orders\?phone=01012345678$/, {
-    timeout: NAVIGATION_TIMEOUT,
-  });
-  await expect(page.getByText(result.orderNumber)).toBeVisible();
+  await expect(page.getByRole("main").getByRole("link", { name: "비회원 주문 조회" })).toBeVisible();
+  await expect(page.locator("form input")).toHaveCount(0);
 
   await page.goto("/faq", { waitUntil: "networkidle" });
   await expect(page.locator("h1")).toBeVisible();

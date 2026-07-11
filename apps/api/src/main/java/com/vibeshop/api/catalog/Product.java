@@ -146,6 +146,7 @@ public class Product {
     public void updateForAdmin(
         String name,
         String summary,
+        String description,
         String badge,
         BigDecimal price,
         int stock,
@@ -156,11 +157,13 @@ public class Product {
 
         this.name = name;
         this.summary = summary;
+        this.description = description;
         this.badge = badge;
         this.price = price;
         this.stock = stock;
         this.popularityScore = popularityScore;
         this.featured = featured;
+        this.searchKeywords = String.join(", ", name, summary, description, badge, slug, category.getName());
     }
 
     private void validateAdminValues(BigDecimal price, int stock, int popularityScore) {

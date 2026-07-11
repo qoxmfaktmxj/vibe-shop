@@ -45,6 +45,8 @@ class ReviewWishlistControllerTest {
         jdbcClient.sql("DELETE FROM shopping_cart_items").update();
         jdbcClient.sql("DELETE FROM customer_order_lines").update();
         jdbcClient.sql("DELETE FROM order_payments").update();
+        jdbcClient.sql("DELETE FROM guest_order_access_tokens").update();
+        jdbcClient.sql("DELETE FROM guest_order_access_audit_logs").update();
         jdbcClient.sql("DELETE FROM customer_orders").update();
         jdbcClient.sql("DELETE FROM shipping_addresses").update();
         jdbcClient.sql("DELETE FROM display_items").update();

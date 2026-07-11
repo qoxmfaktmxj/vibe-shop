@@ -55,7 +55,7 @@ function renderStars(rating: number) {
 
 function SummaryStat({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-4 sm:p-5">
+    <div className="border-l border-[var(--line)] px-4 py-2 sm:px-5">
       <p className="display-eyebrow">{label}</p>
       <p className="mt-3 text-2xl font-semibold text-[var(--ink)]">{value}</p>
     </div>
@@ -95,7 +95,7 @@ function QuickActionButton({
 
 function EmptyState({ children }: { children: ReactNode }) {
   return (
-    <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm leading-7 text-[var(--ink-soft)]">
+    <div className="border-y border-[var(--line)] py-6 text-sm leading-7 text-[var(--ink-soft)]">
       {children}
     </div>
   );
@@ -449,10 +449,10 @@ export function AccountDashboard({
   return (
     <div className="grid-shell space-y-5 sm:space-y-6">
       <section className="grid gap-6 xl:grid-cols-[1.12fr_0.88fr]">
-        <article className="surface-card rounded-[32px] p-6 sm:rounded-[36px] sm:p-8 lg:p-10">
+        <article className="border-y border-[var(--line)] py-8 sm:py-10">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="flex flex-col gap-4 sm:flex-row sm:gap-5">
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-[var(--line)] bg-[rgba(255,255,255,0.82)] text-xl font-semibold text-[var(--ink)] sm:h-20 sm:w-20 sm:text-3xl">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center border border-[var(--line)] bg-[var(--surface-low)] text-xl font-semibold text-[var(--ink)] sm:h-20 sm:w-20 sm:text-3xl">
                 {initials}
               </div>
               <div className="min-w-0">
@@ -510,7 +510,7 @@ export function AccountDashboard({
           ) : null}
         </article>
 
-        <article id="account-profile" className="surface-card rounded-[32px] p-6 sm:rounded-[36px] sm:p-8 lg:p-10">
+        <article id="account-profile" className="border-y border-[var(--line)] py-8 sm:py-10">
           <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
               <p className="display-eyebrow">기본 정보</p>
@@ -522,7 +522,7 @@ export function AccountDashboard({
           </div>
 
           <div className="mt-6 grid gap-4">
-            <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-4 sm:p-5">
+            <div className="border-t border-[var(--line)] py-4">
               <p className="display-eyebrow">이름</p>
               {profileEditing ? (
                 <div className="mt-4 space-y-3">
@@ -555,11 +555,11 @@ export function AccountDashboard({
                 <p className="mt-3 text-xl font-semibold">{profile.name}</p>
               )}
             </div>
-            <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-4 sm:p-5">
+            <div className="border-t border-[var(--line)] py-4">
               <p className="display-eyebrow">이메일</p>
               <p className="mt-3 break-all text-sm text-[var(--ink-soft)]">{profile.email}</p>
             </div>
-            <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-4 sm:p-5">
+            <div className="border-t border-[var(--line)] py-4">
               <p className="display-eyebrow">가입 방식</p>
               <p className="mt-3 text-sm text-[var(--ink-soft)]">{providerLabel}</p>
             </div>
@@ -568,7 +568,7 @@ export function AccountDashboard({
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.02fr_0.98fr]">
-        <article className="surface-card rounded-[32px] p-6 sm:rounded-[36px] sm:p-8 lg:p-10">
+        <article className="border-y border-[var(--line)] py-8 sm:py-10">
           <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
               <p className="display-eyebrow">최근 주문</p>
@@ -582,7 +582,7 @@ export function AccountDashboard({
                 <Link
                   key={order.orderNumber}
                   href={`/orders/${order.orderNumber}`}
-                  className="block rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 transition hover:-translate-y-[2px] hover:border-[var(--ink)]"
+                  className="block border-t border-[var(--line)] py-6 transition-colors hover:bg-[var(--surface-low)]"
                 >
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
@@ -604,7 +604,7 @@ export function AccountDashboard({
           </div>
         </article>
 
-        <article id="account-addresses" className="surface-card rounded-[32px] p-6 sm:rounded-[36px] sm:p-8 lg:p-10">
+        <article id="account-addresses" className="border-y border-[var(--line)] py-8 sm:py-10">
           <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
               <p className="display-eyebrow">배송지</p>
@@ -623,10 +623,10 @@ export function AccountDashboard({
 
           <div className="mt-6 space-y-4">
             {defaultAddress ? (
-              <article className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5 sm:p-6">
+              <article className="border-t border-[var(--line)] py-5 sm:py-6">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="text-base font-semibold sm:text-lg">{defaultAddress.label}</p>
-                  <span className="rounded-full bg-[rgba(28,107,81,0.12)] px-3 py-1 text-xs font-semibold text-[var(--secondary)]">
+                  <span className="border border-[var(--line)] px-3 py-1 text-xs font-semibold text-[var(--secondary)]">
                     기본 배송지
                   </span>
                 </div>
@@ -659,7 +659,7 @@ export function AccountDashboard({
                 {additionalAddresses.map((address) => (
                   <article
                     key={address.id}
-                    className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.62)] p-4 sm:p-5"
+                    className="border-t border-[var(--line)] py-4 sm:py-5"
                   >
                     <p className="break-words text-base font-semibold">{address.label}</p>
                     <p className="mt-2 text-sm text-[var(--ink-soft)]">{address.recipientName}</p>
@@ -701,14 +701,14 @@ export function AccountDashboard({
                   {addresses.map((address) => (
                     <article
                       key={address.id}
-                      className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-4 sm:p-5"
+                      className="border-t border-[var(--line)] py-4 sm:py-5"
                     >
                       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
                             <p className="break-words text-base font-semibold">{address.label}</p>
                             {address.isDefault ? (
-                              <span className="rounded-full bg-[rgba(28,107,81,0.12)] px-3 py-1 text-xs font-semibold text-[var(--secondary)]">
+                              <span className="border border-[var(--line)] px-3 py-1 text-xs font-semibold text-[var(--secondary)]">
                                 기본 배송지
                               </span>
                             ) : null}
@@ -749,7 +749,7 @@ export function AccountDashboard({
                 </div>
               ) : null}
 
-              <div className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5 sm:p-6">
+              <div className="border border-[var(--line)] bg-[var(--surface-low)] p-5 sm:p-6">
                 <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <p className="display-eyebrow">입력 폼</p>
@@ -840,7 +840,7 @@ export function AccountDashboard({
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">
-        <article className="surface-card rounded-[32px] p-6 sm:rounded-[36px] sm:p-8 lg:p-10">
+        <article className="border-y border-[var(--line)] py-8 sm:py-10">
           <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
               <p className="display-eyebrow">찜한 상품</p>
@@ -853,9 +853,9 @@ export function AccountDashboard({
               wishlistPreview.map((item) => (
                 <article
                   key={item.productId}
-                  className="grid gap-4 rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-4 sm:p-5 sm:grid-cols-[120px_minmax(0,1fr)]"
+                  className="grid gap-4 border-t border-[var(--line)] py-5 sm:grid-cols-[120px_minmax(0,1fr)]"
                 >
-                  <Link href={`/products/${item.slug}`} className="relative min-h-[180px] overflow-hidden rounded-[24px] sm:min-h-[140px]">
+                  <Link href={`/products/${item.slug}`} className="relative min-h-[180px] overflow-hidden sm:min-h-[140px]">
                     <Image src={item.imageUrl} alt={item.imageAlt} fill sizes="120px" className="object-cover" />
                   </Link>
                   <div className="min-w-0">
@@ -891,7 +891,7 @@ export function AccountDashboard({
           </div>
         </article>
 
-        <article className="surface-card rounded-[32px] p-6 sm:rounded-[36px] sm:p-8 lg:p-10">
+        <article className="border-y border-[var(--line)] py-8 sm:py-10">
           <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
               <p className="display-eyebrow">내 리뷰</p>
@@ -906,9 +906,9 @@ export function AccountDashboard({
                 const reviewChanged = hasReviewDraftChanged(review, reviewDraft);
 
                 return (
-                  <article key={review.id} className="rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-5 sm:p-6">
+                  <article key={review.id} className="border-t border-[var(--line)] py-5 sm:py-6">
                     <div className="grid gap-4 sm:grid-cols-[112px_minmax(0,1fr)]">
-                      <Link href={`/products/${review.productSlug}`} className="relative min-h-[112px] overflow-hidden rounded-[24px] border border-[var(--line)] bg-white">
+                      <Link href={`/products/${review.productSlug}`} className="relative min-h-[112px] overflow-hidden border border-[var(--line)] bg-[var(--surface)]">
                         <Image
                           src={review.productImageUrl}
                           alt={review.productImageAlt}

@@ -150,6 +150,7 @@ export function AdminReviewManager({
               return (
                 <div
                   key={review.id}
+                  data-review-id={review.id}
                   className="grid grid-cols-[1.5fr_1.4fr_1fr_1.5fr_220px] gap-3 rounded-[24px] border border-[var(--line)] bg-white/72 px-4 py-4"
                 >
                   <div className="min-w-0 text-sm leading-6 text-[var(--ink-soft)]">

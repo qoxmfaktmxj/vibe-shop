@@ -1,48 +1,39 @@
 import Link from "next/link";
 
-import { OrderHistoryForm } from "@/components/order/order-history-form";
 import { formatPrice } from "@/lib/currency";
 import { formatOrderStatus } from "@/lib/order-status";
 import { getAuthSession, listOrders } from "@/lib/server-api";
 
-export default async function OrderHistoryPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ phone?: string }>;
-}) {
+export default async function OrderHistoryPage() {
   const session = await getAuthSession().catch(() => ({ authenticated: false, user: null }));
-  const { phone } = await searchParams;
-  const normalizedPhone = phone?.trim() ?? "";
-  const orders = session.authenticated
-    ? await listOrders()
-    : normalizedPhone
-      ? await listOrders(normalizedPhone)
-      : [];
+  const orders = session.authenticated ? await listOrders() : [];
 
   const title = session.authenticated ? "회원 주문 내역" : "주문 내역 조회";
   const description = session.authenticated
     ? "로그인한 계정에 연결된 주문만 확인할 수 있습니다."
-    : "주문 시 입력한 연락처로 비회원 주문 내역을 다시 확인할 수 있습니다.";
+    : "비회원 주문은 주문번호와 연락처를 확인한 뒤 해당 주문 한 건만 조회할 수 있습니다.";
 
   return (
     <div className="grid-shell">
-      <section className="surface-card rounded-[36px] p-8 sm:p-10">
+      <section className="border-y border-[var(--line)] py-10 sm:py-14">
         <p className="display-eyebrow">주문</p>
         <h1 className="display-heading mt-4 text-4xl">{title}</h1>
         <p className="mt-4 max-w-2xl text-base leading-8 text-[var(--ink-soft)]">
           {description}
         </p>
         {session.authenticated ? (
-          <div className="mt-8 rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm text-[var(--ink-soft)]">
+          <div className="mt-8 border-l-2 border-[var(--line-strong)] px-5 py-2 text-sm text-[var(--ink-soft)]">
             {session.user?.name} 계정에 연결된 주문만 표시됩니다.
           </div>
         ) : (
-          <OrderHistoryForm />
+          <Link href="/lookup-order" className="button-primary mt-8 px-5 py-3">
+            비회원 주문 조회
+          </Link>
         )}
       </section>
 
-      {(session.authenticated || normalizedPhone) && (
-        <section className="surface-card rounded-[36px] p-6 sm:p-8">
+      {session.authenticated && (
+        <section>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="display-eyebrow">주문 내역</p>
@@ -51,24 +42,20 @@ export default async function OrderHistoryPage({
               </h2>
             </div>
             <p className="text-sm text-[var(--ink-soft)]">
-              {session.authenticated
-                ? `${session.user?.name} 계정`
-                : `조회 연락처 ${normalizedPhone}`}
+              {session.user?.name} 계정
             </p>
           </div>
 
           {orders.length > 0 ? (
             <div className="mt-8 space-y-4">
               {orders.map((order) => {
-                const detailHref = session.authenticated
-                  ? `/orders/${order.orderNumber}`
-                  : `/orders/${order.orderNumber}?phone=${encodeURIComponent(normalizedPhone)}`;
+                const detailHref = `/orders/${order.orderNumber}`;
 
                 return (
                   <Link
                     key={order.orderNumber}
                     href={detailHref}
-                    className="block rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 transition hover:translate-y-[-2px]"
+                    className="block border-t border-[var(--line)] py-6 transition-colors hover:bg-[var(--surface-low)] sm:px-4"
                   >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div className="space-y-2">
@@ -93,10 +80,8 @@ export default async function OrderHistoryPage({
               })}
             </div>
           ) : (
-            <div className="mt-8 rounded-sm border border-[var(--line)] bg-[rgba(255,255,255,0.72)] p-6 text-sm text-[var(--ink-soft)]">
-              {session.authenticated
-                ? "아직 계정에 연결된 주문이 없습니다."
-                : "해당 연락처로 조회되는 주문이 없습니다."}
+            <div className="mt-8 border-y border-[var(--line)] py-10 text-sm text-[var(--ink-soft)]">
+              아직 계정에 연결된 주문이 없습니다.
             </div>
           )}
         </section>

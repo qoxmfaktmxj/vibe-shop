@@ -11,7 +11,6 @@ import { useCart } from "@/lib/cart-store";
 import { formatPrice } from "@/lib/currency";
 import { formatPaymentMethod } from "@/lib/payment";
 
-const GUEST_CHECKOUT_DRAFT_KEY = "vibe_shop_guest_checkout_draft";
 const CHECKOUT_FORM_ID = "checkout-form";
 
 const PAYMENT_OPTIONS: Array<{
@@ -99,7 +98,10 @@ export function CheckoutForm() {
   const [savedAddresses, setSavedAddresses] = useState<ShippingAddress[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState("");
   const [error, setError] = useState("");
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [idempotencyKey, setIdempotencyKey] = useState(() => makeIdempotencyKey());
   const [form, setForm] = useState<CheckoutFormState>(() =>
@@ -110,6 +112,22 @@ export function CheckoutForm() {
     () => items.reduce((sum, item) => sum + item.quantity, 0),
     [items],
   );
+  const phoneDigits = form.phone.replaceAll(/\D/g, "");
+  const formIsValid =
+    form.customerName.trim().length > 0 &&
+    phoneDigits.length >= 10 &&
+    phoneDigits.length <= 11 &&
+    /^\d{5}$/.test(form.postalCode.trim()) &&
+    form.address1.trim().length > 0;
+  const canSubmit =
+    hydrated &&
+    items.length > 0 &&
+    preview !== null &&
+    !previewLoading &&
+    !previewError &&
+    formIsValid &&
+    agreedToTerms &&
+    !isPending;
 
   useEffect(() => {
     setForm((current) => {
@@ -169,36 +187,6 @@ export function CheckoutForm() {
             setLoadingProfile(false);
           }
         }
-        return;
-      }
-
-      if (typeof window === "undefined") {
-        return;
-      }
-
-      try {
-        const storedDraft = window.localStorage.getItem(GUEST_CHECKOUT_DRAFT_KEY);
-        if (!storedDraft) {
-          return;
-        }
-
-        const parsedDraft = JSON.parse(storedDraft) as Partial<CheckoutFormState>;
-        if (cancelled) {
-          return;
-        }
-
-        setForm((current) => ({
-          ...current,
-          customerName: current.customerName || parsedDraft.customerName || current.customerName,
-          phone: current.phone || parsedDraft.phone || "",
-          postalCode: current.postalCode || parsedDraft.postalCode || "",
-          address1: current.address1 || parsedDraft.address1 || "",
-          address2: current.address2 || parsedDraft.address2 || "",
-          note: current.note || parsedDraft.note || "",
-          paymentMethod: parsedDraft.paymentMethod ?? current.paymentMethod,
-        }));
-      } catch {
-        // ignore malformed draft
       }
     };
 
@@ -208,14 +196,6 @@ export function CheckoutForm() {
       cancelled = true;
     };
   }, [hydrated, session.authenticated, session.user?.id, session.user?.name]);
-
-  useEffect(() => {
-    if (!hydrated || session.authenticated || typeof window === "undefined") {
-      return;
-    }
-
-    window.localStorage.setItem(GUEST_CHECKOUT_DRAFT_KEY, JSON.stringify(form));
-  }, [form, hydrated, session.authenticated]);
 
   useEffect(() => {
     if (!hydrated) {
@@ -228,23 +208,30 @@ export function CheckoutForm() {
       if (items.length === 0) {
         if (!cancelled) {
           setPreview(null);
+          setPreviewError("");
         }
         return;
       }
 
+      setPreviewLoading(true);
+      setPreview(null);
+      setPreviewError("");
       try {
         const nextPreview = await previewOrder(items);
         if (!cancelled) {
           setPreview(nextPreview);
-          setError("");
         }
       } catch (previewError) {
         if (!cancelled) {
-          setError(
+          setPreviewError(
             previewError instanceof Error
               ? previewError.message
               : "주문 금액을 계산하지 못했습니다.",
           );
+        }
+      } finally {
+        if (!cancelled) {
+          setPreviewLoading(false);
         }
       }
     };
@@ -258,7 +245,7 @@ export function CheckoutForm() {
 
   if (hydrated && items.length === 0) {
     return (
-      <div className="surface-card rounded-[24px] p-8 text-center">
+      <div className="border-y border-[var(--line)] py-14 text-center">
         <p className="display-heading text-3xl">주문할 상품이 없습니다.</p>
         <p className="mt-3 text-sm text-[var(--ink-soft)]">
           장바구니에 상품을 담은 뒤 주문서를 작성해 주세요.
@@ -271,15 +258,15 @@ export function CheckoutForm() {
     <div className="pb-[calc(7.5rem+env(safe-area-inset-bottom))] lg:pb-0">
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-start lg:gap-6">
         <section className="space-y-6">
-          <article className="surface-card rounded-[24px] p-5 sm:rounded-[28px] sm:p-8">
+          <article className="border-y border-[var(--line)] py-7 sm:py-9">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <p className="display-eyebrow">주문서</p>
                 <h1 className="display-heading mt-3 text-3xl sm:text-4xl">
-                  모바일 우선 주문서
+                  배송과 결제를 확인해 주세요.
                 </h1>
                 <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--ink-soft)]">
-                  연락처, 배송지, 결제 수단을 한 화면에서 바로 마무리합니다.
+                  주문에 필요한 정보와 최종 결제 금액을 차분히 검토할 수 있습니다.
                 </p>
               </div>
               <div className="grid gap-2 text-sm text-[var(--ink-soft)] sm:text-right">
@@ -293,7 +280,7 @@ export function CheckoutForm() {
             </div>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-              <div className="rounded-[20px] border border-[var(--line)] bg-[rgba(255,255,255,0.76)] px-4 py-4 sm:rounded-[24px]">
+              <div className="border-l border-[var(--line)] px-4 py-2">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ink-soft)]">
                   주문 유형
                 </p>
@@ -301,7 +288,7 @@ export function CheckoutForm() {
                   {session.authenticated ? session.user?.email : "비회원 빠른 주문"}
                 </p>
               </div>
-              <div className="rounded-[20px] border border-[var(--line)] bg-[rgba(255,255,255,0.76)] px-4 py-4 sm:rounded-[24px]">
+              <div className="border-l border-[var(--line)] px-4 py-2">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ink-soft)]">
                   배송지
                 </p>
@@ -311,7 +298,7 @@ export function CheckoutForm() {
                     : "직접 입력 배송지"}
                 </p>
               </div>
-              <div className="rounded-[20px] border border-[var(--line)] bg-[rgba(255,255,255,0.76)] px-4 py-4 sm:rounded-[24px]">
+              <div className="border-l border-[var(--line)] px-4 py-2">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ink-soft)]">
                   결제 수단
                 </p>
@@ -327,6 +314,10 @@ export function CheckoutForm() {
             className="grid gap-5 sm:gap-6"
             onSubmit={(event) => {
               event.preventDefault();
+              if (!canSubmit) {
+                setError("배송 정보, 구매 동의, 최종 결제 금액을 확인해 주세요.");
+                return;
+              }
               startTransition(async () => {
                 try {
                   const result = await createOrder({
@@ -340,16 +331,13 @@ export function CheckoutForm() {
 
                   if (result.paymentStatus !== "FAILED") {
                     clearCart();
-                    if (typeof window !== "undefined") {
-                      window.localStorage.removeItem(GUEST_CHECKOUT_DRAFT_KEY);
-                    }
                   }
 
                   setIdempotencyKey(makeIdempotencyKey());
 
                   const nextUrl = session.authenticated
                     ? `/orders/${result.orderNumber}`
-                    : `/orders/${result.orderNumber}?phone=${encodeURIComponent(form.phone.trim())}`;
+                    : `/orders/${result.orderNumber}`;
 
                   router.push(nextUrl);
                 } catch (submitError) {
@@ -362,7 +350,7 @@ export function CheckoutForm() {
               });
             }}
           >
-            <article className="surface-card rounded-[24px] p-5 sm:rounded-[28px] sm:p-8">
+            <article className="border-t border-[var(--line)] pt-7 sm:pt-9">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="display-eyebrow">연락처</p>
@@ -380,11 +368,14 @@ export function CheckoutForm() {
                   <span className="text-sm font-medium">받는 분</span>
                   <input
                     required
+                    name="customerName"
+                    autoComplete="name"
+                    maxLength={80}
                     value={form.customerName}
                     onChange={(event) =>
                       setForm((current) => ({ ...current, customerName: event.target.value }))
                     }
-                    className="rounded-[18px] border border-[var(--line)] bg-[rgba(255,255,255,0.92)] px-4 py-3 sm:rounded-2xl"
+                    className="soft-input px-4 py-3"
                   />
                 </label>
 
@@ -392,29 +383,33 @@ export function CheckoutForm() {
                   <span className="text-sm font-medium">연락처</span>
                   <input
                     required
+                    type="tel"
+                    name="phone"
+                    autoComplete="tel"
+                    maxLength={14}
                     inputMode="tel"
                     value={form.phone}
                     onChange={(event) =>
                       setForm((current) => ({ ...current, phone: event.target.value }))
                     }
-                    className="rounded-[18px] border border-[var(--line)] bg-[rgba(255,255,255,0.92)] px-4 py-3 sm:rounded-2xl"
+                    className="soft-input px-4 py-3"
                   />
                 </label>
               </div>
 
               {session.authenticated ? (
-                <div className="mt-5 rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.76)] px-4 py-4 text-sm leading-7 text-[var(--ink-soft)]">
+                <div className="mt-5 border-l-2 border-[var(--line-strong)] px-4 py-2 text-sm leading-7 text-[var(--ink-soft)]">
                   회원 주문은 <span className="font-semibold text-[var(--ink)]">{session.user?.email}</span>
                   계정과 연결됩니다.
                 </div>
               ) : (
-                <div className="mt-5 rounded-[24px] border border-[var(--line)] bg-[rgba(255,255,255,0.76)] px-4 py-4 text-sm leading-7 text-[var(--ink-soft)]">
-                  비회원 주문은 입력한 연락처 기준으로 다시 조회할 수 있습니다. 최근 입력 정보는 이 기기에서만 임시 저장됩니다.
+                <div className="mt-5 border-l-2 border-[var(--line-strong)] px-4 py-2 text-sm leading-7 text-[var(--ink-soft)]">
+                  비회원 주문 정보는 브라우저 저장소에 보관하지 않습니다. 주문번호와 연락처는 조회 권한 확인에만 사용됩니다.
                 </div>
               )}
             </article>
 
-            <article className="surface-card rounded-[24px] p-5 sm:rounded-[28px] sm:p-8">
+            <article className="border-t border-[var(--line)] pt-7 sm:pt-9">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="display-eyebrow">배송</p>
@@ -437,10 +432,10 @@ export function CheckoutForm() {
                           setSelectedAddressId(address.id);
                           setForm((current) => applyAddressToForm(current, address));
                         }}
-                        className={`min-w-[15rem] rounded-[24px] border px-4 py-4 text-left transition ${
+                        className={`min-w-[15rem] border px-4 py-4 text-left transition ${
                           selected
-                            ? "border-[var(--primary)] bg-[rgba(214,81,45,0.08)]"
-                            : "border-[var(--line)] bg-[rgba(255,255,255,0.76)]"
+                            ? "border-[var(--primary)] bg-[var(--primary-soft)]"
+                            : "border-[var(--line)] bg-[var(--surface)]"
                         }`}
                       >
                         <p className="text-sm font-semibold text-[var(--ink)]">
@@ -462,22 +457,29 @@ export function CheckoutForm() {
                   <span className="text-sm font-medium">우편번호</span>
                   <input
                     required
+                    name="postalCode"
+                    autoComplete="postal-code"
+                    inputMode="numeric"
+                    maxLength={5}
                     value={form.postalCode}
                     onChange={(event) =>
                       setForm((current) => ({ ...current, postalCode: event.target.value }))
                     }
-                    className="rounded-[18px] border border-[var(--line)] bg-[rgba(255,255,255,0.92)] px-4 py-3 sm:rounded-2xl"
+                    className="soft-input px-4 py-3"
                   />
                 </label>
                 <label className="grid gap-2">
                   <span className="text-sm font-medium">기본 주소</span>
                   <input
                     required
+                    name="address1"
+                    autoComplete="address-line1"
+                    maxLength={255}
                     value={form.address1}
                     onChange={(event) =>
                       setForm((current) => ({ ...current, address1: event.target.value }))
                     }
-                    className="rounded-[18px] border border-[var(--line)] bg-[rgba(255,255,255,0.92)] px-4 py-3 sm:rounded-2xl"
+                    className="soft-input px-4 py-3"
                   />
                 </label>
               </div>
@@ -485,28 +487,33 @@ export function CheckoutForm() {
               <label className="mt-4 grid gap-2">
                 <span className="text-sm font-medium">상세 주소</span>
                 <input
+                  name="address2"
+                  autoComplete="address-line2"
+                  maxLength={255}
                   value={form.address2}
                   onChange={(event) =>
                     setForm((current) => ({ ...current, address2: event.target.value }))
                   }
-                  className="rounded-[18px] border border-[var(--line)] bg-[rgba(255,255,255,0.92)] px-4 py-3 sm:rounded-2xl"
+                  className="soft-input px-4 py-3"
                 />
               </label>
 
               <label className="mt-4 grid gap-2">
                 <span className="text-sm font-medium">배송 메모</span>
                 <textarea
+                  name="note"
+                  maxLength={255}
                   rows={3}
                   value={form.note}
                   onChange={(event) =>
                     setForm((current) => ({ ...current, note: event.target.value }))
                   }
-                  className="rounded-[18px] border border-[var(--line)] bg-[rgba(255,255,255,0.92)] px-4 py-3 sm:rounded-2xl"
+                  className="soft-input px-4 py-3"
                 />
               </label>
             </article>
 
-            <article className="surface-card rounded-[24px] p-5 sm:rounded-[28px] sm:p-8">
+            <article className="border-t border-[var(--line)] pt-7 sm:pt-9">
               <div>
                 <p className="display-eyebrow">결제</p>
                 <h2 className="display-heading mt-3 text-2xl">결제 수단 선택</h2>
@@ -519,10 +526,10 @@ export function CheckoutForm() {
                   return (
                     <label
                       key={option.value}
-                      className={`rounded-[24px] border px-4 py-4 transition ${
+                      className={`border px-4 py-4 transition ${
                         selected
-                          ? "border-[var(--ink)] bg-[rgba(255,255,255,0.92)]"
-                          : "border-[var(--line)] bg-[rgba(255,255,255,0.72)]"
+                          ? "border-[var(--ink)] bg-[var(--surface-low)]"
+                          : "border-[var(--line)] bg-[var(--surface)]"
                       }`}
                     >
                       <input
@@ -545,11 +552,28 @@ export function CheckoutForm() {
               </div>
             </article>
 
-            {error ? <p className="text-sm text-red-600">{error}</p> : null}
+            <label className="flex items-start gap-3 border-y border-[var(--line)] py-5 text-sm leading-7 sm:py-6">
+              <input
+                type="checkbox"
+                required
+                checked={agreedToTerms}
+                onChange={(event) => setAgreedToTerms(event.target.checked)}
+                className="mt-1 h-5 w-5 shrink-0 accent-[var(--primary)]"
+              />
+              <span>
+                주문 상품, 결제 금액과 배송 정보를 확인했으며, 주문 처리를 위한 개인정보 수집 및
+                <Link href="/terms" className="ml-1 font-semibold text-[var(--primary)] underline-offset-4 hover:underline">
+                  구매 조건
+                </Link>
+                에 동의합니다.
+              </span>
+            </label>
+
+            {error ? <p role="alert" className="text-sm text-red-600">{error}</p> : null}
           </form>
         </section>
 
-        <aside className="surface-card rounded-[24px] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(241,239,233,0.86))] p-5 sm:rounded-[28px] sm:p-8 lg:sticky lg:top-28">
+        <aside className="border-y border-[var(--line)] bg-[var(--surface-low)] p-5 sm:p-8 lg:sticky lg:top-44">
           <p className="display-eyebrow">주문 확인</p>
           <h2 className="display-heading mt-3 text-2xl">최종 확인</h2>
           <p className="mt-3 text-sm leading-7 text-[var(--ink-soft)]">
@@ -558,7 +582,7 @@ export function CheckoutForm() {
 
           <div className="mt-6 space-y-3 text-sm">
             {items.map((item) => (
-              <div key={item.productId} className="flex flex-col gap-3 rounded-[20px] bg-white/72 px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
+              <div key={item.productId} className="flex flex-col gap-3 border-b border-[var(--line)] py-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
                   <p className="break-words font-semibold text-[var(--ink)]">{item.name}</p>
                   <p className="mt-1 text-[var(--ink-soft)]">수량 {item.quantity}</p>
@@ -589,23 +613,30 @@ export function CheckoutForm() {
             </div>
           </div>
 
+          {previewLoading ? (
+            <p aria-live="polite" className="mt-4 text-sm text-[var(--ink-soft)]">최종 결제 금액을 확인하고 있습니다.</p>
+          ) : null}
+          {previewError ? (
+            <p role="alert" className="mt-4 text-sm text-red-600">{previewError}</p>
+          ) : null}
+
           <button
             type="submit"
             form={CHECKOUT_FORM_ID}
-            disabled={isPending}
+            disabled={!canSubmit}
             className="button-primary mt-8 hidden w-full px-5 py-4 disabled:opacity-60 lg:inline-flex lg:justify-center"
           >
-            {isPending ? "주문을 처리하고 있습니다." : "주문하기"}
+            {isPending ? "주문을 처리하고 있습니다." : previewLoading ? "금액 확인 중" : "주문하기"}
           </button>
 
-          <div className="mt-4 rounded-[24px] bg-[var(--surface-low)] p-4 text-[11px] leading-6 text-[var(--ink-soft)]">
+          <div className="mt-4 border-t border-[var(--line)] pt-4 text-[11px] leading-6 text-[var(--ink-soft)]">
             총 결제 금액은 장바구니 기준으로 다시 계산되며, 회원 배송지는 자동 입력 후 수정할 수 있습니다.
           </div>
         </aside>
       </div>
 
       <div className="fixed inset-x-4 bottom-[max(16px,env(safe-area-inset-bottom))] z-40 lg:hidden">
-        <div className="rounded-[22px] border border-[var(--line)] bg-[rgba(255,255,255,0.96)] p-4 shadow-[0_24px_60px_rgba(12,16,24,0.18)] backdrop-blur">
+        <div className="border border-[var(--line)] bg-[var(--surface)] p-4 shadow-[var(--shadow)]">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ink-soft)]">
@@ -618,10 +649,10 @@ export function CheckoutForm() {
             <button
               type="submit"
               form={CHECKOUT_FORM_ID}
-              disabled={isPending}
+              disabled={!canSubmit}
               className="button-primary w-full min-w-0 px-5 py-4 disabled:opacity-60 sm:w-auto sm:flex-1"
             >
-              {isPending ? "처리 중" : "바로 주문"}
+              {isPending ? "처리 중" : previewLoading ? "금액 확인 중" : "바로 주문"}
             </button>
           </div>
         </div>

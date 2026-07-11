@@ -17,7 +17,7 @@ test.describe("mobile storefront smoke", () => {
     await page.goto("/", { waitUntil: "networkidle" });
     await expect(page.getByRole("link", { name: /로그인 후 내 정보 보기|내 정보 보기/ })).toBeVisible();
     await expect(page.getByRole("link", { name: /장바구니/ })).toBeVisible();
-    await expect(page.getByRole("link", { name: /^로그인$/ })).toBeVisible();
+    await expect(page.getByRole("link", { name: "검색", exact: true })).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
     await page.goto("/search", { waitUntil: "networkidle" });
@@ -29,6 +29,7 @@ test.describe("mobile storefront smoke", () => {
     await expectNoHorizontalOverflow(page);
 
     await page.locator("button.button-hot").first().click();
+    await expect(page.getByRole("link", { name: /장바구니 1개 상품/ })).toBeVisible();
     await page.goto("/cart", { waitUntil: "networkidle" });
     await expect(page.getByRole("link", { name: /주문서로 이동/ }).first()).toBeVisible();
     await expectNoHorizontalOverflow(page);
