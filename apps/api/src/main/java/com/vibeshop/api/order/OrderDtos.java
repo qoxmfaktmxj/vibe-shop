@@ -9,6 +9,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 public final class OrderDtos {
 
@@ -45,7 +47,10 @@ public final class OrderDtos {
     }
 
     public record CreateOrderRequest(
-        @NotBlank(message = "중복 제출 방지 키는 필수입니다.") String idempotencyKey,
+        @NotBlank(message = "중복 제출 방지 키는 필수입니다.")
+        @Size(min = 8, max = 64, message = "중복 제출 방지 키는 8자 이상 64자 이하여야 합니다.")
+        @Pattern(regexp = "[A-Za-z0-9_-]+", message = "중복 제출 방지 키 형식이 올바르지 않습니다.")
+        String idempotencyKey,
         @NotBlank(message = "받는 분 이름을 입력해 주세요.") String customerName,
         @NotBlank(message = "연락처를 입력해 주세요.") String phone,
         @NotBlank(message = "우편번호를 입력해 주세요.") String postalCode,

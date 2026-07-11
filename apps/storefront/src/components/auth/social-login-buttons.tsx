@@ -18,10 +18,10 @@ export function SocialLoginButtons({ nextPath }: { nextPath: string }) {
           <a
             key={item.provider}
             href={`/api/auth/social/login/${item.provider}?next=${encodeURIComponent(nextPath)}`}
-            className={`group flex items-center gap-3 rounded-[18px] border px-4 py-3 transition hover:-translate-y-[1px] hover:shadow-[var(--shadow-soft)] ${item.accentClassName}`}
+            className={`group flex items-center gap-3 border px-4 py-3 transition-colors hover:border-[var(--ink)] ${item.accentClassName}`}
             aria-label={item.label}
           >
-            <span className="relative h-9 w-9 overflow-hidden rounded-full bg-white/80">
+            <span className="relative h-9 w-9 overflow-hidden bg-[var(--surface)]">
               <Image
                 src={item.iconSrc}
                 alt={item.iconAlt}

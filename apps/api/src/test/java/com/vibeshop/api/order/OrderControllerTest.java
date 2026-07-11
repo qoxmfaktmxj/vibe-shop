@@ -3,6 +3,7 @@ package com.vibeshop.api.order;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import jakarta.servlet.http.Cookie;
@@ -14,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.http.HttpHeaders;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -30,6 +32,8 @@ class OrderControllerTest {
         jdbcClient.sql("DELETE FROM shopping_cart_items").update();
         jdbcClient.sql("DELETE FROM customer_order_lines").update();
         jdbcClient.sql("DELETE FROM order_payments").update();
+        jdbcClient.sql("DELETE FROM guest_order_access_tokens").update();
+        jdbcClient.sql("DELETE FROM guest_order_access_audit_logs").update();
         jdbcClient.sql("DELETE FROM customer_orders").update();
         jdbcClient.sql("DELETE FROM shipping_addresses").update();
         jdbcClient.sql("DELETE FROM user_sessions").update();
@@ -154,8 +158,8 @@ class OrderControllerTest {
     }
 
     @Test
-    void guestOrderRequiresMatchingPhoneForDetailAndCancel() throws Exception {
-        mockMvc.perform(post("/api/v1/orders")
+    void guestOrderRequiresShortLivedAccessCookieForDetailAndCancel() throws Exception {
+        Cookie accessCookie = mockMvc.perform(post("/api/v1/orders")
                 .contentType("application/json")
                 .content("""
                     {
@@ -174,30 +178,110 @@ class OrderControllerTest {
                     """))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("PENDING_PAYMENT"))
-            .andExpect(jsonPath("$.paymentStatus").value("PENDING"));
+            .andExpect(jsonPath("$.paymentStatus").value("PENDING"))
+            .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("HttpOnly")))
+            .andExpect(header().string(HttpHeaders.SET_COOKIE, org.hamcrest.Matchers.containsString("SameSite=Lax")))
+            .andReturn()
+            .getResponse()
+            .getCookie("vibe_shop_guest_order_access");
 
         String orderNumber = jdbcClient.sql("SELECT order_number FROM customer_orders WHERE idempotency_key = 'guest-order-1'")
             .query(String.class)
             .single();
 
         mockMvc.perform(get("/api/v1/orders/{orderNumber}", orderNumber))
-            .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/api/v1/orders/{orderNumber}", orderNumber).param("phone", "01000000000"))
             .andExpect(status().isNotFound());
 
         mockMvc.perform(get("/api/v1/orders/{orderNumber}", orderNumber).param("phone", "01099998888"))
+            .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/api/v1/orders/{orderNumber}", orderNumber).cookie(accessCookie))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.orderNumber").value(orderNumber))
             .andExpect(jsonPath("$.customerType").value("GUEST"))
-            .andExpect(jsonPath("$.paymentStatus").value("PENDING"));
+            .andExpect(jsonPath("$.paymentStatus").value("PENDING"))
+            .andExpect(jsonPath("$.phone").value("010-****-8888"))
+            .andExpect(jsonPath("$.postalCode").value("*****"))
+            .andExpect(jsonPath("$.address2").value(""))
+            .andExpect(jsonPath("$.note").value(""));
+
+        mockMvc.perform(get("/api/v1/orders").param("phone", "01099998888"))
+            .andExpect(status().isUnauthorized());
 
         mockMvc.perform(post("/api/v1/orders/{orderNumber}/cancel", orderNumber))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isNotFound());
 
-        mockMvc.perform(post("/api/v1/orders/{orderNumber}/cancel", orderNumber).param("phone", "01099998888"))
+        mockMvc.perform(post("/api/v1/orders/{orderNumber}/cancel", orderNumber).cookie(accessCookie))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("CANCELLED"));
+    }
+
+    @Test
+    void guestLookupIssuesAccessCookieAndRateLimitsRepeatedFailures() throws Exception {
+        mockMvc.perform(post("/api/v1/orders")
+                .contentType("application/json")
+                .content("""
+                    {
+                      "idempotencyKey": "guest-lookup-rate-limit",
+                      "customerName": "Guest User",
+                      "phone": "01077776666",
+                      "postalCode": "06236",
+                      "address1": "Teheran-ro 123",
+                      "address2": "8F",
+                      "note": "Leave at the door",
+                      "paymentMethod": "BANK_TRANSFER",
+                      "items": [{ "productId": 10, "quantity": 1 }]
+                    }
+                    """))
+            .andExpect(status().isOk());
+
+        String orderNumber = jdbcClient.sql(
+                "SELECT order_number FROM customer_orders WHERE idempotency_key = 'guest-lookup-rate-limit'"
+            )
+            .query(String.class)
+            .single();
+
+        Cookie accessCookie = mockMvc.perform(post("/api/v1/orders/lookup")
+                .contentType("application/json")
+                .content("""
+                    { "orderNumber": "%s", "phone": "01077776666" }
+                    """.formatted(orderNumber)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.orderNumber").value(orderNumber))
+            .andReturn()
+            .getResponse()
+            .getCookie("vibe_shop_guest_order_access");
+
+        org.assertj.core.api.Assertions.assertThat(accessCookie).isNotNull();
+        org.assertj.core.api.Assertions.assertThat(accessCookie.isHttpOnly()).isTrue();
+        org.assertj.core.api.Assertions.assertThat(accessCookie.getMaxAge()).isEqualTo(1200);
+
+        for (int attempt = 0; attempt < 5; attempt++) {
+            String wrongPhone = "0100000000" + attempt;
+            mockMvc.perform(post("/api/v1/orders/lookup")
+                    .contentType("application/json")
+                    .content("""
+                        { "orderNumber": "%s", "phone": "%s" }
+                        """.formatted(orderNumber, wrongPhone)))
+                .andExpect(status().isNotFound());
+        }
+
+        mockMvc.perform(post("/api/v1/orders/lookup")
+                .contentType("application/json")
+                .content("""
+                    { "orderNumber": "%s", "phone": "01000000000" }
+                    """.formatted(orderNumber)))
+            .andExpect(status().isTooManyRequests())
+            .andExpect(jsonPath("$.code").value("too_many_requests"));
+
+        Integer failedAuditCount = jdbcClient.sql("""
+                SELECT COUNT(*)
+                FROM guest_order_access_audit_logs
+                WHERE action = 'LOOKUP' AND succeeded = FALSE
+                """)
+            .query(Integer.class)
+            .single();
+        org.assertj.core.api.Assertions.assertThat(failedAuditCount).isEqualTo(5);
     }
 
     private Cookie signUpAndGetSessionCookie(String email) throws Exception {

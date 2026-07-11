@@ -123,6 +123,7 @@ test("member can create photo review, another member can mark it helpful, then a
   await expect(reviewCard).toBeVisible();
   await reviewCard.locator("select").selectOption("HIDDEN");
   await reviewCard.getByRole("button").click();
+  await expect(page.getByText(/리뷰 .* 상태를 저장했습니다/)).toBeVisible();
 
   await helperPage.goto("/products/brew-mug", { waitUntil: "domcontentloaded" });
   await expect(helperPage.getByText(reviewTitle)).toHaveCount(0);

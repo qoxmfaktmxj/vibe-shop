@@ -13,32 +13,21 @@ import {
   getRecentlyViewedRecommendations,
 } from "@/lib/server-api";
 
-const SEARCH_CHIPS = ["여름", "리빙", "키친", "웰니스", "신상품", "베스트"];
-
-const MAIN_DISPLAY_TITLE = "공간에 어울리는 오브제를 만나보세요";
-const MAIN_DISPLAY_SUBTITLE = "취향에 맞는 인테리어 아이템, MARU에서 쉽고 편하게 찾아보세요.";
-
 const MAIN_BAD_COPY_PATTERNS = [
   "운영자가 직접 수정한 메인 카피입니다.",
+  "운영 메인 카피",
   "오늘 메인에서 가장 먼저 보여줄 장면과 상품을 한 화면에 담았습니다.",
   "Ops Edit 1774402391338",
+  "추천 상품",
+  "실시간 인기",
 ];
-
-const FEATURED_CATEGORY_TITLE = "카테고리";
-const FEATURED_CATEGORY_SUBTITLE = "관심 있는 공간을 골라보세요.";
-
-const DEFAULT_EYEBROW_BAD_COPY = ["추천 상품", "실시간 인기"];
 
 function getSection(sections: HomeDisplaySection[], code: string) {
   return sections.find((section) => section.code === code);
 }
 
-function normalizeCopy(value: string, fallback: string) {
-  if (!value) {
-    return fallback;
-  }
-
-  if ([...MAIN_BAD_COPY_PATTERNS, ...DEFAULT_EYEBROW_BAD_COPY].some((token) => value.includes(token))) {
+function normalizeCopy(value: string | null | undefined, fallback: string) {
+  if (!value || MAIN_BAD_COPY_PATTERNS.some((token) => value.includes(token))) {
     return fallback;
   }
 
@@ -50,11 +39,7 @@ function sectionValue(
   field: "title" | "subtitle",
   fallback: string,
 ) {
-  if (!section?.[field]) {
-    return fallback;
-  }
-
-  return normalizeCopy(section[field], fallback);
+  return normalizeCopy(section?.[field], fallback);
 }
 
 export default async function HomePage() {
@@ -65,179 +50,131 @@ export default async function HomePage() {
     items: [],
   };
   const emptyRecentlyViewed: Awaited<ReturnType<typeof getRecentlyViewed>> = { items: [] };
-  const emptyHome = {
-    heroTitle: "",
-    heroSubtitle: "",
-    heroCtaLabel: "",
-    heroCtaHref: "",
-    displaySections: [],
-    featuredCategories: [],
-    curatedPicks: [],
-    newArrivals: [],
-    bestSellers: [],
-  } as Awaited<ReturnType<typeof getHomeData>>;
   const [home, recentlyViewed, recentlyViewedRecommendations, homeRecommendations] =
     await Promise.all([
-      getHomeData().catch(() => emptyHome),
+      getHomeData().catch(() => null),
       getRecentlyViewed().catch(() => emptyRecentlyViewed),
       getRecentlyViewedRecommendations().catch(() => emptyCollection),
       getHomeRecommendations().catch(() => emptyCollection),
     ]);
 
-  const heroProduct = home.curatedPicks[0] ?? home.newArrivals[0] ?? home.bestSellers[0];
+  if (!home) {
+    return (
+      <section role="alert" className="mx-auto my-20 w-full max-w-xl border-y border-[var(--line)] py-14 text-center">
+        <h1 className="display-heading text-3xl">상품을 불러오지 못했습니다.</h1>
+        <p className="mt-4 text-sm leading-7 text-[var(--ink-soft)]">
+          잠시 후 다시 시도해 주세요. 문제가 계속되면 고객지원에 알려 주세요.
+        </p>
+        <Link href="/" className="button-primary mt-7 px-6 py-3">다시 시도</Link>
+      </section>
+    );
+  }
+
   const heroSection = getSection(home.displaySections, "HERO");
-  const featuredCategorySection = getSection(home.displaySections, "FEATURED_CATEGORY");
+  const categorySection = getSection(home.displaySections, "FEATURED_CATEGORY");
   const curatedSection = getSection(home.displaySections, "CURATED_PICK");
   const newestSection = getSection(home.displaySections, "NEW_ARRIVALS");
-  const bestSellerSection = getSection(home.displaySections, "BEST_SELLERS");
   const promotionSection = getSection(home.displaySections, "PROMOTION");
   const heroBanner = heroSection?.items[0] ?? null;
+  const heroProduct = home.curatedPicks[0] ?? home.newArrivals[0] ?? home.bestSellers[0];
   const categoryCards = home.featuredCategories.slice(0, 3);
-
-  const heroTitle = normalizeCopy(home.heroTitle, MAIN_DISPLAY_TITLE);
-  const heroSubtitle = normalizeCopy(home.heroSubtitle, MAIN_DISPLAY_SUBTITLE);
+  const story = promotionSection?.visible ? promotionSection.items[0] : null;
+  const heroHref = heroBanner?.href ?? (heroProduct ? `/products/${heroProduct.slug}` : "/search");
 
   return (
-    <div className="grid-shell pb-8 sm:pb-10">
-      {/* ── Hero Section ── */}
-      <section className="animate-entrance">
-        {/* Hero Banner (full-width image) */}
-        {(heroBanner || heroProduct) ? (
-          <div className="relative overflow-hidden rounded-[var(--radius-xl)] sm:rounded-[24px]" style={{ minHeight: "420px" }}>
-            <div className="absolute inset-0">
-              {heroBanner ? (
-                <Image
-                  src={heroBanner.imageUrl}
-                  alt={heroBanner.imageAlt}
-                  fill
-                  sizes="100vw"
-                  priority
-                  className="object-cover"
-                />
-              ) : heroProduct ? (
-                <Image
-                  src={heroProduct.imageUrl}
-                  alt={heroProduct.imageAlt}
-                  fill
-                  sizes="100vw"
-                  priority
-                  className="object-cover"
-                />
-              ) : null}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-            </div>
-
-            <div className="relative flex min-h-[420px] flex-col justify-end p-6 text-white sm:min-h-[480px] sm:p-10 lg:min-h-[540px] lg:p-14">
-              <div className="max-w-xl">
-                <p className="text-xs font-medium uppercase tracking-widest text-white/70">
-                  {sectionValue(heroSection, "title", heroBanner ? "기획전" : "큐레이션")}
-                </p>
-                <h1 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
-                  {normalizeCopy(heroBanner?.title || heroProduct?.name || "", "오늘의 추천")}
-                </h1>
-                <p className="mt-3 text-sm leading-relaxed text-white/80 sm:text-base">
-                  {normalizeCopy(
-                    heroBanner?.subtitle || heroProduct?.summary || "",
-                    "매일 사용하는 공간에 어울리는 구성을 제안합니다.",
-                  )}
-                </p>
-                <div className="mt-6 flex flex-wrap items-center gap-3">
-                  <Link
-                    href={heroBanner?.href ?? `/products/${heroProduct?.slug ?? ""}`}
-                    className="overlay-cta px-6 py-3"
-                  >
-                    {normalizeCopy((heroBanner?.ctaLabel || home.heroCtaLabel || "").trim(), "둘러보기")}
-                  </Link>
-                  {heroProduct ? (
-                    <p className="text-lg font-bold text-white/90">
-                      {formatPrice(heroProduct.price)}원
-                    </p>
-                  ) : null}
-                </div>
+    <div className="grid-shell pb-6 sm:pb-10">
+      {(heroBanner || heroProduct) ? (
+        <section className="animate-entrance relative min-h-[68svh] overflow-hidden rounded-[var(--radius-lg)] bg-[var(--surface-low)] lg:min-h-[72svh]">
+          <Image
+            src={heroBanner?.imageUrl ?? heroProduct!.imageUrl}
+            alt={heroBanner?.imageAlt ?? heroProduct!.imageAlt}
+            fill
+            sizes="100vw"
+            priority
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-[oklch(0.16_0.018_45/0.4)]" />
+          <div className="relative flex min-h-[68svh] items-end p-6 text-[var(--surface)] sm:p-10 lg:min-h-[72svh] lg:p-16">
+            <div className="max-w-2xl">
+              <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[oklch(0.95_0.01_80/0.78)]">
+                MARU Living Collection
+              </p>
+              <h1 className="display-heading mt-5 text-4xl leading-[1.12] text-[var(--surface)] sm:text-5xl lg:text-6xl">
+                {normalizeCopy(heroBanner?.title ?? home.heroTitle, "머무는 시간이 더 좋아지는 오브제")}
+              </h1>
+              <p className="mt-5 max-w-xl text-sm leading-7 text-[oklch(0.96_0.01_80/0.84)] sm:text-base">
+                {normalizeCopy(
+                  heroBanner?.subtitle ?? home.heroSubtitle,
+                  "좋은 소재와 편안한 형태로, 매일의 공간을 오래 사랑할 수 있게 합니다.",
+                )}
+              </p>
+              <div className="mt-8 flex flex-wrap items-center gap-5">
+                <Link href={heroHref} className="overlay-cta min-h-11 px-6 py-3">
+                  {normalizeCopy(heroBanner?.ctaLabel ?? home.heroCtaLabel, "컬렉션 보기")}
+                </Link>
+                {heroProduct ? (
+                  <span className="text-sm font-medium tracking-[0.04em] text-[oklch(0.96_0.01_80/0.86)]">
+                    {formatPrice(heroProduct.price)}원부터
+                  </span>
+                ) : null}
               </div>
             </div>
           </div>
-        ) : null}
+        </section>
+      ) : null}
 
-        {/* Headline + Search area */}
-        <div className="mt-8 sm:mt-10">
-          <h2 className="text-2xl font-bold leading-snug text-[var(--ink)] sm:text-3xl">
-            {heroTitle}
+      <section className="grid gap-8 border-y border-[var(--line)] py-14 sm:py-20 lg:grid-cols-[0.75fr_1.25fr] lg:items-end">
+        <p className="display-eyebrow">The MARU Point of View</p>
+        <div>
+          <h2 className="display-heading max-w-3xl text-3xl sm:text-4xl lg:text-5xl">
+            편안함은 보이는 것이 아니라, 오래 머물고 싶은 감각입니다.
           </h2>
-          <p className="mt-2 max-w-lg text-sm leading-relaxed text-[var(--ink-soft)] sm:text-base">
-            {heroSubtitle}
+          <p className="mt-5 max-w-2xl text-sm leading-7 text-[var(--ink-soft)] sm:text-base">
+            과장된 장식 대신 손에 닿는 소재, 몸을 받치는 형태, 시간이 지나도 자연스러운 색을 고릅니다.
           </p>
-
-          <form action="/search" method="GET" className="mt-5 max-w-lg">
-            <div className="flex items-center gap-2 rounded-[var(--radius)] border border-[var(--line)] bg-white px-4 py-2.5 shadow-[var(--shadow-sm)] transition focus-within:border-[var(--primary)] focus-within:shadow-[0_0_0_3px_var(--primary-soft)]">
-              <svg className="h-4 w-4 shrink-0 text-[var(--ink-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.35-4.35" strokeLinecap="round" />
-              </svg>
-              <input
-                name="q"
-                type="text"
-                placeholder="상품명, 카테고리, 키워드로 검색"
-                className="min-w-0 flex-1 bg-transparent text-sm text-[var(--ink)] outline-none placeholder:text-[var(--ink-muted)]"
-              />
-              <button type="submit" className="button-primary rounded-[var(--radius-sm)] px-4 py-2 text-xs">
-                검색
-              </button>
-            </div>
-          </form>
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            {SEARCH_CHIPS.map((chip) => (
-              <Link
-                key={chip}
-                href={`/search?q=${encodeURIComponent(chip)}`}
-                className="inline-flex min-h-[44px] items-center rounded-full border border-[var(--line)] bg-white px-4 text-xs font-medium text-[var(--ink-soft)] transition hover:border-[var(--primary)] hover:text-[var(--primary)]"
-              >
-                {chip}
-              </Link>
-            ))}
-          </div>
         </div>
       </section>
 
-      {/* ── Featured Categories ── */}
-      {featuredCategorySection?.visible !== false && categoryCards.length > 0 ? (
-        <section className="animate-entrance-delay-1 space-y-5">
-          <div className="flex items-end justify-between gap-4">
+      {categorySection?.visible !== false && categoryCards.length > 0 ? (
+        <section className="animate-entrance-delay-1">
+          <div className="mb-8 grid gap-3 sm:mb-10 lg:grid-cols-2 lg:items-end">
             <div>
-              <h2 className="text-xl font-bold text-[var(--ink)] sm:text-2xl">
-                {sectionValue(featuredCategorySection, "title", FEATURED_CATEGORY_TITLE)}
+              <p className="display-eyebrow">Ways to live</p>
+              <h2 className="display-heading mt-3 text-3xl sm:text-4xl">
+                {sectionValue(categorySection, "title", "공간으로 고르기")}
               </h2>
-              <p className="mt-1 text-sm text-[var(--ink-soft)]">
-                {sectionValue(featuredCategorySection, "subtitle", FEATURED_CATEGORY_SUBTITLE)}
-              </p>
             </div>
+            <p className="max-w-xl text-sm leading-7 text-[var(--ink-soft)] lg:justify-self-end">
+              {sectionValue(categorySection, "subtitle", "생활의 장면에서 시작해 나에게 맞는 오브제를 발견해 보세요.")}
+            </p>
           </div>
 
-          <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {categoryCards.map((category) => (
+          <div className="grid gap-5 lg:grid-cols-12 lg:grid-rows-2">
+            {categoryCards.map((category, index) => (
               <Link
                 key={category.id}
                 href={`/category/${category.slug}`}
-                className="group relative overflow-hidden rounded-[var(--radius-lg)] sm:rounded-[var(--radius-xl)]"
+                className={[
+                  "group relative min-h-[360px] overflow-hidden bg-[var(--surface-low)] lg:min-h-0",
+                  index === 0 ? "lg:col-span-7 lg:row-span-2 lg:aspect-[4/5]" : "lg:col-span-5 lg:aspect-[16/10]",
+                ].join(" ")}
               >
-                <div className="relative aspect-[3/4] sm:aspect-[4/5]">
-                  <Image
-                    src={category.coverImageUrl}
-                    alt={category.coverImageAlt}
-                    fill
-                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                    className="object-cover transition duration-500 group-hover:scale-[1.03]"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 p-5 text-white sm:p-6">
-                    <h3 className="text-lg font-bold sm:text-xl">
-                      {category.heroTitle || category.name}
-                    </h3>
-                    <p className="mt-1.5 text-sm leading-relaxed text-white/75">
-                      {category.heroSubtitle || category.description}
-                    </p>
-                  </div>
+                <Image
+                  src={category.coverImageUrl}
+                  alt={category.coverImageAlt}
+                  fill
+                  sizes={index === 0 ? "(min-width: 1024px) 58vw, 100vw" : "(min-width: 1024px) 42vw, 100vw"}
+                  className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                />
+                <div className="absolute inset-0 bg-[oklch(0.15_0.018_45/0.28)]" />
+                <div className="absolute inset-x-0 bottom-0 p-6 text-[var(--surface)] sm:p-8">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-[oklch(0.96_0.01_80/0.72)]">0{index + 1}</p>
+                  <h3 className="mt-2 font-[var(--font-display)] text-2xl sm:text-3xl">
+                    {category.heroTitle || category.name}
+                  </h3>
+                  <p className="mt-2 max-w-md text-sm leading-6 text-[oklch(0.96_0.01_80/0.78)]">
+                    {category.heroSubtitle || category.description}
+                  </p>
                 </div>
               </Link>
             ))}
@@ -245,15 +182,20 @@ export default async function HomePage() {
         </section>
       ) : null}
 
-      {/* ── Curated Picks ── */}
       {curatedSection?.visible !== false && home.curatedPicks.length > 0 ? (
-        <section className="animate-entrance-delay-2 space-y-5">
-          <div>
-            <h2 className="text-xl font-bold text-[var(--ink)] sm:text-2xl">
-              {sectionValue(curatedSection, "title", "추천 상품")}
-            </h2>
+        <section className="animate-entrance-delay-2">
+          <div className="mb-8 flex items-end justify-between gap-5 border-b border-[var(--line)] pb-5 sm:mb-10">
+            <div>
+              <p className="display-eyebrow">The edit</p>
+              <h2 className="display-heading mt-3 text-3xl sm:text-4xl">
+                {sectionValue(curatedSection, "title", "이번 계절의 선택")}
+              </h2>
+            </div>
+            <Link href="/search" className="hidden text-xs font-semibold tracking-[0.08em] text-[var(--ink-soft)] hover:text-[var(--primary)] sm:block">
+              전체 보기 →
+            </Link>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-12 lg:grid-cols-4 lg:gap-x-6">
             {home.curatedPicks.slice(0, 4).map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -261,63 +203,44 @@ export default async function HomePage() {
         </section>
       ) : null}
 
-      <RecentlyViewedShelf recentlyViewed={recentlyViewed} />
-      <RecommendationShelf
-        collection={recentlyViewed.items.length > 0 ? recentlyViewedRecommendations : homeRecommendations}
-        eyebrow={recentlyViewed.items.length > 0 ? "다시 보기" : "추천"}
-      />
+      {recentlyViewed.items.length > 0 ? (
+        <div className="space-y-20 border-t border-[var(--line)] pt-16 sm:space-y-24 sm:pt-20">
+          <RecentlyViewedShelf recentlyViewed={recentlyViewed} />
+          <RecommendationShelf
+            collection={recentlyViewedRecommendations.items.length > 0 ? recentlyViewedRecommendations : homeRecommendations}
+            eyebrow="이어지는 선택"
+          />
+        </div>
+      ) : null}
 
-      {/* ── Promotions ── */}
-      {promotionSection?.visible && promotionSection.items.length > 0 ? (
-        <section className="space-y-5">
-          <div>
-            <h2 className="text-xl font-bold text-[var(--ink)] sm:text-2xl">
-              {sectionValue(promotionSection, "title", "진행 중인 기획전")}
-            </h2>
+      {story ? (
+        <section className="grid overflow-hidden bg-[var(--ink)] text-[var(--surface)] lg:grid-cols-2">
+          <div className="relative min-h-[420px] lg:min-h-[600px]">
+            <Image src={story.imageUrl} alt={story.imageAlt} fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" />
           </div>
-
-          <div className="grid gap-4 lg:grid-cols-2">
-            {promotionSection.items.map((item) => (
-              <Link
-                key={item.id}
-                href={item.href}
-                className="group relative overflow-hidden rounded-[var(--radius-lg)]"
-              >
-                <div className="relative min-h-[240px] sm:min-h-[300px]">
-                  <Image
-                    src={item.imageUrl}
-                    alt={item.imageAlt}
-                    fill
-                    sizes="(min-width: 1024px) 50vw, 100vw"
-                    className="object-cover transition duration-500 group-hover:scale-[1.02]"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 p-5 text-white sm:p-7">
-                    <h3 className="text-xl font-bold sm:text-2xl">{item.title}</h3>
-                    <p className="mt-2 max-w-md text-sm leading-relaxed text-white/80">{item.subtitle}</p>
-                    <span className="overlay-cta mt-4 rounded-[var(--radius-sm)] px-4 py-2.5 text-sm">
-                      {item.ctaLabel}
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
+          <div className="flex flex-col justify-center px-7 py-14 sm:px-12 lg:px-16">
+            <p className="text-[11px] uppercase tracking-[0.22em] text-[oklch(0.9_0.01_80/0.68)]">Material story</p>
+            <h2 className="display-heading mt-5 text-3xl text-[var(--surface)] sm:text-4xl lg:text-5xl">{story.title}</h2>
+            <p className="mt-5 max-w-xl text-sm leading-7 text-[oklch(0.92_0.01_80/0.72)] sm:text-base">{story.subtitle}</p>
+            <Link href={story.href} className="mt-8 w-fit border-b border-[var(--surface)] pb-1 text-sm font-semibold">{story.ctaLabel}</Link>
           </div>
         </section>
       ) : null}
 
-      {/* ── New Arrivals ── */}
       {newestSection?.visible !== false && home.newArrivals.length > 0 ? (
-        <section className="space-y-5">
-          <div className="flex items-end justify-between gap-4">
-            <h2 className="text-xl font-bold text-[var(--ink)] sm:text-2xl">
-              {sectionValue(newestSection, "title", "신상품")}
-            </h2>
-            <p className="hidden text-sm text-[var(--ink-soft)] sm:block">
-              {sectionValue(newestSection, "subtitle", "지금 막 들어온 상품들을 둘러보세요.")}
+        <section>
+          <div className="mb-8 flex items-end justify-between gap-5 border-b border-[var(--line)] pb-5 sm:mb-10">
+            <div>
+              <p className="display-eyebrow">Just arrived</p>
+              <h2 className="display-heading mt-3 text-3xl sm:text-4xl">
+                {sectionValue(newestSection, "title", "새롭게 도착한 오브제")}
+              </h2>
+            </div>
+            <p className="hidden max-w-md text-right text-sm leading-6 text-[var(--ink-soft)] md:block">
+              {sectionValue(newestSection, "subtitle", "이번 주 새롭게 선보이는 소재와 형태를 만나보세요.")}
             </p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-12 lg:grid-cols-4 lg:gap-x-6">
             {home.newArrivals.slice(0, 4).map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -325,21 +248,19 @@ export default async function HomePage() {
         </section>
       ) : null}
 
-      {/* ── Best Sellers ── */}
-      {bestSellerSection?.visible !== false && home.bestSellers.length > 0 ? (
-        <section className="space-y-5">
-          <div>
-            <h2 className="text-xl font-bold text-[var(--ink)] sm:text-2xl">
-              {sectionValue(bestSellerSection, "title", "베스트셀러")}
-            </h2>
+      <section aria-label="MARU 서비스" className="grid border-y border-[var(--line)] md:grid-cols-3">
+        {[
+          ["Complimentary delivery", "전국 무료배송", "안전한 포장과 배송 과정을 안내합니다."],
+          ["Living concierge", "리빙 컨시어지", "공간과 선물에 맞는 상품 선택을 도와드립니다."],
+          ["Considered care", "오래 쓰는 관리", "소재별 관리와 교환·반품을 차분히 지원합니다."],
+        ].map(([eyebrow, title, description], index) => (
+          <div key={eyebrow} className={`py-9 md:px-8 md:py-10 ${index > 0 ? "border-t border-[var(--line)] md:border-l md:border-t-0" : ""}`}>
+            <p className="text-[10px] uppercase tracking-[0.18em] text-[var(--ink-muted)]">{eyebrow}</p>
+            <h2 className="mt-3 font-[var(--font-display)] text-xl">{title}</h2>
+            <p className="mt-2 text-xs leading-6 text-[var(--ink-soft)]">{description}</p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {home.bestSellers.slice(0, 4).map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </section>
-      ) : null}
+        ))}
+      </section>
     </div>
   );
 }

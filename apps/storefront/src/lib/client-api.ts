@@ -275,10 +275,8 @@ export async function lookupGuestOrder(
 
 export async function cancelOrder(
   orderNumber: string,
-  phone?: string,
 ): Promise<CancelOrderResponse> {
-  const query = phone ? `?phone=${encodeURIComponent(phone)}` : "";
-  return fetchJson<CancelOrderResponse>(`/api/v1/orders/${orderNumber}/cancel${query}`, {
+  return fetchJson<CancelOrderResponse>(`/api/v1/orders/${orderNumber}/cancel`, {
     method: "POST",
   });
 }

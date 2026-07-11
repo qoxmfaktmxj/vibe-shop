@@ -39,7 +39,7 @@ test("admin can review members, see statistics, and block a member account", asy
   await page.locator('input[type="email"]').fill(email);
   await page.locator('input[type="password"]').fill("password123");
   await page.locator('form button[type="submit"]').click();
-  await expect(page).toHaveURL(/\/login$/);
+  await expect(page).toHaveURL(/\/auth\?tab=login/);
   await expect(page.getByRole("alert")).toBeVisible();
 
   await page.goto(`${adminUrl}/analytics`, { waitUntil: "networkidle" });

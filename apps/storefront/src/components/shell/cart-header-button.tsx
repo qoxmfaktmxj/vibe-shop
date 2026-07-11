@@ -31,10 +31,10 @@ export function CartHeaderButton() {
     <Link
       href="/cart"
       aria-label={count > 0 ? `장바구니 ${count}개 상품` : "장바구니"}
-      className="inline-flex min-h-11 items-center gap-3 rounded-full border border-[var(--chrome-border)] bg-[var(--chrome-hover)] px-4 py-2 text-sm font-semibold text-[var(--chrome-fg)] transition hover:-translate-y-[1px] hover:border-[var(--line-strong)] hover:bg-[var(--surface-low)] focus-visible:outline-[var(--focus)]"
+      className="inline-flex min-h-11 items-center gap-1.5 border-b border-transparent px-1.5 text-sm text-[var(--chrome-fg)] transition-colors hover:border-[var(--chrome-fg)] focus-visible:outline-[var(--focus)]"
     >
       <CartIcon />
-      <span className="inline-flex min-w-6 items-center justify-center rounded-full bg-[var(--chrome-fg)] px-2 py-1 text-[10px] font-bold leading-none text-[var(--chrome-bg)]">
+      <span className="inline-flex min-w-4 items-center justify-center text-[10px] font-bold leading-none text-[var(--chrome-fg)]">
         {count}
       </span>
     </Link>

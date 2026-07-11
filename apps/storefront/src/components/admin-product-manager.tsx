@@ -53,7 +53,7 @@ function createProductForm(
     slug: product.slug,
     name: product.name,
     summary: product.summary,
-    description: product.summary,
+    description: product.description,
     price: product.price,
     badge: product.badge,
     accentColor: matchedCategory?.accentColor ?? "#D6512D",
@@ -69,6 +69,7 @@ function toUpdatePayload(form: ProductEditorForm): UpdateAdminProductPayload {
   return {
     name: form.name,
     summary: form.summary,
+    description: form.description,
     badge: form.badge,
     price: form.price,
     stock: form.stock,
@@ -526,8 +527,7 @@ export function AdminProductManager({
               />
             </label>
 
-            {isCreateMode ? (
-              <label className="grid gap-2">
+            <label className="grid gap-2">
                 <span className="text-sm font-medium">상세 설명</span>
                 <textarea
                   name="productDescription"
@@ -541,8 +541,7 @@ export function AdminProductManager({
                   }
                   className="admin-input px-4 py-3"
                 />
-              </label>
-            ) : null}
+            </label>
           </div>
 
           <div className="grid gap-4 rounded-[24px] border border-[var(--line)] bg-white/72 p-5">

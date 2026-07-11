@@ -23,9 +23,7 @@ export function GuestOrderLookupForm({ initialOrderNumber = "" }: { initialOrder
           try {
             const result = await lookupGuestOrder(form);
             setError("");
-            router.push(
-              `/orders/${result.orderNumber}?phone=${encodeURIComponent(form.phone.trim())}`,
-            );
+            router.push(`/orders/${result.orderNumber}`);
           } catch (lookupError) {
             setError(
               lookupError instanceof Error
@@ -40,11 +38,13 @@ export function GuestOrderLookupForm({ initialOrderNumber = "" }: { initialOrder
         <span className="text-sm font-medium">주문번호</span>
         <input
           required
+          name="orderNumber"
+          autoComplete="off"
           value={form.orderNumber}
           onChange={(event) =>
             setForm((current) => ({ ...current, orderNumber: event.target.value }))
           }
-          className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,255,0.9)] px-4 py-3"
+          className="soft-input px-4 py-3"
         />
         <span className="text-xs leading-5 text-[var(--ink-soft)]">
           주문 완료 화면 상단과 주문 확인 메일에서 확인할 수 있습니다.
@@ -55,15 +55,18 @@ export function GuestOrderLookupForm({ initialOrderNumber = "" }: { initialOrder
         <span className="text-sm font-medium">연락처</span>
         <input
           required
+          name="phone"
+          type="tel"
+          autoComplete="tel"
           value={form.phone}
           onChange={(event) =>
             setForm((current) => ({ ...current, phone: event.target.value }))
           }
-          className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,255,0.9)] px-4 py-3"
+          className="soft-input px-4 py-3"
         />
       </label>
 
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? <p role="alert" className="text-sm text-red-600">{error}</p> : null}
 
       <button
         type="submit"

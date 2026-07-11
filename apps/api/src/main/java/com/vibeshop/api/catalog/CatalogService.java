@@ -266,6 +266,7 @@ public class CatalogService {
             product.getAccentColor(),
             product.getImageUrl(),
             product.getImageAlt(),
+            product.getStock(),
             wishlisted
         );
     }

@@ -1,4 +1,4 @@
-const { defineConfig } = require("playwright/test");
+const { defineConfig, devices } = require("playwright/test");
 
 function getPort(url, fallbackPort) {
   try {
@@ -32,6 +32,17 @@ module.exports = defineConfig({
     ["html", { open: "never", outputFolder: "output/playwright-report" }],
   ],
   outputDir: "output/test-results",
+  projects: [
+    {
+      name: "chromium",
+      use: { browserName: "chromium" },
+    },
+    {
+      name: "webkit-mobile",
+      testMatch: /mobile-storefront\.spec\.js/,
+      use: { ...devices["iPhone 13"] },
+    },
+  ],
   use: {
     baseURL: storefrontUrl,
     viewport: { width: 1440, height: 1200 },
@@ -57,13 +68,14 @@ module.exports = defineConfig({
         DB_PASSWORD: process.env.DB_PASSWORD ?? "vibeshop",
         APP_DEMO_SEED_NORMALIZE_E2E_STOCK: process.env.APP_DEMO_SEED_NORMALIZE_E2E_STOCK ?? "true",
         APP_DEMO_ADMIN_PASSWORD: process.env.E2E_ADMIN_PASSWORD ?? process.env.APP_DEMO_ADMIN_PASSWORD ?? "admin1234!",
+        APP_DEMO_ADMIN_EMAIL: process.env.E2E_ADMIN_EMAIL ?? "admin@vibeshop.local",
         CORS_ALLOWED_ORIGINS:
           process.env.CORS_ALLOWED_ORIGINS ??
           `${storefrontUrl},http://127.0.0.1:3000,http://localhost:3000`,
       },
     },
     {
-      command: `node scripts/run-storefront-tool.mjs next dev --webpack --hostname 127.0.0.1 --port ${storefrontPort}`,
+      command: `node scripts/run-storefront-tool.mjs next start --hostname 127.0.0.1 --port ${storefrontPort}`,
       cwd: ".",
       url: storefrontUrl,
       reuseExistingServer,
@@ -73,6 +85,7 @@ module.exports = defineConfig({
         API_BASE_URL: apiBaseUrl,
         NEXT_PUBLIC_API_BASE_URL: apiBaseUrl,
         NEXT_PUBLIC_APP_URL: storefrontUrl,
+        NEXT_PUBLIC_DEMO_MODE: "true",
         APP_ORIGIN: storefrontUrl,
         GOOGLE_CLIENT_ID: process.env.E2E_GOOGLE_CLIENT_ID ?? "",
         GOOGLE_CLIENT_SECRET: process.env.E2E_GOOGLE_CLIENT_SECRET ?? "",

@@ -172,16 +172,14 @@ export async function getRecentlyViewedRecommendations() {
   return normalizeRecommendations(response);
 }
 
-export async function getOrder(orderNumber: string, phone?: string) {
-  const query = phone ? `?phone=${encodeURIComponent(phone)}` : "";
-  return fetchFromApi<OrderResponse>(`/api/v1/orders/${orderNumber}${query}`, {
+export async function getOrder(orderNumber: string) {
+  return fetchFromApi<OrderResponse>(`/api/v1/orders/${orderNumber}`, {
     headers: await getCookieHeaders(),
   });
 }
 
-export async function listOrders(phone?: string) {
-  const query = phone ? `?phone=${encodeURIComponent(phone)}` : "";
-  return fetchFromApi<OrderSummaryResponse[]>(`/api/v1/orders${query}`, {
+export async function listOrders() {
+  return fetchFromApi<OrderSummaryResponse[]>(`/api/v1/orders`, {
     headers: await getCookieHeaders(),
   });
 }

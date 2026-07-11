@@ -18,7 +18,7 @@ export function ProductSortTabs({
   currentSort: string;
 }) {
   return (
-    <div className="no-scrollbar -mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1">
+    <div className="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto border-b border-[var(--line)]">
       {SORT_OPTIONS.map((option) => {
         const nextParams = new URLSearchParams();
         for (const [key, value] of Object.entries(searchParams)) {
@@ -39,10 +39,10 @@ export function ProductSortTabs({
           <Link
             key={option.value}
             href={href}
-            className={`shrink-0 snap-start rounded-full px-4 py-2 text-sm font-medium transition ${
+            className={`shrink-0 snap-start border-b py-3 text-xs font-medium transition-colors ${
               currentSort === option.value
-                ? "border border-[var(--line-strong)] bg-[var(--ink)] !text-white shadow-[0_10px_24px_rgba(24,23,21,0.12)]"
-                : "border border-[var(--line)] bg-[rgba(255,255,255,0.84)] text-[var(--ink-soft)] hover:bg-[var(--surface-high)]"
+                ? "border-[var(--ink)] text-[var(--ink)]"
+                : "border-transparent text-[var(--ink-muted)] hover:text-[var(--ink)]"
             }`}
           >
             {option.label}

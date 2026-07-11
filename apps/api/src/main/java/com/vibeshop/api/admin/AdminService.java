@@ -177,6 +177,7 @@ public class AdminService {
         product.updateForAdmin(
             request.name().trim(),
             request.summary().trim(),
+            request.description().trim(),
             request.badge().trim(),
             request.price(),
             request.stock(),
@@ -492,6 +493,7 @@ public class AdminService {
             product.getCategory().getName(),
             product.getName(),
             product.getSummary(),
+            product.getDescription(),
             product.getPrice(),
             product.getBadge(),
             product.isFeatured(),

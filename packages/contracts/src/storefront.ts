@@ -42,6 +42,7 @@ export type ProductSummary = {
   accentColor: string;
   imageUrl: string;
   imageAlt: string;
+  stock: number;
   wishlisted: boolean;
 };
 

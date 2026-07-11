@@ -2,7 +2,7 @@ const { expect, test } = require("playwright/test");
 
 test("catalog display sections, recommendations, and search filters work", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
-  await expect(page.locator('form[action="/search"] input[name="q"]')).toBeVisible();
+  await expect(page.getByRole("link", { name: "검색", exact: true })).toBeVisible();
   await expect(page.locator('a[href^="/category/"]').first()).toBeVisible();
   await expect(page.locator('a[href^="/products/"]').first()).toBeVisible();
 

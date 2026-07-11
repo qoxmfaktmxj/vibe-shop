@@ -115,6 +115,7 @@ export type AdminProduct = {
   categoryName: string;
   name: string;
   summary: string;
+  description: string;
   price: number;
   badge: string;
   featured: boolean;
@@ -127,6 +128,7 @@ export type AdminProduct = {
 export type UpdateAdminProductPayload = {
   name: string;
   summary: string;
+  description: string;
   badge: string;
   price: number;
   stock: number;

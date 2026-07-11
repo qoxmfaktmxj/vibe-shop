@@ -40,12 +40,9 @@ test("admin can manage display banners and categories", async ({ page }) => {
   await expect(page.locator('input[name="displayItemTitle"]')).toHaveValue(bannerTitle);
 
   await page.goto(`${adminUrl}/products`, { waitUntil: "networkidle" });
-  await page
-    .locator("article")
-    .filter({ hasText: /Categories|카테고리/ })
-    .getByRole("button")
-    .first()
-    .click();
+  await page.getByRole("button", { name: "카테고리", exact: true }).click();
+  await page.getByRole("button", { name: "새 카테고리", exact: true }).click();
+  await expect(page.locator('input[name="categorySlug"]')).toHaveValue("");
   await page.locator('input[name="categorySlug"]').fill(categorySlug);
   await page.locator('input[name="categoryName"]').fill(categoryName);
   await page.locator('textarea[name="categoryDescription"]').fill("브라우저 테스트에서 생성한 임시 카테고리입니다.");
@@ -71,15 +68,16 @@ test("admin can manage display banners and categories", async ({ page }) => {
   await page
     .locator("form")
     .filter({ has: page.locator('input[name="categorySlug"]') })
-    .locator("button")
-    .nth(1)
+    .getByRole("button", { name: "카테고리 삭제" })
     .click();
+  await expect(page.getByRole("button", { name: new RegExp(categoryName) })).toHaveCount(0);
 
   await page.goto(`${adminUrl}/display`, { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: /기획전 PROMOTION/ }).click();
+  await page.getByRole("button", { name: new RegExp(bannerTitle) }).click();
   await page
     .locator("form")
     .filter({ has: page.locator('input[name="displayItemTitle"]') })
-    .locator("button")
-    .nth(1)
+    .getByRole("button", { name: "Delete banner" })
     .click();
 });

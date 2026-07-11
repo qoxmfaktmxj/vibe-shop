@@ -14,6 +14,7 @@ public record ProductSummary(
     String accentColor,
     String imageUrl,
     String imageAlt,
+    int stock,
     boolean wishlisted
 ) {
 }

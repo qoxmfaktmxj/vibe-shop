@@ -1,6 +1,6 @@
 Status: current
 Owner: api
-Last reviewed: 2026-03-24
+Last reviewed: 2026-07-11
 
 # API Contract v1
 
@@ -236,6 +236,7 @@ Response 예시
     "accentColor": "#29339b",
     "imageUrl": "/images/products/living-01.jpg",
     "imageAlt": "Linen Bed Set image",
+    "stock": 10,
     "wishlisted": false
   }
 ]
@@ -432,12 +433,17 @@ Response
 
 ```json
 {
-  "orderNumber": "VS202603240001",
+  "orderNumber": "VS-019F4FBC-4086-7B3E-8A83-EF9EA84478B3",
   "status": "PAID",
   "paymentStatus": "SUCCEEDED",
   "paymentMethod": "CARD"
 }
 ```
+
+- `orderNumber` 는 UUIDv7 기반 외부 주문번호다.
+- `idempotencyKey` 는 8~64자의 영문, 숫자, `_`, `-`만 허용한다.
+- 비회원 주문 생성 응답에는 20분짜리 `vibe_shop_guest_order_access` HttpOnly 쿠키가 함께 설정된다.
+- 재고는 `stock >= quantity` 조건부 원자 업데이트로 차감되며 부족하면 주문 전체가 롤백된다.
 
 ### 6.3 비회원 주문 조회용 주문번호 확인
 
@@ -447,7 +453,7 @@ Request
 
 ```json
 {
-  "orderNumber": "VS202603240001",
+  "orderNumber": "VS-019F4FBC-4086-7B3E-8A83-EF9EA84478B3",
   "phone": "01012345678"
 }
 ```
@@ -456,22 +462,26 @@ Response
 
 ```json
 {
-  "orderNumber": "VS202603240001"
+  "orderNumber": "VS-019F4FBC-4086-7B3E-8A83-EF9EA84478B3"
 }
 ```
+
+- 성공 응답에는 20분짜리 `vibe_shop_guest_order_access` HttpOnly, SameSite=Lax 쿠키가 설정된다.
+- 주문번호와 연락처가 일치하지 않는 실패가 15분 동안 5회 누적되면 `429 too_many_requests`를 반환한다.
+- 연락처 원문은 URL, 토큰 테이블, 조회 감사 로그에 저장하지 않는다.
 
 ### 6.4 주문 취소
 
 `POST /api/v1/orders/{orderNumber}/cancel`
 
 - 회원: 세션 쿠키 기준
-- 비회원: `?phone=...` 전달
+- 비회원: 먼저 `POST /api/v1/orders/lookup`을 통과해 발급받은 `vibe_shop_guest_order_access` 쿠키 기준
 
 Response
 
 ```json
 {
-  "orderNumber": "VS202603240001",
+  "orderNumber": "VS-019F4FBC-4086-7B3E-8A83-EF9EA84478B3",
   "status": "CANCELLED"
 }
 ```
@@ -480,19 +490,23 @@ Response
 
 `GET /api/v1/orders/{orderNumber}`
 
+- 회원 주문은 로그인 세션과 주문 소유자가 일치해야 한다.
+- 비회원 주문은 주문번호에 연결된 유효한 단기 조회 쿠키가 필요하다.
+- 비회원 응답의 이름, 연락처, 우편번호, 주소는 마스킹되고 상세 주소와 배송 메모는 반환하지 않는다.
+
 ### 6.6 주문 목록 조회
 
 `GET /api/v1/orders`
 
-- 회원: 세션 쿠키 기준 내 주문 목록
-- 비회원: `?phone=...` 기준 조회
+- 회원 세션 전용이다. 로그인하지 않은 요청은 `401 unauthorized`를 반환한다.
+- 전화번호 단독 비회원 주문 목록 API는 제공하지 않는다. 비회원은 주문번호와 연락처로 단일 주문만 조회한다.
 
 Response 예시
 
 ```json
 [
   {
-    "orderNumber": "VS202603240001",
+    "orderNumber": "VS-019F4FBC-4086-7B3E-8A83-EF9EA84478B3",
     "status": "PAID",
     "customerType": "MEMBER",
     "customerName": "홍길동",
@@ -814,6 +828,10 @@ Response
 - `GET /api/v1/admin/products`
 - `PUT /api/v1/admin/products/{productId}`
 
+비고:
+- 상품 응답과 수정 요청에는 `description`이 포함된다.
+- 상품 생성의 `accentColor`는 `#RRGGBB` 형식만 허용한다.
+
 ### 11.3 주문 관리
 - `GET /api/v1/admin/orders`
 - `PUT /api/v1/admin/orders/{orderNumber}/status`
@@ -861,4 +879,4 @@ Response
 Status: current
 Status: current
 Owner: api + frontend
-Last reviewed: 2026-03-24
+Last reviewed: 2026-07-11

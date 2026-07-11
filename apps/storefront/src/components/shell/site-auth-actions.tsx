@@ -32,7 +32,7 @@ export function SiteAuthActions() {
           });
         }}
         aria-label="로그아웃"
-        className="inline-flex min-h-11 items-center rounded-full border border-[var(--chrome-border)] bg-[var(--chrome-hover)] px-4 py-2 text-sm font-semibold text-[var(--chrome-fg)] transition hover:-translate-y-[1px] hover:border-[var(--line-strong)] hover:bg-[var(--surface-low)] focus-visible:outline-[var(--focus)] disabled:cursor-wait disabled:opacity-60"
+        className="hidden min-h-11 items-center border-b border-transparent px-2 text-xs font-medium text-[var(--chrome-fg-muted)] transition-colors hover:border-[var(--chrome-fg)] hover:text-[var(--chrome-fg)] focus-visible:outline-[var(--focus)] disabled:cursor-wait disabled:opacity-60 sm:inline-flex"
       >
         {isPending ? "로그아웃 중..." : "로그아웃"}
       </button>
@@ -42,7 +42,7 @@ export function SiteAuthActions() {
   return (
     <Link
       href={buildAuthHref(pathname)}
-      className="inline-flex min-h-11 items-center rounded-full border border-[var(--chrome-border)] bg-[var(--chrome-hover)] px-5 py-2 text-sm font-semibold text-[var(--chrome-fg)] transition hover:-translate-y-[1px] hover:border-[var(--line-strong)] hover:bg-[var(--surface-low)] focus-visible:outline-[var(--focus)]"
+      className="hidden min-h-11 items-center border-b border-transparent px-2 text-xs font-medium text-[var(--chrome-fg-muted)] transition-colors hover:border-[var(--chrome-fg)] hover:text-[var(--chrome-fg)] focus-visible:outline-[var(--focus)] sm:inline-flex"
     >
       로그인
     </Link>

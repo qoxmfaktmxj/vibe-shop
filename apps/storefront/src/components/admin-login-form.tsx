@@ -7,8 +7,8 @@ import { useAdminAuth } from "@/lib/admin-auth-store";
 function LoginProgressIndicator() {
   return (
     <div className="grid gap-2" role="status" aria-live="polite">
-      <div className="h-1.5 overflow-hidden rounded-full bg-[rgba(27,49,36,0.14)]">
-        <div className="h-full w-2/3 animate-pulse rounded-full bg-[var(--ink)]" />
+      <div className="h-1.5 overflow-hidden bg-[var(--line)]">
+        <div className="h-full w-2/3 animate-pulse bg-[var(--ink)]" />
       </div>
       <p className="text-center text-xs font-medium text-[var(--ink-soft)]">
         관리자 페이지로 이동 중입니다.

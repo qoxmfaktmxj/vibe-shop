@@ -269,10 +269,10 @@ public class DemoDataSeeder implements ApplicationRunner {
             String accent = accents.get((ordinal - 1) % accents.size());
             String name = prefix + " " + accent + " " + productType;
             String slug = categorySlug + "-demo-" + String.format(Locale.ROOT, "%03d", ordinal);
-            String summary = categoryLabel + " 카테고리 테스트용 확장 상품 " + ordinal;
-            String description = name + " 상품입니다. 검색, 추천, 리뷰, 관리자 테스트를 위해 준비한 대량 예시 데이터입니다.";
+            String summary = categoryLabel + "의 소재와 쓰임을 차분하게 담은 데일리 셀렉션";
+            String description = name + "은 편안한 형태와 오래 두고 쓰기 좋은 마감을 중심으로 고른 마루의 리빙 오브제입니다.";
             BigDecimal price = BigDecimal.valueOf(basePrice(categorySlug) + ((ordinal % 20) * 7000L));
-            String badge = ordinal % 9 == 0 ? "TREND" : ordinal % 5 == 0 ? "NEW" : "DEMO";
+            String badge = ordinal % 9 == 0 ? "CURATED" : ordinal % 5 == 0 ? "NEW" : "ESSENTIAL";
             String accentColor = switch (ordinal % 6) {
                 case 0 -> "#1f2937";
                 case 1 -> "#475569";
