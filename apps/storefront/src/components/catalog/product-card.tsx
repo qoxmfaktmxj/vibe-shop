@@ -19,6 +19,10 @@ function getBadgeLabel(badge: string) {
     return "데일리 픽";
   }
 
+  if (badge === "NEW") return "신상품";
+  if (badge === "LIMITED") return "한정 상품";
+  if (badge === "PICK") return "추천";
+
   return badge;
 }
 
@@ -26,7 +30,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
   const badgeLabel = getBadgeLabel(product.badge);
 
   return (
-    <article className="group w-full">
+    <article className="product-card group w-full">
       <div className="relative">
         <Link
           href={`/products/${product.slug}`}
@@ -65,11 +69,11 @@ export function ProductCard({ product }: { product: ProductSummary }) {
         </div>
       </div>
 
-      <div className="mt-4">
+      <div className="product-card-info mt-4">
         <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--ink-muted)]">
           {product.categoryName}
         </p>
-        <Link href={`/products/${product.slug}`} className="block">
+        <Link href={`/products/${product.slug}`} className="product-card-title block">
           <h3 className="mt-2 text-sm font-medium leading-snug text-[var(--ink)] sm:text-base">
             {product.name}
           </h3>
@@ -78,11 +82,11 @@ export function ProductCard({ product }: { product: ProductSummary }) {
           </p>
         </Link>
 
-        <div className="mt-3 border-t border-[var(--line)] pt-3">
+        <div className="product-card-purchase mt-3 border-t border-[var(--line)] pt-3">
           <p className="text-sm font-semibold text-[var(--ink)] sm:text-base">
             {formatPrice(product.price)}원
           </p>
-          <div className="mt-3 lg:opacity-0 lg:transition-opacity lg:duration-200 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100">
+          <div className="product-card-actions mt-3 lg:opacity-0 lg:transition-opacity lg:duration-200 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100">
             <AddToCartButton
               disabled={product.stock === 0}
               product={{
