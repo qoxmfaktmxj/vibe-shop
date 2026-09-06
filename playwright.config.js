@@ -39,7 +39,7 @@ module.exports = defineConfig({
     },
     {
       name: "webkit-mobile",
-      testMatch: /mobile-storefront\.spec\.js/,
+      testMatch: /(?:mobile-storefront|home-motion)\.spec\.js/,
       use: { ...devices["iPhone 13"] },
     },
   ],

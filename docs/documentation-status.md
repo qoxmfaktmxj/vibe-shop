@@ -8,6 +8,8 @@ This file defines which documents are current sources of truth and which are his
 
 ## Current
 
+- `PRODUCT.md`
+- `DESIGN.md`
 - `.impeccable.md`
 - `docs/design-system.md`
 - `docs/screen-inventory-and-ux-audit-2026-03-24.md`
@@ -18,7 +20,9 @@ This file defines which documents are current sources of truth and which are his
 
 ## Draft
 
+- `docs/landing-design-review-2026-09-06.md` (provisional, integrated browser QA pending)
 - `docs/design-modernization-audit-2026-07-11.md`
+- `docs/landing-motion-redesign-plan-2026-09-06.md`
 
 ## Reference
 

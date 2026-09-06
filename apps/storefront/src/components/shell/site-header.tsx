@@ -22,7 +22,6 @@ export function SiteHeader({ categories = [] }: SiteHeaderProps) {
       <div className="hidden border-b border-[var(--chrome-border)] lg:block">
         <div className="page-container flex h-8 items-center justify-between text-[11px] tracking-[0.04em] text-[var(--chrome-fg-muted)]">
           <p>새로운 일상을 위한 리빙 셀렉션</p>
-          <p>전국 무료배송 · 리빙 컨시어지 10:00–18:00</p>
         </div>
       </div>
 

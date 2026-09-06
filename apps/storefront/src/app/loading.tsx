@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <section className="surface-card grid min-h-[420px] place-items-center rounded-[2rem] px-6 py-16 text-center">
+    <section className="app-loading surface-card grid min-h-[420px] place-items-center rounded-[2rem] px-6 py-16 text-center">
       <div className="grid gap-4">
         <p className="display-eyebrow">로딩 중</p>
         <h1 className="display-heading text-4xl sm:text-5xl">다음 화면을 준비하고 있습니다.</h1>

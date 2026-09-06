@@ -39,10 +39,10 @@ export function SiteFooter() {
         </div>
 
         <div className="space-y-5">
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--ink)]">리빙 컨시어지</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--ink)]">이용 도움말</p>
           <div className="space-y-2 text-xs leading-6 text-[var(--ink-soft)]">
-            <p>평일 10:00–18:00</p>
-            <p>배송·선물·상품 선택을 도와드립니다.</p>
+            <p>주문과 장바구니 이용 방법을 확인하세요.</p>
+            <Link href="/faq" className="inline-flex min-h-11 items-center underline underline-offset-4">쇼핑 도움말 보기</Link>
           </div>
         </div>
 
