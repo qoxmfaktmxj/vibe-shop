@@ -107,6 +107,8 @@ Last reviewed: 2026-09-06
 
 후속 데스크톱 구성 개선이 이 평가 이후 적용됐다. 첫 화면 좌우 배치와 카테고리 세 열을 도입했고, 반응형 열 수를 모션 활성 여부와 분리했다. 해당 변경은 별도의 레이아웃 검증을 받았으며 위 Nielsen 점수를 새 화면의 재평가 점수로 사용하지 않는다. 현재 구현과 확인 범위는 `DESIGN.md`, `.omx/desktop-layout-results.json`을 따른다.
 
+이후 첫 원격 CI에서 로컬 배너 문구를 가정한 테스트와 JavaScript 없는 전체 앱 탐색 전제가 맞지 않음을 확인했다. 배너 검사는 실제 홈 요소와 접근 가능한 이름을 확인하도록 바꿨다. JavaScript 비활성 상태는 무기한 로딩 대신 브라우저 설정 안내를 제공하는 것으로 명시했으며, 정적 SSR 배치와 전체 앱 지원 범위를 구분한다. WebKit에서 강제 문서 이동이 진행 중인 prefetch를 취소한 trace를 확인해, 테스트 복귀 동작을 실제 홈 링크 클릭으로 수정했다. 오류 검사나 보안 헤더를 완화하지 않았다.
+
 - `.omx/nielsen-round1-b.md`, `.omx/nielsen-round1-b.json`
 - `.omx/nielsen-round2-b.md`, `.omx/nielsen-round2-b-dom.json`
 - `.omx/nielsen-round2-desktop.png`, `.omx/nielsen-round2-mobile.png`

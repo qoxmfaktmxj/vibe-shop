@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+.no-script-notice { padding-block: 5rem; }
+.no-script-notice p { margin-top: 1rem; line-height: 1.8; color: var(--ink-soft); }
+
 /* Cinematic home: scoped so transactional pages keep their own rhythm. */
 .cinema-home {
   --cinema-ease: cubic-bezier(0.16, 1, 0.3, 1);

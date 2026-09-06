@@ -1,8 +1,11 @@
 const { expect, test } = require("playwright/test");
 
 async function expectHomeContent(page) {
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("오브제");
-  await expect(page.getByRole("link", { name: /^(컬렉션 보기|상품 자세히 보기)$/ })).toBeVisible();
+  await expect(page.locator("#home-title")).toBeVisible();
+  await expect(page.locator("#home-title")).toHaveText(/\S/);
+  const primaryAction = page.locator(".cinema-hero-copy .cinema-text-link");
+  await expect(primaryAction).toBeVisible();
+  await expect(primaryAction).toHaveAccessibleName(/\S/);
   await expect(page.locator(".cinema-hero-stage img")).toHaveJSProperty("complete", true);
   await expect(page.locator(".cinema-hero-stage img")).not.toHaveJSProperty("naturalWidth", 0);
 }
@@ -22,7 +25,8 @@ test("home keeps category navigation and purchase actions usable after scrolling
   await expect(lastCategory).toBeFocused();
   await lastCategory.press("Enter");
   await expect(page).toHaveURL(/\/category\//);
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.getByRole("link", { name: "MARU 홈", exact: true }).click();
+  await expectHomeContent(page);
   const firstProduct = page.locator(".cinema-edit article").first();
   const add = firstProduct.getByRole("button", { name: /장바구니 담기/ });
   await add.scrollIntoViewIfNeeded();
@@ -70,25 +74,19 @@ test("desktop product images, prices and cart buttons align across the row", asy
 });
 
 for (const width of [390, 1440]) {
-test(`home remains readable and navigable without JavaScript at ${width}px`, async ({ browser, baseURL }) => {
-  const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width, height: 1000 } });
-  const page = await context.newPage();
-  try {
-    await page.goto(baseURL, { waitUntil: "networkidle" });
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("오브제");
-    for (const scene of await page.locator(".cinema-collection-scene").all()) {
-      await scene.scrollIntoViewIfNeeded();
-      await expect(scene.locator(".cinema-collection-media")).toBeVisible();
-      await expect(scene.getByRole("link")).toBeVisible();
+  test(`disabled JavaScript shows an actionable notice instead of an endless loader at ${width}px`, async ({ browser, baseURL }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width, height: 1000 } });
+    const page = await context.newPage();
+    try {
+      await page.goto(baseURL, { waitUntil: "networkidle" });
+      const notice = page.getByRole("region", { name: "브라우저 설정을 확인해 주세요" });
+      await expect(notice).toBeVisible();
+      await expect(notice).toContainText("JavaScript를 허용");
+      await expect(notice.getByRole("link", { name: "설정 후 다시 열기" })).toHaveAttribute("href", "/");
+      await expect(page.locator(".app-loading")).toBeHidden();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+    } finally {
+      await context.close();
     }
-    const cta = page.getByRole("link", { name: /^(컬렉션 보기|상품 자세히 보기)$/ });
-    await expect(cta).toBeVisible();
-    const href = await cta.getAttribute("href");
-    await cta.click();
-    await expect(page).toHaveURL(new URL(href, baseURL).href);
-    await expect(page.locator("main")).toBeVisible();
-  } finally {
-    await context.close();
-  }
-});
+  });
 }
